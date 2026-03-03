@@ -134,7 +134,6 @@ class SwapSlippageVM(
         warning = slippageWarning,
         primary = confirmButtonState,
         onBack = ::onBack,
-        footer = stringRes(R.string.pay_slippage_footer).takeIf { args.mode == EXACT_OUTPUT }
     )
 
     private fun createButtonState(amount: BigDecimal?) =
@@ -175,6 +174,7 @@ class SwapSlippageVM(
 
         return SwapSlippageInfoState(
             title = result,
+            additional = stringRes(R.string.pay_slippage_footer).takeIf { args.mode == EXACT_OUTPUT },
             mode =
                 when {
                     percent <= BigDecimal("1") -> SwapSlippageInfoState.Mode.LOW

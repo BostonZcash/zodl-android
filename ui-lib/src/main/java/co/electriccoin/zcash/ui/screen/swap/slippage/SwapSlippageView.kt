@@ -26,7 +26,6 @@ import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.Spacer
 import co.electriccoin.zcash.ui.design.component.ZashiButton
 import co.electriccoin.zcash.ui.design.component.ZashiCard
-import co.electriccoin.zcash.ui.design.component.ZashiInfoText
 import co.electriccoin.zcash.ui.design.component.ZashiScreenModalBottomSheet
 import co.electriccoin.zcash.ui.design.component.ZashiSmallTopAppBar
 import co.electriccoin.zcash.ui.design.component.ZashiTopAppBarCloseNavigation
@@ -80,14 +79,6 @@ fun SwapSlippageView(state: SwapSlippageState?) {
                         SlippageInfoCard(innerState.info)
                     }
                     Spacer(1f)
-                    if (innerState.footer != null) {
-                        Spacer(20.dp)
-                        ZashiInfoText(
-                            text = innerState.footer.getValue(),
-                            style = ZashiTypography.textXs,
-                            color = ZashiColors.Text.textTertiary
-                        )
-                    }
                     if (innerState.warning != null) {
                         Spacer(20.dp)
                         ZashiCard(
@@ -130,7 +121,7 @@ private fun SlippageInfoCard(state: SwapSlippageInfoState) {
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Text(
-            text = state.title.getValue(),
+            text = state.title.getValue() + state.additional?.let { " " + it.getValue() }.orEmpty(),
             style = ZashiTypography.textSm,
             fontWeight = FontWeight.SemiBold,
             color = titleColor
@@ -183,6 +174,7 @@ private fun Preview() =
                     info =
                         SwapSlippageInfoState(
                             title = stringRes("Title"),
+                            additional = stringRes("Title"),
                             mode = SwapSlippageInfoState.Mode.HIGH,
                         ),
                     warning =
@@ -197,7 +189,6 @@ private fun Preview() =
                         ButtonState(
                             text = stringRes("Confirm")
                         ),
-                    footer = stringRes("Footer"),
                 )
         )
     }

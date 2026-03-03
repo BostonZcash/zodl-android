@@ -11,7 +11,6 @@ data class SwapSlippageState(
     val picker: SlippagePickerState,
     val info: SwapSlippageInfoState?,
     val warning: StyledStringResource?,
-    val footer: StringResource?,
     val primary: ButtonState,
     override val onBack: () -> Unit
 ) : ModalBottomSheetState
@@ -19,6 +18,7 @@ data class SwapSlippageState(
 @Immutable
 data class SwapSlippageInfoState(
     val title: StringResource,
+    val additional: StringResource?,
     val mode: Mode,
 ) {
     enum class Mode { LOW, MEDIUM, HIGH }
