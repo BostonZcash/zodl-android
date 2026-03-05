@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import cash.z.ecc.sdk.ANDROID_STATE_FLOW_TIMEOUT
 import co.electriccoin.zcash.ui.NavigationRouter
 import co.electriccoin.zcash.ui.R
-import co.electriccoin.zcash.ui.common.mapper.GetSwapMessageMapper
+import co.electriccoin.zcash.ui.common.mapper.SwapSupportMapper
 import co.electriccoin.zcash.ui.common.model.SwapStatus.EXPIRED
 import co.electriccoin.zcash.ui.common.model.SwapStatus.FAILED
 import co.electriccoin.zcash.ui.common.model.SwapStatus.INCOMPLETE_DEPOSIT
@@ -44,7 +44,7 @@ class SwapDetailVM(
     private val navigationRouter: NavigationRouter,
     private val copyToClipboard: CopyToClipboardUseCase,
     private val mapper: CommonTransactionDetailMapper,
-    private val getSwapMessage: GetSwapMessageMapper,
+    private val getSwapMessage: SwapSupportMapper,
 ) : ViewModel() {
     val state: StateFlow<SwapDetailState?> =
         getORSwapQuote
@@ -89,7 +89,7 @@ class SwapDetailVM(
                                         )
                                     },
                         ),
-                    message = getSwapMessage.getMessageState(swapData.status),
+                    message = getSwapMessage.getMessage(swapData.status),
                     errorFooter = mapper.createTransactionDetailErrorFooter(swapData.error),
                     infoFooter =
                         stringRes(R.string.transaction_detail_info_pending)
@@ -164,19 +164,21 @@ class SwapDetailVM(
         swapData: SwapData,
         error: Exception?
     ): ButtonState? {
-        getSwapMessage
-            .getSupportButton(swapData.status) {
+        val supportButton =
+            getSwapMessage.getButton(swapData.status) {
                 onContactSupport(it)
-            }?.let {
-                return it
             }
-        if (swapData.error != null && swapData.status == null) {
-            return mapper.createTransactionDetailErrorButtonState(
-                error = error,
-                reloadHandle = swapData.handle
-            )
+        return when {
+            supportButton != null -> supportButton
+            swapData.error != null && swapData.status == null -> {
+                return mapper.createTransactionDetailErrorButtonState(
+                    error = error,
+                    reloadHandle = swapData.handle
+                )
+            }
+
+            else -> null
         }
-        return null
     }
 
     private fun createTransactionHeaderState(swapData: SwapData): TransactionDetailHeaderState =

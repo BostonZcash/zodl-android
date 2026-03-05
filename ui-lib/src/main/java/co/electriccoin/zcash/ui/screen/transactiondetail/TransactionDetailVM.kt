@@ -8,7 +8,7 @@ import cash.z.ecc.android.sdk.model.WalletAddress
 import cash.z.ecc.sdk.ANDROID_STATE_FLOW_TIMEOUT
 import co.electriccoin.zcash.ui.NavigationRouter
 import co.electriccoin.zcash.ui.R
-import co.electriccoin.zcash.ui.common.mapper.GetSwapMessageMapper
+import co.electriccoin.zcash.ui.common.mapper.SwapSupportMapper
 import co.electriccoin.zcash.ui.common.model.SwapMode.EXACT_INPUT
 import co.electriccoin.zcash.ui.common.model.SwapMode.EXACT_OUTPUT
 import co.electriccoin.zcash.ui.common.model.SwapStatus.EXPIRED
@@ -73,7 +73,7 @@ class TransactionDetailVM(
     private val sendTransactionAgain: SendTransactionAgainUseCase,
     private val flipTransactionBookmark: FlipTransactionBookmarkUseCase,
     private val mapper: CommonTransactionDetailMapper,
-    private val getSwapMessage: GetSwapMessageMapper,
+    private val getSwapMessage: SwapSupportMapper,
 ) : ViewModel() {
     val log = loggable("TransactionDetailVM")
     private val transaction =
@@ -175,7 +175,7 @@ class TransactionDetailVM(
                                 ?.address
                         SendSwapState(
                             status = transaction.swap.status?.status,
-                            message = getSwapMessage.getMessageState(transaction.swap.status),
+                            message = getSwapMessage.getMessage(transaction.swap.status),
                             quoteHeader =
                                 mapper.createTransactionDetailQuoteHeaderState(
                                     swap = transaction.swap.status,
@@ -365,13 +365,12 @@ class TransactionDetailVM(
         mapper.createTransactionDetailErrorFooter(data.swap?.error)
 
     private fun createPrimaryButtonState(data: DetailedTransactionData): ButtonState? {
-        getSwapMessage
-            .getSupportButton(data.swap?.status) {
+        val supportButton =
+            getSwapMessage.getButton(data.swap?.status) {
                 onContactSupport(it)
-            }?.let {
-                return it
             }
         return when {
+            supportButton != null -> supportButton
             data.swap?.error != null && data.swap.status == null ->
                 mapper.createTransactionDetailErrorButtonState(
                     error = data.swap.error,
