@@ -210,8 +210,31 @@ internal class SwapVM(
             if (selected != null) {
                 selectedContact.update { selected }
                 addressText.update { "" }
+                preselectChain(selected)
             }
         }
+
+    private fun preselectChain(selected: EnhancedABContact) {
+        if (mode.value == SWAP_INTO_ZEC) {
+            val selectedChainTicker = selected.blockchain?.chainTicker
+            val currentAsset = swapRepository.selectedAsset.value
+            val currentChainTicker = currentAsset?.chainTicker
+
+            if (selectedChainTicker != null &&
+                currentChainTicker != null &&
+                !selectedChainTicker.equals(currentChainTicker, ignoreCase = true)
+            ) {
+                val swapAssets = swapRepository.assets.value.data
+                val matchingAsset =
+                    swapAssets?.find { asset ->
+                        asset.chainTicker.equals(selectedChainTicker, ignoreCase = true)
+                    }
+                if (matchingAsset != null) {
+                    swapRepository.select(matchingAsset)
+                }
+            }
+        }
+    }
 
     private fun onQrCodeScannerClick() =
         viewModelScope.launch {
