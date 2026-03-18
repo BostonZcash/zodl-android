@@ -97,12 +97,6 @@ sealed interface StringResource {
         val includeDecimalSeparator: Boolean
     ) : StringResource
 
-    @Immutable
-    data class Hidden(
-        val value: StringResource,
-        val hiddenValue: StringResource = stringRes(R.string.hide_balance_placeholder)
-    ) : StringResource
-
     operator fun plus(other: StringResource): StringResource = CompositeStringResource(listOf(this, other))
 
     operator fun plus(other: String): StringResource = CompositeStringResource(listOf(this, stringRes(other)))
@@ -117,6 +111,12 @@ sealed interface StringResource {
 @Immutable
 private data class CompositeStringResource(
     val resources: List<StringResource>
+) : StringResource
+
+@Immutable
+private data class PrivacySensitiveResource(
+    val value: StringResource,
+    val hiddenValue: StringResource = stringRes(R.string.hide_balance_placeholder)
 ) : StringResource
 
 @Stable
@@ -192,7 +192,9 @@ fun stringResByDynamicNumber(number: Number, includeDecimalSeparator: Boolean = 
     StringResource.ByDynamicNumber(number, includeDecimalSeparator)
 
 @Stable
-fun stringHidden(value: StringResource): StringResource = StringResource.Hidden(value)
+infix fun StringResource.asPrivacySensitive(
+    other: StringResource = stringRes(R.string.hide_balance_placeholder)
+): StringResource = PrivacySensitiveResource(this, other)
 
 @Stable
 @Composable
@@ -205,6 +207,7 @@ fun StringResource.getValue(): String =
         )
     )
 
+@Immutable
 data class StringContext(
     val context: Context,
     val locale: Locale,
@@ -240,12 +243,12 @@ fun StringResource.getString(
             is StringResource.ByNumber -> convertNumber(context)
             is StringResource.ByDynamicNumber -> convertDynamicNumber(context)
             is CompositeStringResource -> convertComposite(context)
-            is StringResource.Hidden -> convertHidden(context)
+            is PrivacySensitiveResource -> convertPrivacySensitive(context)
         }
     return string
 }
 
-private fun StringResource.Hidden.convertHidden(context: StringContext) =
+private fun PrivacySensitiveResource.convertPrivacySensitive(context: StringContext) =
     if (context.isHideBalances) {
         hiddenValue.getString(context)
     } else {
