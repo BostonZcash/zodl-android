@@ -85,6 +85,16 @@ fun SendShielded(
                             )
                     )
                     ZashiHorizontalDivider(thickness = 2.dp)
+                    TransactionDetailInfoRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        state =
+                            TransactionDetailInfoRowState(
+                                title =
+                                    stringRes(R.string.transaction_detail_info_transaction_fee),
+                                message = state.fee.withStyle(),
+                            )
+                    )
+                    ZashiHorizontalDivider(thickness = 2.dp)
                     CompositionLocalProvider(
                         LocalBalancesAvailable provides (state.isPending || LocalBalancesAvailable.current)
                     ) {
@@ -102,16 +112,6 @@ fun SendShielded(
                                 )
                         )
                     }
-                    ZashiHorizontalDivider(thickness = 2.dp)
-                    TransactionDetailInfoRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        state =
-                            TransactionDetailInfoRowState(
-                                title =
-                                    stringRes(R.string.transaction_detail_info_transaction_fee),
-                                message = state.fee.withStyle(),
-                            )
-                    )
                 }
             }
             if (state.note != null) {

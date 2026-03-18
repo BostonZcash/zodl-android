@@ -61,6 +61,18 @@ fun Shielding(
                         message = state.fee.withStyle(),
                     )
             )
+            if (state.note != null) {
+                ZashiHorizontalDivider(thickness = 2.dp)
+                TransactionDetailInfoColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    state =
+                        TransactionDetailInfoColumnState(
+                            title = stringRes(R.string.transaction_detail_info_note),
+                            message = state.note,
+                            onClick = null
+                        )
+                )
+            }
             ZashiHorizontalDivider(thickness = 2.dp)
             CompositionLocalProvider(
                 LocalBalancesAvailable provides (state.isPending || LocalBalancesAvailable.current)
@@ -76,18 +88,6 @@ fun Shielding(
                                     stringRes(R.string.transaction_detail_info_timestamp)
                                 },
                             message = state.completedTimestamp.withStyle(),
-                        )
-                )
-            }
-            if (state.note != null) {
-                ZashiHorizontalDivider(thickness = 2.dp)
-                TransactionDetailInfoColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    state =
-                        TransactionDetailInfoColumnState(
-                            title = stringRes(R.string.transaction_detail_info_note),
-                            message = state.note,
-                            onClick = null
                         )
                 )
             }

@@ -28,6 +28,7 @@ import co.electriccoin.zcash.ui.design.util.imageRes
 import co.electriccoin.zcash.ui.design.util.loadingImageRes
 import co.electriccoin.zcash.ui.design.util.stringRes
 import co.electriccoin.zcash.ui.design.util.stringResByAddress
+import co.electriccoin.zcash.ui.design.util.styledStringResource
 import co.electriccoin.zcash.ui.design.util.withStyle
 import co.electriccoin.zcash.ui.screen.transactionprogress.TransactionProgressState.Background.ERROR
 import co.electriccoin.zcash.ui.screen.transactionprogress.TransactionProgressState.Background.PENDING
@@ -109,7 +110,11 @@ class TransactionProgressVM(
                     is SwapTransactionProposal ->
                         stringRes(R.string.send_confirmation_swapping_subtitle_transparent).withStyle()
 
-                    else -> stringRes(R.string.send_confirmation_sending_subtitle, getAddressAbbreviated()).withStyle()
+                    else ->
+                        styledStringResource(
+                            R.string.send_confirmation_sending_subtitle,
+                            getAddressAbbreviated()
+                        )
                 },
             title =
                 if (proposal is ShieldTransactionProposal) {
@@ -141,17 +146,20 @@ class TransactionProgressVM(
             subtitle =
                 when (proposal) {
                     is ShieldTransactionProposal ->
-                        stringRes(R.string.send_confirmation_success_subtitle_transparent)
+                        stringRes(R.string.send_confirmation_success_subtitle_transparent).withStyle()
 
                     is ExactInputSwapTransactionProposal ->
-                        stringRes(R.string.send_confirmation_success_swap_subtitle)
+                        stringRes(R.string.send_confirmation_success_swap_subtitle).withStyle()
 
                     is ExactOutputSwapTransactionProposal ->
-                        stringRes(R.string.send_confirmation_success_cross_chain_subtitle)
+                        stringRes(R.string.send_confirmation_success_cross_chain_subtitle).withStyle()
 
                     else ->
-                        stringRes(R.string.send_confirmation_success_subtitle, getAddressAbbreviated())
-                }.withStyle(),
+                        styledStringResource(
+                            R.string.send_confirmation_success_subtitle,
+                            getAddressAbbreviated()
+                        )
+                },
             middleButton =
                 when (proposal) {
                     is ExactInputSwapTransactionProposal,
