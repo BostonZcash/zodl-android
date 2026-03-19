@@ -52,7 +52,7 @@ class ScanViewTestSetup(
             snackbarHostState = SnackbarHostState(),
             onBack = {},
             onScan = {},
-            onScanError = {},
+            onImageScan = {},
             onOpenSettings = {
                 onOpenSettingsCount.incrementAndGet()
             },
