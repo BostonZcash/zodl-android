@@ -27,7 +27,8 @@ object FileShareUtil {
     const val ZASHI_INTERNAL_DATA_AUTHORITY_TESTNET = "co.electriccoin.zcash.provider.testnet"
     const val ZASHI_INTERNAL_DATA_AUTHORITY_TESTNET_DEBUG = "co.electriccoin.zcash.debug.provider.testnet"
     const val ZASHI_INTERNAL_DATA_AUTHORITY_TESTNET_INTERNAL = "co.electriccoin.zcash.internal.provider.testnet"
-    const val ZASHI_INTERNAL_DATA_AUTHORITY_TESTNET_INTERNAL_DEBUG = "co.electriccoin.zcash.internal.debug.provider.testnet"
+    const val ZASHI_INTERNAL_DATA_AUTHORITY_TESTNET_INTERNAL_DEBUG =
+        "co.electriccoin.zcash.internal.debug.provider.testnet"
 
     const val ZASHI_INTERNAL_DATA_FOSS_AUTHORITY_TESTNET = "co.electriccoin.zcash.foss.provider.testnet"
     const val ZASHI_INTERNAL_DATA_FOSS_AUTHORITY_TESTNET_DEBUG = "co.electriccoin.zcash.foss.debug.provider.testnet"
