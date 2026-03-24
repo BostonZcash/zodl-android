@@ -10,7 +10,7 @@
 
     <string name="payment_request_memo">Para:</string>
 
-    <string name="payment_request_fee">Tarifa</string>
+    <string name="payment_request_fee">Comisión</string>
     <string name="payment_request_total">Total</string>
 
     <string name="payment_request_send_btn">Enviar</string>

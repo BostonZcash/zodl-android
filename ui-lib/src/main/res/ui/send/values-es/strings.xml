@@ -16,7 +16,7 @@
         <xliff:g id="typed_bytes" example="12">%1$s</xliff:g>/<xliff:g id="max_bytes" example="512">%2$s</xliff:g>
     </string>
     <string name="send_create">Revisar</string>
-    <string name="send_fee">(Tarifa típica &lt; <xliff:g id="fee_amount" example="0.001">%1$s</xliff:g>)</string>
+    <string name="send_fee">(Comisión típica &lt; <xliff:g id="fee_amount" example="0.001">%1$s</xliff:g>)</string>
 
     <string name="send_dialog_error_title">Error al enviar fondos</string>
     <string name="send_dialog_error_text">Error: El intento de enviar fondos falló. Inténtelo de nuevo, por favor.</string>

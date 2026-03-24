@@ -6,6 +6,7 @@ import cash.z.ecc.sdk.ANDROID_STATE_FLOW_TIMEOUT
 import co.electriccoin.zcash.ui.R
 import co.electriccoin.zcash.ui.common.model.SwapBlockchain
 import co.electriccoin.zcash.ui.common.repository.SwapRepository
+import co.electriccoin.zcash.ui.common.usecase.EnsureSwapAssetsLoadedUseCase
 import co.electriccoin.zcash.ui.common.usecase.FilterSwapBlockchainsUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetSwapAssetsUseCase
 import co.electriccoin.zcash.ui.common.usecase.NavigateToSelectSwapBlockchainUseCase
@@ -32,7 +33,15 @@ class SwapBlockchainPickerVM(
     private val navigateToSelectSwapBlockchain: NavigateToSelectSwapBlockchainUseCase,
     private val filterSwapBlockchains: FilterSwapBlockchainsUseCase,
     private val swapRepository: SwapRepository,
+    ensureSwapAssetsLoaded: EnsureSwapAssetsLoadedUseCase,
 ) : ViewModel() {
+    init {
+        // Ensure assets are loaded even if user hasn't visited swap screen before
+        viewModelScope.launch {
+            ensureSwapAssetsLoaded()
+        }
+    }
+
     private val searchText = MutableStateFlow("")
 
     private val searchTextFieldState =
