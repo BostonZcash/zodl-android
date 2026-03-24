@@ -86,11 +86,15 @@ internal class ScanGenericAddressVM(
             mutex.withLock {
                 if (!hasBeenScannedSuccessfully) {
                     when (result) {
-                        is ImageToQrCodeResult.SingleCode -> onScanned(result.text)
+                        is ImageToQrCodeResult.SingleCode -> {
+                            onScanned(result.text)
+                        }
+
                         ImageToQrCodeResult.MultipleCodes -> {
                             hasBeenScannedSuccessfully = false
                             state.update { ScanValidationState.SEVERAL_CODES_FOUND }
                         }
+
                         ImageToQrCodeResult.NoCode -> {
                             hasBeenScannedSuccessfully = false
                             state.update { ScanValidationState.INVALID_IMAGE }

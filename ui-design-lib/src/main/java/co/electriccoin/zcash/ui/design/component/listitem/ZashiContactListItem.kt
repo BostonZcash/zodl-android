@@ -61,7 +61,7 @@ private fun ContactItemLeading(
     modifier: Modifier = Modifier,
 ) {
     when (state.bigIcon) {
-        is ImageResource.ByDrawable ->
+        is ImageResource.ByDrawable -> {
             Box(modifier) {
                 Image(
                     painter = painterResource(state.bigIcon.resource),
@@ -80,8 +80,9 @@ private fun ContactItemLeading(
                     )
                 }
             }
+        }
 
-        is ImageResource.DisplayString ->
+        is ImageResource.DisplayString -> {
             Box(
                 modifier.size(40.dp)
             ) {
@@ -120,6 +121,7 @@ private fun ContactItemLeading(
                     )
                 }
             }
+        }
 
         ImageResource.Loading -> {
             // do nothing

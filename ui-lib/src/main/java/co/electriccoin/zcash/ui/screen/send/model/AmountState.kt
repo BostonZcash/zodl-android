@@ -62,8 +62,10 @@ sealed interface AmountState {
 
             // Note that the zero funds sending is supported for sending a memo-only shielded transaction
             return when {
-                (zatoshi.value == 0L && isTransparentOrTextRecipient) ->
+                (zatoshi.value == 0L && isTransparentOrTextRecipient) -> {
                     Invalid(normalized, fiatValue, lastFieldChangedByUser)
+                }
+
                 else -> {
                     Valid(
                         value = normalized,
@@ -112,6 +114,7 @@ sealed interface AmountState {
                         lastFieldChangedByUser = AmountField.FIAT
                     )
                 }
+
                 (zatoshi.value == 0L && isTransparentOrTextRecipient) -> {
                     Invalid(
                         value = if (fiatValue.isBlank()) "" else value,
@@ -119,6 +122,7 @@ sealed interface AmountState {
                         lastFieldChangedByUser = AmountField.FIAT
                     )
                 }
+
                 else -> {
                     Valid(
                         value = zatoshi.toZecString(),
@@ -153,22 +157,26 @@ sealed interface AmountState {
                                 val lastFieldChangedByUser =
                                     AmountField.valueOf(it[KEY_LAST_FIELD_CHANGED_BY_USER] as String)
                                 when (type) {
-                                    TYPE_VALID ->
+                                    TYPE_VALID -> {
                                         Valid(
                                             value = amountString,
                                             fiatValue = fiatAmountString,
                                             zatoshi = Zatoshi(it[KEY_ZATOSHI] as Long),
                                             lastFieldChangedByUser = lastFieldChangedByUser
                                         )
+                                    }
 
-                                    TYPE_INVALID ->
+                                    TYPE_INVALID -> {
                                         Invalid(
                                             value = amountString,
                                             fiatValue = fiatAmountString,
                                             lastFieldChangedByUser = lastFieldChangedByUser
                                         )
+                                    }
 
-                                    else -> null
+                                    else -> {
+                                        null
+                                    }
                                 }
                             }
                         }
@@ -183,7 +191,9 @@ sealed interface AmountState {
                     saverMap[KEY_ZATOSHI] = this.zatoshi.value
                 }
 
-                is Invalid -> saverMap[KEY_TYPE] = TYPE_INVALID
+                is Invalid -> {
+                    saverMap[KEY_TYPE] = TYPE_INVALID
+                }
             }
             saverMap[KEY_VALUE] = this.value
             saverMap[KEY_FIAT_VALUE] = this.fiatValue

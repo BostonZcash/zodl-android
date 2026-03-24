@@ -30,8 +30,9 @@ class CreateProposalUseCase(
                     keystoneProposalRepository.createPCZTFromProposal()
                 }
 
-                is ZashiAccount ->
+                is ZashiAccount -> {
                     zashiProposalRepository.createProposal(normalized)
+                }
             }
             navigationRouter.forward(ReviewTransactionArgs)
         } catch (_: TexUnsupportedOnKSException) {

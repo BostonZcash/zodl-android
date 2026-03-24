@@ -38,10 +38,16 @@ inline fun <reified T : ViewModel> koinActivityViewModel(
 fun ProvidableCompositionLocal<Context>.componentActivity(): ComponentActivity {
     val context = this.current
     return when {
-        context is ComponentActivity -> context
-        context is ContextWrapper && context.baseContext is ComponentActivity ->
-            context.baseContext as ComponentActivity
+        context is ComponentActivity -> {
+            context
+        }
 
-        else -> throw ClassCastException("Context is not a ComponentActivity")
+        context is ContextWrapper && context.baseContext is ComponentActivity -> {
+            context.baseContext as ComponentActivity
+        }
+
+        else -> {
+            throw ClassCastException("Context is not a ComponentActivity")
+        }
     }
 }

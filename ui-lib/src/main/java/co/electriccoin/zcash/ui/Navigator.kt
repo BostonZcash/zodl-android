@@ -45,6 +45,7 @@ class NavigatorImpl(
 
                 currentRoute?.let { sheetStateManager.hide(it) }
             }
+
             else -> {
                 // do nothing
             }

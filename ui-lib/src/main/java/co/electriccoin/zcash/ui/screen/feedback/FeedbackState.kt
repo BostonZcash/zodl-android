@@ -18,7 +18,7 @@ data class FeedbackEmojiState(
 )
 
 enum class FeedbackEmoji(
-    @DrawableRes val res: Int,
+    @field:DrawableRes val res: Int,
     val order: Int,
     val encoding: String
 ) {

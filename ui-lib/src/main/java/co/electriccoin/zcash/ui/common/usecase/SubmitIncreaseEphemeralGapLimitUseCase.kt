@@ -41,7 +41,10 @@ class SubmitIncreaseEphemeralGapLimitUseCase(
                     )
             )
             when (accountDataSource.getSelectedAccount()) {
-                is KeystoneAccount -> navigationRouter.replace(SignKeystoneTransactionArgs)
+                is KeystoneAccount -> {
+                    navigationRouter.replace(SignKeystoneTransactionArgs)
+                }
+
                 is ZashiAccount -> {
                     submitZashiProposal()
                     navigationRouter.back()
@@ -71,7 +74,9 @@ class SubmitIncreaseEphemeralGapLimitUseCase(
             is SubmitResult.Error,
             is SubmitResult.Failure,
             is SubmitResult.GrpcFailure,
-            is SubmitResult.Success -> ephemeralAddressRepository.invalidate()
+            is SubmitResult.Success -> {
+                ephemeralAddressRepository.invalidate()
+            }
 
             is SubmitResult.Partial -> {
                 // do nothing

@@ -82,11 +82,17 @@ class WalletBackupViewModel(
                     ButtonState(
                         text =
                             when {
-                                isRevealed && args.isOpenedFromSeedBackupInfo ->
+                                isRevealed && args.isOpenedFromSeedBackupInfo -> {
                                     stringRes(R.string.seed_recovery_saved_button)
+                                }
 
-                                isRevealed -> stringRes(R.string.seed_recovery_hide_button)
-                                else -> stringRes(R.string.seed_recovery_reveal_button)
+                                isRevealed -> {
+                                    stringRes(R.string.seed_recovery_hide_button)
+                                }
+
+                                else -> {
+                                    stringRes(R.string.seed_recovery_reveal_button)
+                                }
                             },
                         onClick =
                             if (isRevealed && args.isOpenedFromSeedBackupInfo) {

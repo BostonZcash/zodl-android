@@ -227,7 +227,7 @@ class TransactionDetailVM(
                         )
                     }
 
-                    transaction.recipient is WalletAddress.Transparent ->
+                    transaction.recipient is WalletAddress.Transparent -> {
                         SendTransparentState(
                             contact = transaction.contact?.let { stringRes(it.name) },
                             address = stringRes(transaction.recipient.address),
@@ -246,8 +246,9 @@ class TransactionDetailVM(
                             isPending = isPending(transaction),
                             note = transaction.metadata.note?.let { stringRes(it) },
                         )
+                    }
 
-                    else ->
+                    else -> {
                         SendShieldedState(
                             contact = transaction.contact?.let { stringRes(it.name) },
                             address =
@@ -279,6 +280,7 @@ class TransactionDetailVM(
                             note = transaction.metadata.note?.let { stringRes(it) },
                             isPending = isPending(transaction)
                         )
+                    }
                 }
             }
 
@@ -370,16 +372,22 @@ class TransactionDetailVM(
                 onContactSupport(it)
             }
         return when {
-            supportButton != null -> supportButton
-            data.swap?.error != null && data.swap.status == null ->
+            supportButton != null -> {
+                supportButton
+            }
+
+            data.swap?.error != null && data.swap.status == null -> {
                 mapper.createTransactionDetailErrorButtonState(
                     error = data.swap.error,
                     reloadHandle = data.reloadHandle
                 )
+            }
 
-            data.swap != null -> null
+            data.swap != null -> {
+                null
+            }
 
-            data.contact == null ->
+            data.contact == null -> {
                 if (data.transaction is SendTransaction) {
                     ButtonState(
                         text = stringRes(R.string.transaction_detail_save_address),
@@ -388,8 +396,9 @@ class TransactionDetailVM(
                 } else {
                     null
                 }
+            }
 
-            else ->
+            else -> {
                 if (data.transaction is SendTransaction) {
                     ButtonState(
                         text = stringRes(R.string.transaction_detail_send_again),
@@ -398,6 +407,7 @@ class TransactionDetailVM(
                 } else {
                     null
                 }
+            }
         }
     }
 
@@ -424,6 +434,7 @@ class TransactionDetailVM(
             -> createAddNoteButtonState()
 
             transaction.swap != null -> null
+
             else -> createAddNoteButtonState()
         }
     }
@@ -446,12 +457,30 @@ class TransactionDetailVM(
         TransactionDetailHeaderState(
             title =
                 when (val transaction = data.transaction) {
-                    is ReceiveTransaction.Success -> stringRes(R.string.transaction_history_received)
-                    is ReceiveTransaction.Pending -> stringRes(R.string.transaction_detail_receiving)
-                    is ReceiveTransaction.Failed -> stringRes(R.string.transaction_history_receiving_failed)
-                    is ShieldTransaction.Success -> stringRes(R.string.transaction_history_shielded)
-                    is ShieldTransaction.Pending -> stringRes(R.string.transaction_detail_shielding)
-                    is ShieldTransaction.Failed -> stringRes(R.string.transaction_history_shielding_failed)
+                    is ReceiveTransaction.Success -> {
+                        stringRes(R.string.transaction_history_received)
+                    }
+
+                    is ReceiveTransaction.Pending -> {
+                        stringRes(R.string.transaction_detail_receiving)
+                    }
+
+                    is ReceiveTransaction.Failed -> {
+                        stringRes(R.string.transaction_history_receiving_failed)
+                    }
+
+                    is ShieldTransaction.Success -> {
+                        stringRes(R.string.transaction_history_shielded)
+                    }
+
+                    is ShieldTransaction.Pending -> {
+                        stringRes(R.string.transaction_detail_shielding)
+                    }
+
+                    is ShieldTransaction.Failed -> {
+                        stringRes(R.string.transaction_history_shielding_failed)
+                    }
+
                     is SendTransaction -> {
                         if (data.metadata.swapMetadata == null) {
                             when (transaction) {
@@ -467,29 +496,39 @@ class TransactionDetailVM(
                                 }
                             } else {
                                 when (data.metadata.swapMetadata.mode) {
-                                    EXACT_INPUT ->
+                                    EXACT_INPUT -> {
                                         when (data.metadata.swapMetadata.status) {
                                             PROCESSING,
                                             PENDING -> stringRes(R.string.transaction_detail_swapping)
 
                                             INCOMPLETE_DEPOSIT -> stringRes(R.string.swap_detail_incomplete)
+
                                             SUCCESS -> stringRes(R.string.transaction_history_swapped)
+
                                             REFUNDED -> stringRes(R.string.transaction_history_swap_refunded)
+
                                             FAILED -> stringRes(R.string.transaction_history_swap_failed)
+
                                             EXPIRED -> stringRes(R.string.transaction_history_swap_expired)
                                         }
+                                    }
 
-                                    EXACT_OUTPUT ->
+                                    EXACT_OUTPUT -> {
                                         when (data.metadata.swapMetadata.status) {
                                             PROCESSING,
                                             PENDING -> stringRes(R.string.transaction_detail_paying)
 
                                             INCOMPLETE_DEPOSIT -> stringRes(R.string.transaction_detail_pay_incomplete)
+
                                             SUCCESS -> stringRes(R.string.transaction_history_paid)
+
                                             REFUNDED -> stringRes(R.string.transaction_history_payment_refunded)
+
                                             FAILED -> stringRes(R.string.transaction_history_payment_failed)
+
                                             EXPIRED -> stringRes(R.string.transaction_history_payment_expired)
                                         }
+                                    }
                                 }
                             }
                         }
@@ -507,7 +546,7 @@ class TransactionDetailVM(
                         )
                     }
 
-                    is SendSwapState ->
+                    is SendSwapState -> {
                         listOf(
                             data.metadata.swapMetadata
                                 ?.origin
@@ -521,19 +560,22 @@ class TransactionDetailVM(
                                 ?.destination
                                 ?.tokenIcon ?: loadingImageRes()
                         )
+                    }
 
                     is SendShieldedState,
-                    is SendTransparentState ->
+                    is SendTransparentState -> {
                         listOf(
                             imageRes(co.electriccoin.zcash.ui.design.R.drawable.ic_token_zec),
                             imageRes(R.drawable.ic_transaction_sent)
                         )
+                    }
 
-                    is ShieldingState ->
+                    is ShieldingState -> {
                         listOf(
                             imageRes(co.electriccoin.zcash.ui.design.R.drawable.ic_token_zec),
                             imageRes(R.drawable.ic_transaction_shielded),
                         )
+                    }
                 },
         )
 

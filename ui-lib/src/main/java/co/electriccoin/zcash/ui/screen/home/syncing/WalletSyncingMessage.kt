@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -50,7 +49,6 @@ fun WalletSyncingMessage(
     )
 }
 
-@Immutable
 class WalletSyncingMessageState(
     val progress: Float,
     val onClick: () -> Unit

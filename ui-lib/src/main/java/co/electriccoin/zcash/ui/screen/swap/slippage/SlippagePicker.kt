@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -368,24 +367,18 @@ private fun Indicator(
     }
 }
 
-@Immutable
 private sealed interface Selection {
-    @Immutable
     data object ByButton1 : Selection
 
-    @Immutable
     data object ByButton2 : Selection
 
-    @Immutable
     data object ByButton3 : Selection
 
-    @Immutable
     data class ByTextField(
         val bigDecimal: BigDecimal?
     ) : Selection
 }
 
-@Immutable
 data class SlippagePickerState(
     val amount: BigDecimal? = BigDecimal("0.5"),
     val onAmountChange: (BigDecimal?) -> Unit

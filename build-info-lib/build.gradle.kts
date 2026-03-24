@@ -47,7 +47,7 @@ val generateBuildConfigTask = tasks.register("buildConfig") {
         outputFile.parentFile.mkdirs()
 
         // To add timestamp, add this to the output below
-        // import kotlinx.datetime.Instant
+        // import kotlin.time.Instant
         // import kotlinx.datetime.toInstant
         // val buildTimestamp: Instant = "$buildTimestamp".toInstant()
         outputFile.writeText(

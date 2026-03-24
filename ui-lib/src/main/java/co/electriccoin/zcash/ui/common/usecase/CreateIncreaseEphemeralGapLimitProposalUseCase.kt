@@ -35,8 +35,10 @@ class CreateIncreaseEphemeralGapLimitProposalUseCase(
                     keystoneProposalRepository.createProposal(normalized)
                     keystoneProposalRepository.createPCZTFromProposal()
                 }
-                is ZashiAccount ->
+
+                is ZashiAccount -> {
                     zashiProposalRepository.createProposal(normalized)
+                }
             }
         } catch (e: Exception) {
             keystoneProposalRepository.clear()

@@ -67,16 +67,22 @@ class SpendableBalanceVM(
     private fun createMessage(account: WalletAccount, transactions: List<ListTransactionData>?): StringResource {
         val pending =
             when {
-                account.isAllShielded -> stringRes(R.string.balance_action_all_shielded)
+                account.isAllShielded -> {
+                    stringRes(R.string.balance_action_all_shielded)
+                }
 
                 account.totalBalance > account.spendableShieldedBalance &&
-                    transactions.orEmpty().any { it.transaction.isPending } ->
+                    transactions.orEmpty().any { it.transaction.isPending } -> {
                     stringRes(R.string.balance_action_pending)
+                }
 
-                account.totalBalance > account.spendableShieldedBalance ->
+                account.totalBalance > account.spendableShieldedBalance -> {
                     stringRes(R.string.balance_action_syncing)
+                }
 
-                else -> null
+                else -> {
+                    null
+                }
             }
 
         val shielding =
@@ -120,22 +126,26 @@ class SpendableBalanceVM(
             when {
                 account.totalShieldedBalance > account.spendableShieldedBalance &&
                     account.isShieldedPending &&
-                    hasPendingTransaction ->
+                    hasPendingTransaction -> {
                     SpendableBalanceRowState(
                         title = stringRes(R.string.balance_action_info_pending),
                         icon = loadingImageRes(),
                         value = stringRes(account.pendingShieldedBalance)
                     )
+                }
 
-                account.totalShieldedBalance > account.spendableShieldedBalance && hasPendingTransaction ->
+                account.totalShieldedBalance > account.spendableShieldedBalance && hasPendingTransaction -> {
                     SpendableBalanceRowState(
                         title = stringRes(R.string.balance_action_info_pending),
                         icon = loadingImageRes(),
                         value =
                             stringRes(account.totalShieldedBalance - account.spendableShieldedBalance)
                     )
+                }
 
-                else -> null
+                else -> {
+                    null
+                }
             },
         )
     }

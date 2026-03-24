@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
@@ -176,7 +175,6 @@ private fun InteractionSource.isFocused(): Flow<Boolean> =
         }
     }
 
-@Immutable
 data class SeedTextFieldState(
     val values: List<SeedWordTextFieldState>,
 )

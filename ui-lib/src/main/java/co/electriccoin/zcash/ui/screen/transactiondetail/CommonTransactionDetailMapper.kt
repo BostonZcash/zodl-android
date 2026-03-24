@@ -95,11 +95,15 @@ class CommonTransactionDetailMapper {
                     bigIcon = destinationAsset.getQuoteTokenIcon(),
                     smallIcon =
                         when (destinationAsset) {
-                            is DynamicSwapAsset -> destinationAsset.chainIcon
-                            is ZecSwapAsset ->
+                            is DynamicSwapAsset -> {
+                                destinationAsset.chainIcon
+                            }
+
+                            is ZecSwapAsset -> {
                                 destinationAsset.getQuoteChainIcon(
                                     isShielded = swap.quote.destinationAddress is ZcashShieldedSwapAddress
                                 )
+                            }
                         },
                     amount = stringResByNumber(swap.amountOutFormatted),
                     fiatAmount = stringResByDynamicCurrencyNumber(swap.amountOutUsd, FiatCurrency.USD.symbol),

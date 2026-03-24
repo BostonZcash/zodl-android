@@ -71,6 +71,7 @@ class GetHomeMessageUseCase(
                         when (it) {
                             Synchronizer.Status.STOPPED,
                             Synchronizer.Status.INITIALIZING -> emptyFlow()
+
                             else -> messages
                         }
                     }.distinctUntilChanged()
@@ -86,8 +87,11 @@ class GetHomeMessageUseCase(
     private fun observeShieldFundsMessage() =
         accountDataSource.selectedAccount.flatMapLatest { account ->
             when {
-                account == null -> flowOf(null)
-                account.isShieldingAvailable ->
+                account == null -> {
+                    flowOf(null)
+                }
+
+                account.isShieldingAvailable -> {
                     messageAvailabilityDataSource.canShowShieldMessage
                         .map { canShowShieldMessage ->
                             when {
@@ -95,8 +99,11 @@ class GetHomeMessageUseCase(
                                 else -> HomeMessageData.ShieldFunds(account.transparent.balance)
                             }
                         }
+                }
 
-                else -> flowOf(null)
+                else -> {
+                    flowOf(null)
+                }
             }
         }
 
@@ -166,17 +173,29 @@ class GetHomeMessageUseCase(
         val isHigherPriorityMessage = (message?.priority ?: 0) > (cache.lastShownMessage?.priority ?: 0)
         val result =
             when {
-                message == null -> null
-                message is RuntimeMessage -> message
-                isSameMessageUpdate -> message
-                isHigherPriorityMessage ->
+                message == null -> {
+                    null
+                }
+
+                message is RuntimeMessage -> {
+                    message
+                }
+
+                isSameMessageUpdate -> {
+                    message
+                }
+
+                isHigherPriorityMessage -> {
                     if (hasNoMessageBeenShownLately) {
                         if (someMessageBeenShown) null else message
                     } else {
                         message
                     }
+                }
 
-                else -> null
+                else -> {
+                    null
+                }
             }
 
         if (result != null) {

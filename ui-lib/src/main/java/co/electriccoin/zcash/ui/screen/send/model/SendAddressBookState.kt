@@ -9,7 +9,7 @@ data class SendAddressBookState(
     val onButtonClick: () -> Unit
 ) {
     enum class Mode(
-        @DrawableRes val icon: Int
+        @field:DrawableRes val icon: Int
     ) {
         PICK_FROM_ADDRESS_BOOK(R.drawable.send_address_book),
         ADD_TO_ADDRESS_BOOK(R.drawable.send_address_book_plus)

@@ -12,7 +12,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -106,9 +105,8 @@ internal fun BalanceWidgetButton(
     )
 }
 
-@Immutable
 data class BalanceButtonState(
-    @DrawableRes val icon: Int,
+    @field:DrawableRes val icon: Int,
     val text: StringResource,
     val amount: Zatoshi?,
     val onClick: () -> Unit

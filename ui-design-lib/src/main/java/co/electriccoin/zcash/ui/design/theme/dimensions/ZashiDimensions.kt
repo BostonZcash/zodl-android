@@ -1,9 +1,7 @@
 package co.electriccoin.zcash.ui.design.theme.dimensions
 
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.dp
 
-@Immutable
 object ZashiDimensions {
     object Radius {
         val radiusXxs = 2.dp

@@ -41,8 +41,11 @@ class ActivityWidgetVM(
             getWalletRestoringState.observe(),
         ) { activities, restoringState ->
             when {
-                activities == null -> ActivityWidgetState.Loading
-                activities.isEmpty() ->
+                activities == null -> {
+                    ActivityWidgetState.Loading
+                }
+
+                activities.isEmpty() -> {
                     ActivityWidgetState.Empty(
                         subtitle =
                             stringRes(R.string.transaction_history_widget_empty_subtitle)
@@ -54,8 +57,9 @@ class ActivityWidgetVM(
                             ).takeIf { restoringState != WalletRestoringState.RESTORING },
                         enableShimmer = restoringState == WalletRestoringState.RESTORING
                     )
+                }
 
-                else ->
+                else -> {
                     ActivityWidgetState.Data(
                         header =
                             TransactionHistoryWidgetHeaderState(
@@ -81,6 +85,7 @@ class ActivityWidgetVM(
                                     )
                                 }
                     )
+                }
             }
         }.stateIn(
             scope = viewModelScope,

@@ -17,7 +17,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -304,7 +303,6 @@ object ZashiButtonDefaults {
     )
 }
 
-@Immutable
 data class ZashiButtonColors(
     val containerColor: Color,
     val contentColor: Color,
@@ -317,12 +315,11 @@ data class ZashiButtonColors(
 /**
  * @property style explicit button style
  */
-@Immutable
 data class ButtonState(
     val text: StringResource,
     val style: ButtonStyle? = null,
-    @DrawableRes val icon: Int? = null,
-    @DrawableRes val trailingIcon: Int? = null,
+    @param:DrawableRes val icon: Int? = null,
+    @param:DrawableRes val trailingIcon: Int? = null,
     val isEnabled: Boolean = true,
     val isLoading: Boolean = false,
     val hapticFeedbackType: HapticFeedbackType? = null,

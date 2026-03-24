@@ -117,9 +117,13 @@ class SendViewModel(
 
     private fun onAddressBookButtonClicked(mode: SendAddressBookState.Mode, recipient: RecipientAddressState) {
         when (mode) {
-            SendAddressBookState.Mode.PICK_FROM_ADDRESS_BOOK -> viewModelScope.launch { navigateToSelectRecipient() }
-            SendAddressBookState.Mode.ADD_TO_ADDRESS_BOOK ->
+            SendAddressBookState.Mode.PICK_FROM_ADDRESS_BOOK -> {
+                viewModelScope.launch { navigateToSelectRecipient() }
+            }
+
+            SendAddressBookState.Mode.ADD_TO_ADDRESS_BOOK -> {
                 navigationRouter.forward(AddZashiABContactArgs(recipient.address))
+            }
         }
     }
 

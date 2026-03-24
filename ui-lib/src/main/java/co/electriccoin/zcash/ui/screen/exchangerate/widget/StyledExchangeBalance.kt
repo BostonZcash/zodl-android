@@ -49,9 +49,9 @@ import co.electriccoin.zcash.ui.design.util.stringRes
 import co.electriccoin.zcash.ui.design.util.stringResByDynamicCurrencyNumber
 import co.electriccoin.zcash.ui.fixture.ObserveFiatCurrencyResultFixture
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import java.math.BigDecimal
 import java.math.MathContext
+import kotlin.time.Clock
 
 @Suppress("LongParameterList", "ComplexCondition")
 @Composable
@@ -65,7 +65,7 @@ fun StyledExchangeBalance(
     style: TextStyle = ZashiTypography.textSm.copy(fontWeight = FontWeight.SemiBold)
 ) {
     when (state) {
-        is ExchangeRateState.Data ->
+        is ExchangeRateState.Data -> {
             if ((state.isStale && !state.isLoading) || (!state.isLoading && state.currencyConversion == null)) {
                 ExchangeRateUnavailableButton(
                     textColor = textColor,
@@ -82,6 +82,7 @@ fun StyledExchangeBalance(
                     isHideBalance = LocalBalancesAvailable.current.not()
                 )
             }
+        }
 
         is ExchangeRateState.OptIn -> {
             // do not show anything

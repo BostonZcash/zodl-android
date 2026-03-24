@@ -36,15 +36,31 @@ data class RecipientAddressState(
                                 RecipientAddressState(
                                     address,
                                     when (type) {
-                                        TYPE_INVALID ->
+                                        TYPE_INVALID -> {
                                             AddressType.Invalid(
                                                 (it[KEY_INVALID_REASON] as String)
                                             )
-                                        TYPE_SHIELDED -> AddressType.Shielded
-                                        TYPE_UNIFIED -> AddressType.Unified
-                                        TYPE_TRANSPARENT -> AddressType.Transparent
-                                        TYPE_TEX -> AddressType.Tex
-                                        else -> null
+                                        }
+
+                                        TYPE_SHIELDED -> {
+                                            AddressType.Shielded
+                                        }
+
+                                        TYPE_UNIFIED -> {
+                                            AddressType.Unified
+                                        }
+
+                                        TYPE_TRANSPARENT -> {
+                                            AddressType.Transparent
+                                        }
+
+                                        TYPE_TEX -> {
+                                            AddressType.Tex
+                                        }
+
+                                        else -> {
+                                            null
+                                        }
                                     }
                                 )
                             }
@@ -64,11 +80,22 @@ data class RecipientAddressState(
                             saverMap[KEY_INVALID_REASON] = this.type.reason
                             TYPE_INVALID
                         }
-                        AddressType.Unified -> TYPE_UNIFIED
-                        AddressType.Transparent -> TYPE_TRANSPARENT
-                        AddressType.Shielded -> TYPE_SHIELDED
-                        AddressType.Tex -> TYPE_TEX
-                        else -> error("Unsupported type: ${this.type}")
+
+                        AddressType.Unified -> {
+                            TYPE_UNIFIED
+                        }
+
+                        AddressType.Transparent -> {
+                            TYPE_TRANSPARENT
+                        }
+
+                        AddressType.Shielded -> {
+                            TYPE_SHIELDED
+                        }
+
+                        AddressType.Tex -> {
+                            TYPE_TEX
+                        }
                     }
             }
             return saverMap

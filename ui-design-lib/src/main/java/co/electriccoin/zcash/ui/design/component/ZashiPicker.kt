@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -123,7 +122,6 @@ fun ZashiPicker(
     }
 }
 
-@Immutable
 data class PickerState(
     val bigIcon: ImageResource?,
     val smallIcon: ImageResource?,

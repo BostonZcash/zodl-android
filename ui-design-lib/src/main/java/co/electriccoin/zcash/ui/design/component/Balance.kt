@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -164,7 +163,6 @@ data class ZecAmountTriple(
     val suffix: String? = null
 )
 
-@Immutable
 data class BalanceTextStyle(
     val mostSignificantPart: TextStyle,
     val leastSignificantPart: TextStyle

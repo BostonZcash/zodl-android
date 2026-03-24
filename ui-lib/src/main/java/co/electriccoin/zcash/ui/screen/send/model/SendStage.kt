@@ -42,8 +42,14 @@ sealed class SendStage {
         private fun SendStage.toSaverMap(): HashMap<String, String> {
             val saverMap = HashMap<String, String>()
             when (this) {
-                Form -> saverMap[KEY_TYPE] = TYPE_FORM
-                Proposing -> saverMap[KEY_TYPE] = TYPE_PROPOSING
+                Form -> {
+                    saverMap[KEY_TYPE] = TYPE_FORM
+                }
+
+                Proposing -> {
+                    saverMap[KEY_TYPE] = TYPE_PROPOSING
+                }
+
                 is SendFailure -> {
                     saverMap[KEY_TYPE] = TYPE_FAILURE
                     saverMap[KEY_ERROR] = this.error

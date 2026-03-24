@@ -26,8 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,7 +35,6 @@ import co.electriccoin.zcash.ui.R
 import co.electriccoin.zcash.ui.common.compose.SecureScreen
 import co.electriccoin.zcash.ui.common.compose.ZashiTooltip
 import co.electriccoin.zcash.ui.common.compose.ZashiTooltipBox
-import co.electriccoin.zcash.ui.common.compose.drawCaretWithPath
 import co.electriccoin.zcash.ui.common.compose.shouldSecureScreen
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.IconButtonState
@@ -196,30 +193,17 @@ private fun BDSecret(
                 fontWeight = FontWeight.Medium
             )
             if (state.tooltip != null) {
-                val density = LocalDensity.current
-                val configuration = LocalConfiguration.current
-                val containerColor = ZashiColors.HintTooltips.defaultBg
                 Spacer(2.dp)
                 ZashiTooltipBox(
                     tooltip = {
                         ZashiTooltip(
-                            modifier =
-                                Modifier.drawCaret {
-                                    drawCaretWithPath(
-                                        density = density,
-                                        configuration = configuration,
-                                        containerColor = containerColor,
-                                        anchorLayoutCoordinates = it
-                                    )
-                                },
-                            showCaret = false,
                             title = state.tooltip.title,
                             message = state.tooltip.message,
                             onDismissRequest = {
                                 scope.launch {
                                     tooltipState.dismiss()
                                 }
-                            }
+                            },
                         )
                     },
                     state = tooltipState,

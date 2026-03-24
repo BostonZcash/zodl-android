@@ -69,7 +69,7 @@ import co.electriccoin.zcash.ui.design.util.stringResByDynamicCurrencyNumber
 import co.electriccoin.zcash.ui.design.util.withStyle
 import co.electriccoin.zcash.ui.screen.balances.BalanceWidgetHeader
 import co.electriccoin.zcash.ui.screen.exchangerate.widget.StyledExchangeLabel
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 @Composable
 fun ReviewTransactionView(state: ReviewTransactionState) {
@@ -100,7 +100,9 @@ fun ReviewTransactionView(state: ReviewTransactionState) {
             ) {
                 state.items.forEach { item ->
                     when (item) {
-                        is AmountState -> AmountWidget(item)
+                        is AmountState -> {
+                            AmountWidget(item)
+                        }
 
                         is ExactOutputQuoteState -> {
                             SimpleAmountWidget(item)

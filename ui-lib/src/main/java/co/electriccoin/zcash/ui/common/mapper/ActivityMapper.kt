@@ -40,7 +40,7 @@ class ActivityMapper {
         onDisplayed: (ActivityData) -> Unit
     ): ActivityState =
         when (data) {
-            is ActivityData.BySwap ->
+            is ActivityData.BySwap -> {
                 ActivityState(
                     key = data.swap.depositAddress,
                     bigIcon = getSwapBigIcon(data),
@@ -53,8 +53,9 @@ class ActivityMapper {
                     isUnread = false,
                     onDisplayed = { onDisplayed(data) }
                 )
+            }
 
-            is ActivityData.ByTransaction ->
+            is ActivityData.ByTransaction -> {
                 ActivityState(
                     key = data.transaction.id.txIdString(),
                     bigIcon = getTransactionBigIcon(data),
@@ -67,6 +68,7 @@ class ActivityMapper {
                     isUnread = isTransactionUnread(data, restoreTimestamp),
                     onDisplayed = { onDisplayed(data) }
                 )
+            }
         }
 
     private fun getSwapValue(data: ActivityData.BySwap): StyledStringResource =
@@ -115,12 +117,30 @@ class ActivityMapper {
     @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     private fun getTransactionBigIcon(data: ActivityData.ByTransaction) =
         when (val transaction = data.transaction) {
-            is ReceiveTransaction.Success -> R.drawable.ic_transaction_received
-            is ReceiveTransaction.Pending -> R.drawable.ic_transaction_receive_pending
-            is ReceiveTransaction.Failed -> R.drawable.ic_transaction_receive_failed
-            is ShieldTransaction.Success -> R.drawable.ic_transaction_shielded
-            is ShieldTransaction.Pending -> R.drawable.ic_transaction_shield_pending
-            is ShieldTransaction.Failed -> R.drawable.ic_transaction_shield_failed
+            is ReceiveTransaction.Success -> {
+                R.drawable.ic_transaction_received
+            }
+
+            is ReceiveTransaction.Pending -> {
+                R.drawable.ic_transaction_receive_pending
+            }
+
+            is ReceiveTransaction.Failed -> {
+                R.drawable.ic_transaction_receive_failed
+            }
+
+            is ShieldTransaction.Success -> {
+                R.drawable.ic_transaction_shielded
+            }
+
+            is ShieldTransaction.Pending -> {
+                R.drawable.ic_transaction_shield_pending
+            }
+
+            is ShieldTransaction.Failed -> {
+                R.drawable.ic_transaction_shield_failed
+            }
+
             is SendTransaction -> {
                 if (data.metadata.swapMetadata == null) {
                     when (transaction) {
@@ -136,19 +156,21 @@ class ActivityMapper {
                         }
                     } else {
                         when (data.metadata.swapMetadata.mode) {
-                            EXACT_INPUT ->
+                            EXACT_INPUT -> {
                                 when (data.metadata.swapMetadata.status) {
                                     INCOMPLETE_DEPOSIT, PROCESSING, PENDING -> R.drawable.ic_transaction_send_pending
                                     SUCCESS -> R.drawable.ic_transaction_sent
                                     EXPIRED, REFUNDED, FAILED -> R.drawable.ic_transaction_send_failed
                                 }
+                            }
 
-                            EXACT_OUTPUT ->
+                            EXACT_OUTPUT -> {
                                 when (data.metadata.swapMetadata.status) {
                                     INCOMPLETE_DEPOSIT, PROCESSING, PENDING -> R.drawable.ic_transaction_paying
                                     SUCCESS -> R.drawable.ic_transaction_paid
                                     EXPIRED, REFUNDED, FAILED -> R.drawable.ic_transaction_pay_failed
                                 }
+                            }
                         }
                     }
                 }
@@ -158,12 +180,30 @@ class ActivityMapper {
     @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     private fun getTransactionTitle(data: ActivityData.ByTransaction) =
         when (val transaction = data.transaction) {
-            is ReceiveTransaction.Success -> stringRes(R.string.transaction_history_received)
-            is ReceiveTransaction.Pending -> stringRes(R.string.transaction_history_receiving)
-            is ReceiveTransaction.Failed -> stringRes(R.string.transaction_history_receiving_failed)
-            is ShieldTransaction.Success -> stringRes(R.string.transaction_history_shielded)
-            is ShieldTransaction.Pending -> stringRes(R.string.transaction_history_shielding)
-            is ShieldTransaction.Failed -> stringRes(R.string.transaction_history_shielding_failed)
+            is ReceiveTransaction.Success -> {
+                stringRes(R.string.transaction_history_received)
+            }
+
+            is ReceiveTransaction.Pending -> {
+                stringRes(R.string.transaction_history_receiving)
+            }
+
+            is ReceiveTransaction.Failed -> {
+                stringRes(R.string.transaction_history_receiving_failed)
+            }
+
+            is ShieldTransaction.Success -> {
+                stringRes(R.string.transaction_history_shielded)
+            }
+
+            is ShieldTransaction.Pending -> {
+                stringRes(R.string.transaction_history_shielding)
+            }
+
+            is ShieldTransaction.Failed -> {
+                stringRes(R.string.transaction_history_shielding_failed)
+            }
+
             is SendTransaction -> {
                 if (data.metadata.swapMetadata == null) {
                     when (transaction) {
@@ -179,29 +219,37 @@ class ActivityMapper {
                         }
                     } else {
                         when (data.metadata.swapMetadata.mode) {
-                            EXACT_INPUT ->
+                            EXACT_INPUT -> {
                                 when (data.metadata.swapMetadata.status) {
                                     INCOMPLETE_DEPOSIT,
                                     PROCESSING,
                                     PENDING -> stringRes(R.string.transaction_history_swapping)
 
                                     SUCCESS -> stringRes(R.string.transaction_history_swapped)
+
                                     REFUNDED -> stringRes(R.string.transaction_history_swap_refunded)
+
                                     FAILED -> stringRes(R.string.transaction_history_swap_failed)
+
                                     EXPIRED -> stringRes(R.string.transaction_history_swap_expired)
                                 }
+                            }
 
-                            EXACT_OUTPUT ->
+                            EXACT_OUTPUT -> {
                                 when (data.metadata.swapMetadata.status) {
                                     INCOMPLETE_DEPOSIT,
                                     PROCESSING,
                                     PENDING -> stringRes(R.string.transaction_history_paying)
 
                                     SUCCESS -> stringRes(R.string.transaction_history_paid)
+
                                     REFUNDED -> stringRes(R.string.transaction_history_payment_refunded)
+
                                     FAILED -> stringRes(R.string.transaction_history_payment_failed)
+
                                     EXPIRED -> stringRes(R.string.transaction_history_payment_expired)
                                 }
+                            }
                         }
                     }
                 }
@@ -213,16 +261,21 @@ class ActivityMapper {
         val transactionDate = timestamp.atZone(ZoneId.systemDefault())
         val daysBetween = ChronoUnit.DAYS.between(transactionDate.toLocalDate(), LocalDate.now())
         return when {
-            LocalDate.now() == transactionDate.toLocalDate() ->
+            LocalDate.now() == transactionDate.toLocalDate() -> {
                 stringRes(R.string.transaction_history_today)
+            }
 
-            LocalDate.now().minusDays(1) == transactionDate.toLocalDate() ->
+            LocalDate.now().minusDays(1) == transactionDate.toLocalDate() -> {
                 stringRes(R.string.transaction_history_yesterday)
+            }
 
-            daysBetween < MONTH_THRESHOLD ->
+            daysBetween < MONTH_THRESHOLD -> {
                 stringRes(R.string.transaction_history_days_ago, daysBetween.toString())
+            }
 
-            else -> stringResByDateTime(zonedDateTime = transactionDate, useFullFormat = false)
+            else -> {
+                stringResByDateTime(zonedDateTime = transactionDate, useFullFormat = false)
+            }
         }
     }
 
@@ -239,38 +292,62 @@ class ActivityMapper {
             when (data.transaction) {
                 is SendTransaction.Success,
                 is SendTransaction.Failed,
-                is SendTransaction.Pending ->
+                is SendTransaction.Pending -> {
                     stringRes("- ") + stringRes(data.transaction.amount)
+                }
 
                 is ShieldTransaction.Success,
                 is ShieldTransaction.Failed,
                 is ShieldTransaction.Pending,
                 is ReceiveTransaction.Success,
                 is ReceiveTransaction.Failed,
-                is ReceiveTransaction.Pending ->
+                is ReceiveTransaction.Pending -> {
                     stringRes(data.transaction.amount)
+                }
             }
 
         val color =
             when (data.transaction) {
-                is ReceiveTransaction.Success -> StringResourceColor.POSITIVE
-                is ReceiveTransaction.Pending -> StringResourceColor.PRIMARY
-                is ReceiveTransaction.Failed -> StringResourceColor.NEGATIVE
-                is ShieldTransaction.Success -> StringResourceColor.PRIMARY
-                is ShieldTransaction.Pending -> StringResourceColor.PRIMARY
-                is ShieldTransaction.Failed -> StringResourceColor.NEGATIVE
-                is SendTransaction ->
+                is ReceiveTransaction.Success -> {
+                    StringResourceColor.POSITIVE
+                }
+
+                is ReceiveTransaction.Pending -> {
+                    StringResourceColor.PRIMARY
+                }
+
+                is ReceiveTransaction.Failed -> {
+                    StringResourceColor.NEGATIVE
+                }
+
+                is ShieldTransaction.Success -> {
+                    StringResourceColor.PRIMARY
+                }
+
+                is ShieldTransaction.Pending -> {
+                    StringResourceColor.PRIMARY
+                }
+
+                is ShieldTransaction.Failed -> {
+                    StringResourceColor.NEGATIVE
+                }
+
+                is SendTransaction -> {
                     when {
-                        data.metadata.swapMetadata == null ->
+                        data.metadata.swapMetadata == null -> {
                             when (data.transaction) {
                                 is SendTransaction.Success,
                                 is SendTransaction.Pending -> StringResourceColor.PRIMARY
 
                                 is SendTransaction.Failed -> StringResourceColor.NEGATIVE
                             }
+                        }
 
-                        data.transaction is SendTransaction.Failed -> StringResourceColor.NEGATIVE
-                        else ->
+                        data.transaction is SendTransaction.Failed -> {
+                            StringResourceColor.NEGATIVE
+                        }
+
+                        else -> {
                             when (data.metadata.swapMetadata.status) {
                                 INCOMPLETE_DEPOSIT,
                                 PENDING,
@@ -281,7 +358,9 @@ class ActivityMapper {
                                 REFUNDED,
                                 FAILED -> StringResourceColor.NEGATIVE
                             }
+                        }
                     }
+                }
             }
 
         return stringRes.withStyle(StyledStringStyle(color = color))

@@ -109,9 +109,9 @@ class TransactionRepositoryImpl(
 
     private suspend fun createTransaction(transaction: TransactionOverview, synchronizer: Synchronizer): Transaction =
         when (transaction.transactionState) {
-            Expired ->
+            Expired -> {
                 when {
-                    transaction.isShielding ->
+                    transaction.isShielding -> {
                         ShieldTransaction.Failed(
                             timestamp = createTimestamp(transaction),
                             transactionOutputs = synchronizer.getTransactionOutputs(transaction),
@@ -122,8 +122,9 @@ class TransactionRepositoryImpl(
                             overview = transaction,
                             recipient = null
                         )
+                    }
 
-                    transaction.isSentTransaction ->
+                    transaction.isSentTransaction -> {
                         SendTransaction.Failed(
                             timestamp = createTimestamp(transaction),
                             transactionOutputs = synchronizer.getTransactionOutputs(transaction),
@@ -134,8 +135,9 @@ class TransactionRepositoryImpl(
                             overview = transaction,
                             recipient = getRecipient(transaction)
                         )
+                    }
 
-                    else ->
+                    else -> {
                         ReceiveTransaction.Failed(
                             timestamp = createTimestamp(transaction),
                             transactionOutputs = synchronizer.getTransactionOutputs(transaction),
@@ -145,11 +147,13 @@ class TransactionRepositoryImpl(
                             overview = transaction,
                             recipient = null
                         )
+                    }
                 }
+            }
 
-            Confirmed ->
+            Confirmed -> {
                 when {
-                    transaction.isShielding ->
+                    transaction.isShielding -> {
                         ShieldTransaction.Success(
                             timestamp = createTimestamp(transaction),
                             transactionOutputs = synchronizer.getTransactionOutputs(transaction),
@@ -160,8 +164,9 @@ class TransactionRepositoryImpl(
                             overview = transaction,
                             recipient = null
                         )
+                    }
 
-                    transaction.isSentTransaction ->
+                    transaction.isSentTransaction -> {
                         SendTransaction.Success(
                             timestamp = createTimestamp(transaction),
                             transactionOutputs = synchronizer.getTransactionOutputs(transaction),
@@ -172,8 +177,9 @@ class TransactionRepositoryImpl(
                             overview = transaction,
                             recipient = getRecipient(transaction)
                         )
+                    }
 
-                    else ->
+                    else -> {
                         ReceiveTransaction.Success(
                             timestamp = createTimestamp(transaction),
                             transactionOutputs = synchronizer.getTransactionOutputs(transaction),
@@ -183,11 +189,13 @@ class TransactionRepositoryImpl(
                             overview = transaction,
                             recipient = null
                         )
+                    }
                 }
+            }
 
-            Pending ->
+            Pending -> {
                 when {
-                    transaction.isShielding ->
+                    transaction.isShielding -> {
                         ShieldTransaction.Pending(
                             timestamp = createTimestamp(transaction),
                             transactionOutputs = synchronizer.getTransactionOutputs(transaction),
@@ -198,8 +206,9 @@ class TransactionRepositoryImpl(
                             overview = transaction,
                             recipient = null
                         )
+                    }
 
-                    transaction.isSentTransaction ->
+                    transaction.isSentTransaction -> {
                         SendTransaction.Pending(
                             timestamp = createTimestamp(transaction),
                             transactionOutputs = synchronizer.getTransactionOutputs(transaction),
@@ -210,8 +219,9 @@ class TransactionRepositoryImpl(
                             overview = transaction,
                             recipient = getRecipient(transaction)
                         )
+                    }
 
-                    else ->
+                    else -> {
                         ReceiveTransaction.Pending(
                             timestamp = createTimestamp(transaction),
                             transactionOutputs = synchronizer.getTransactionOutputs(transaction),
@@ -221,7 +231,9 @@ class TransactionRepositoryImpl(
                             overview = transaction,
                             recipient = null
                         )
+                    }
                 }
+            }
         }
 
     private fun createTransactionState(minedHeight: BlockHeight?): TransactionState? {

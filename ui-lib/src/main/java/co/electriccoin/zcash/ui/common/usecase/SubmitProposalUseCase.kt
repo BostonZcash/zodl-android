@@ -65,7 +65,10 @@ class SubmitProposalUseCase(
                 )
             }
             when (account) {
-                is KeystoneAccount -> navigationRouter.replace(SignKeystoneTransactionArgs)
+                is KeystoneAccount -> {
+                    navigationRouter.replace(SignKeystoneTransactionArgs)
+                }
+
                 is ZashiAccount -> {
                     swapRepository.clear()
                     submitZashiProposal(proposal)

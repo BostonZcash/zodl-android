@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -162,7 +161,6 @@ private fun ExpandedBaseListItem(
     }
 }
 
-@Immutable
 data class ZashiExpandedCheckboxListItemState(
     val title: StringResource,
     val subtitle: StringResource,
@@ -178,7 +176,6 @@ data class ZashiExpandedCheckboxListItemState(
     val onClick: () -> Unit
 ) : CheckboxListItemState
 
-@Immutable
 data class ZashiExpandedCheckboxRowState(
     val title: StringResource,
     val subtitle: StringResource,

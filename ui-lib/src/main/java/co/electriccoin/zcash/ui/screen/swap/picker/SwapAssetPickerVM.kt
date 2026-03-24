@@ -65,7 +65,7 @@ class SwapAssetPickerVM(
         SwapAssetPickerState(
             data =
                 when {
-                    assets.data != null ->
+                    assets.data != null -> {
                         SwapAssetPickerDataState.Success(
                             assets.data.map {
                                 ListItemState(
@@ -79,9 +79,13 @@ class SwapAssetPickerVM(
                                 )
                             }
                         )
+                    }
 
-                    assets.isLoading -> SwapAssetPickerDataState.Loading
-                    else ->
+                    assets.isLoading -> {
+                        SwapAssetPickerDataState.Loading
+                    }
+
+                    else -> {
                         SwapAssetPickerDataState.Error(
                             stringRes(co.electriccoin.zcash.ui.design.R.string.general_error_title),
                             stringRes(co.electriccoin.zcash.ui.design.R.string.general_error_message),
@@ -90,6 +94,7 @@ class SwapAssetPickerVM(
                                 onClick = ::onRetryClick
                             )
                         )
+                    }
                 },
             onBack = ::onBack,
             search = search,

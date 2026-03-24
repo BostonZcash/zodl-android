@@ -17,6 +17,7 @@ class ValidateZashiABContactAddressUseCase(
         val result = synchronizerProvider.getSynchronizer().validateAddress(address)
         return when {
             result.isNotValid -> ContactAddressValidationResult.Invalid
+
             addressBookRepository.contacts
                 .filterNotNull()
                 .first()

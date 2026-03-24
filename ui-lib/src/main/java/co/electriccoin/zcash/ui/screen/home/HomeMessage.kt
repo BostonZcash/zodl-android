@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -122,82 +121,93 @@ fun HomeMessage(
             val contentPadding = PaddingValues(top = TOP_CUTOUT_HEIGHT_DP.dp, bottom = BOTTOM_CUTOUT_HEIGHT_DP.dp)
             val innerModifier = Modifier
             when (normalizedState) {
-                is WalletBackupMessageState ->
+                is WalletBackupMessageState -> {
                     WalletBackupMessage(
                         innerModifier = innerModifier,
                         state = normalizedState as WalletBackupMessageState,
                         contentPadding = contentPadding
                     )
+                }
 
-                is EnableCurrencyConversionMessageState ->
+                is EnableCurrencyConversionMessageState -> {
                     EnableCurrencyConversionMessage(
                         innerModifier = innerModifier,
                         state = normalizedState as EnableCurrencyConversionMessageState,
                         contentPadding = contentPadding
                     )
+                }
 
-                is ShieldFundsMessageState ->
+                is ShieldFundsMessageState -> {
                     ShieldFundsMessage(
                         innerModifier = innerModifier,
                         state = normalizedState as ShieldFundsMessageState,
                         contentPadding = contentPadding
                     )
+                }
 
-                is WalletDisconnectedMessageState ->
+                is WalletDisconnectedMessageState -> {
                     WalletDisconnectedMessage(
                         innerModifier = innerModifier,
                         state = normalizedState as WalletDisconnectedMessageState,
                         contentPadding = contentPadding
                     )
+                }
 
-                is WalletRestoringMessageState ->
+                is WalletRestoringMessageState -> {
                     WalletRestoringMessage(
                         innerModifier = innerModifier,
                         state = normalizedState as WalletRestoringMessageState,
                         contentPadding = contentPadding
                     )
+                }
 
-                is WalletSyncingMessageState ->
+                is WalletSyncingMessageState -> {
                     WalletSyncingMessage(
                         innerModifier = innerModifier,
                         state = normalizedState as WalletSyncingMessageState,
                         contentPadding = contentPadding
                     )
+                }
 
-                is WalletUpdatingMessageState ->
+                is WalletUpdatingMessageState -> {
                     WalletUpdatingMessage(
                         innerModifier = innerModifier,
                         state = normalizedState as WalletUpdatingMessageState,
                         contentPadding = contentPadding
                     )
+                }
 
-                is WalletErrorMessageState ->
+                is WalletErrorMessageState -> {
                     WalletErrorMessage(
                         innerModifier = innerModifier,
                         state = normalizedState as WalletErrorMessageState,
                         contentPadding = contentPadding
                     )
+                }
 
-                is CrashReportMessageState ->
+                is CrashReportMessageState -> {
                     CrashReportMessage(
                         innerModifier = innerModifier,
                         state = normalizedState as CrashReportMessageState,
                         contentPadding = contentPadding
                     )
+                }
 
-                is EnableTorMessageState ->
+                is EnableTorMessageState -> {
                     EnableTorMessage(
                         innerModifier = innerModifier,
                         state = normalizedState as EnableTorMessageState,
                         contentPadding = contentPadding
                     )
+                }
 
-                is ORSwapMessageState ->
+                is ORSwapMessageState -> {
                     ORSwapMessage(
                         innerModifier = innerModifier,
                         state = normalizedState as ORSwapMessageState,
                         contentPadding = contentPadding
                     )
+                }
 
                 null -> {
                     // do nothing
@@ -248,7 +258,6 @@ fun HomeMessage(
     }
 }
 
-@Immutable
 interface HomeMessageState
 
 @Suppress("MagicNumber")

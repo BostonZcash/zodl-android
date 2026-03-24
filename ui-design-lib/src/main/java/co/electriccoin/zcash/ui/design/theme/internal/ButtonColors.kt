@@ -2,10 +2,8 @@
 
 package co.electriccoin.zcash.ui.design.theme.internal
 
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
-@Immutable
 interface ButtonColors {
     val containerColor: Color
     val disabledContainerColor: Color
@@ -19,7 +17,6 @@ interface ButtonColors {
     val shadowDisabledStrokeColor: Color
 }
 
-@Immutable
 internal data class DefaultButtonColors(
     override val containerColor: Color = Color.Unspecified,
     override val disabledContainerColor: Color = Color.Unspecified,
@@ -35,7 +32,6 @@ internal data class DefaultButtonColors(
 
 // LIGHT THEME BUTTONS:
 
-@Immutable
 internal data class LightPrimaryButtonColors(
     override val containerColor: Color = Color(0xFF000000),
     override val disabledContainerColor: Color = Color(0xFFB7B7B7),
@@ -49,7 +45,6 @@ internal data class LightPrimaryButtonColors(
     override val shadowDisabledStrokeColor: Color = Color(0xFF000000),
 ) : ButtonColors
 
-@Immutable
 internal data class LightSecondaryButtonColors(
     override val containerColor: Color = Color(0xFFFFFFFF),
     override val disabledContainerColor: Color = Color(0xFFFFFFFF),
@@ -64,7 +59,6 @@ internal data class LightSecondaryButtonColors(
 ) : ButtonColors
 
 // Currently the same as Light-Primary version
-@Immutable
 internal data class LightTertiaryButtonColors(
     override val containerColor: Color = Color(0xFF000000),
     override val disabledContainerColor: Color = Color(0xFFB7B7B7),
@@ -80,7 +74,6 @@ internal data class LightTertiaryButtonColors(
 
 // DARK THEME BUTTONS:
 
-@Immutable
 internal data class DarkPrimaryButtonColors(
     override val containerColor: Color = Color(0xFF181716),
     override val disabledContainerColor: Color = Color(0xFF4D4D4D),
@@ -94,7 +87,6 @@ internal data class DarkPrimaryButtonColors(
     override val shadowDisabledStrokeColor: Color = Color(0xFFFFFFFF),
 ) : ButtonColors
 
-@Immutable
 internal data class DarkSecondaryButtonColors(
     override val containerColor: Color = Color(0xFF181716),
     override val disabledContainerColor: Color = Color(0xFFFFFFFF),
@@ -108,7 +100,6 @@ internal data class DarkSecondaryButtonColors(
     override val shadowDisabledStrokeColor: Color = Color(0xFF000000),
 ) : ButtonColors
 
-@Immutable
 internal data class DarkTertiaryButtonColors(
     override val containerColor: Color = Color(0xFFFFFFFF),
     override val disabledContainerColor: Color = Color(0xFFB7B7B7),

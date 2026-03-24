@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -68,7 +67,7 @@ fun ZashiOverlappingIcons(state: OverlappingIconsState) {
             val iconModifier = offset then cutout
 
             when (icon) {
-                is ImageResource.ByDrawable ->
+                is ImageResource.ByDrawable -> {
                     icon.Compose(
                         modifier =
                             iconModifier then
@@ -78,12 +77,14 @@ fun ZashiOverlappingIcons(state: OverlappingIconsState) {
                                     Modifier.Companion
                                 },
                     )
+                }
 
-                is ImageResource.Loading ->
+                is ImageResource.Loading -> {
                     icon.ComposeAsShimmerCircle(
                         modifier = iconModifier,
                         size = iconSize
                     )
+                }
 
                 is ImageResource.DisplayString -> {
                     // do nothing
@@ -93,7 +94,6 @@ fun ZashiOverlappingIcons(state: OverlappingIconsState) {
     }
 }
 
-@Immutable
 data class OverlappingIconsState(
     val icons: List<ImageResource>
 )

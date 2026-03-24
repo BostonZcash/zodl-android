@@ -143,12 +143,16 @@ class SwapSlippageVM(
         val percentString = stringResByNumber(percent, minDecimals = 0) + stringRes("%")
         val result =
             when {
-                percent > BigDecimal("30") -> stringRes(R.string.swap_slippage_max_threshold)
-                fiatAmount == null ->
+                percent > BigDecimal("30") -> {
+                    stringRes(R.string.swap_slippage_max_threshold)
+                }
+
+                fiatAmount == null -> {
                     when (args.mode) {
                         EXACT_INPUT -> stringRes(R.string.swap_slippage_info, percentString)
                         EXACT_OUTPUT -> stringRes(R.string.pay_slippage_info, percentString)
                     }
+                }
 
                 else -> {
                     val slippageFiat =

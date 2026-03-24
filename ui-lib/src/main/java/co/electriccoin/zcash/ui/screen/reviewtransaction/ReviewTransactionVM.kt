@@ -82,7 +82,7 @@ class ReviewTransactionVM(
                 }
             ).map { addressBookContact ->
                 when (proposal) {
-                    is Zip321TransactionProposal ->
+                    is Zip321TransactionProposal -> {
                         createZip321State(
                             transactionProposal = proposal,
                             addressBookContact = addressBookContact,
@@ -90,8 +90,9 @@ class ReviewTransactionVM(
                             isReceiverExpanded = isReceiverExpanded,
                             exchangeRateState = exchangeRate
                         )
+                    }
 
-                    else ->
+                    else -> {
                         createState(
                             transactionProposal = proposal,
                             addressBookContact = addressBookContact,
@@ -99,6 +100,7 @@ class ReviewTransactionVM(
                             exchangeRateState = exchangeRate,
                             accounts = accounts
                         )
+                    }
                 }
             }
         }.stateIn(

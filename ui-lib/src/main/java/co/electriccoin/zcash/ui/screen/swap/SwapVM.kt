@@ -322,19 +322,21 @@ internal class SwapVM(
         viewModelScope.launch {
             isRequestingQuote.update { true }
             when (mode.value) {
-                SWAP_FROM_ZEC ->
+                SWAP_FROM_ZEC -> {
                     requestSwapQuote.requestExactInput(
                         amount = amount,
                         address = address,
                         canNavigateToSwapQuote = { !isCancelStateVisible.value }
                     )
+                }
 
-                SWAP_INTO_ZEC ->
+                SWAP_INTO_ZEC -> {
                     requestSwapQuote.requestExactInputIntoZec(
                         amount = amount,
                         refundAddress = address,
                         canNavigateToSwapQuote = { !isCancelStateVisible.value }
                     )
+                }
             }
             isRequestingQuote.update { false }
         }

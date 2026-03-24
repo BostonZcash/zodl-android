@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -86,11 +85,10 @@ fun ZashiChipButton(
     }
 }
 
-@Immutable
 data class ChipButtonState(
     val text: StringResource,
-    @DrawableRes val startIcon: Int? = null,
-    @DrawableRes val endIcon: Int? = null,
+    @param:DrawableRes val startIcon: Int? = null,
+    @param:DrawableRes val endIcon: Int? = null,
     val isEnabled: Boolean = true,
     val onClick: () -> Unit,
 )

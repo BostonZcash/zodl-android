@@ -55,7 +55,10 @@ class GetFilteredActivitiesUseCase(
                     activities
                         ?.map { activity ->
                             when (activity) {
-                                is ActivityData.BySwap -> flowOf(InternalState.BySwap(activity))
+                                is ActivityData.BySwap -> {
+                                    flowOf(InternalState.BySwap(activity))
+                                }
+
                                 is ActivityData.ByTransaction -> {
                                     val recipient = activity.transaction.recipient
 
@@ -283,9 +286,10 @@ class GetFilteredActivitiesUseCase(
 
     private fun hasAddressWithFulltext(transaction: InternalState, fulltextFilter: String): Boolean =
         when (transaction) {
-            is InternalState.BySwap ->
+            is InternalState.BySwap -> {
                 transaction.activity.swap.depositAddress
                     .contains(fulltextFilter, true)
+            }
 
             is InternalState.ByTransaction -> {
                 transaction.activity.transaction.recipient

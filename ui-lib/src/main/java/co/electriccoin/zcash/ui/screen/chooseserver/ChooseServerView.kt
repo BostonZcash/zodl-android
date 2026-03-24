@@ -241,7 +241,7 @@ private fun LazyListScope.serverListItems(state: ServerListState) {
         key = { _, item -> item.key }
     ) { index, item ->
         when (item) {
-            is ServerState.Custom ->
+            is ServerState.Custom -> {
                 CustomServerRadioButton(
                     modifier =
                         Modifier
@@ -256,8 +256,9 @@ private fun LazyListScope.serverListItems(state: ServerListState) {
                             ),
                     state = item
                 )
+            }
 
-            is ServerState.Default ->
+            is ServerState.Default -> {
                 ZashiRadioButton(
                     state = item.radioButtonState,
                     modifier =
@@ -295,6 +296,7 @@ private fun LazyListScope.serverListItems(state: ServerListState) {
                         }
                     }
                 )
+            }
         }
 
         if (index != state.servers.lastIndex) {

@@ -6,7 +6,6 @@ import android.R.attr.resource
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.platform.LocalContext
 import cash.z.ecc.android.sdk.ext.convertZatoshiToZecString
@@ -27,50 +26,41 @@ import java.util.Locale
 import kotlin.text.take
 import kotlin.text.takeLast
 
-@Immutable
 sealed interface StringResource {
-    @Immutable
     data class ByResource(
-        @StringRes val resource: Int,
+        @param:StringRes val resource: Int,
         val args: List<Any>
     ) : StringResource
 
     @JvmInline
-    @Immutable
     value class ByString(
         val value: String
     ) : StringResource
 
-    @Immutable
     data class ByZatoshi(
         val zatoshi: Zatoshi,
         val tickerLocation: TickerLocation
     ) : StringResource
 
-    @Immutable
     data class ByDateTime(
         val zonedDateTime: ZonedDateTime,
         val useFullFormat: Boolean
     ) : StringResource
 
-    @Immutable
     data class ByYearMonth(
         val yearMonth: YearMonth
     ) : StringResource
 
-    @Immutable
     data class ByTransactionId(
         val transactionId: String,
         val abbreviated: Boolean
     ) : StringResource
 
-    @Immutable
     data class ByAddress(
         val address: String,
         val middle: Boolean
     ) : StringResource
 
-    @Immutable
     data class ByCurrencyNumber(
         val amount: Number,
         val ticker: String,
@@ -78,7 +68,6 @@ sealed interface StringResource {
         val minDecimals: Int
     ) : StringResource
 
-    @Immutable
     data class ByDynamicCurrencyNumber(
         val amount: Number,
         val ticker: String,
@@ -86,13 +75,11 @@ sealed interface StringResource {
         val tickerLocation: TickerLocation
     ) : StringResource
 
-    @Immutable
     data class ByNumber(
         val number: Number,
         val minDecimals: Int
     ) : StringResource
 
-    @Immutable
     data class ByDynamicNumber(
         val number: Number,
         val includeDecimalSeparator: Boolean
@@ -109,12 +96,10 @@ sealed interface StringResource {
         }
 }
 
-@Immutable
 private data class CompositeStringResource(
     val resources: List<StringResource>
 ) : StringResource
 
-@Immutable
 private data class PrivacySensitiveResource(
     val value: StringResource,
     val hiddenValue: StringResource = stringRes(R.string.hide_balance_placeholder)
@@ -208,7 +193,6 @@ fun StringResource.getValue(): String =
         )
     )
 
-@Immutable
 data class StringContext(
     val context: Context,
     val locale: Locale,
@@ -372,11 +356,13 @@ private fun StringResource.ByYearMonth.convertYearMonth(context: StringContext):
 
 private fun StringResource.ByAddress.convertAddress(): String =
     when {
-        middle && address.length > ADDRESS_MAX_LENGTH_ABBREVIATED ->
+        middle && address.length > ADDRESS_MAX_LENGTH_ABBREVIATED -> {
             address.ellipsizeMiddle(ADDRESS_MAX_LENGTH_ABBREVIATED / 2)
+        }
 
-        address.length > ADDRESS_MAX_LENGTH_ABBREVIATED ->
+        address.length > ADDRESS_MAX_LENGTH_ABBREVIATED -> {
             address.ellipsizeEnd(ADDRESS_MAX_LENGTH_ABBREVIATED)
+        }
 
         else -> {
             address

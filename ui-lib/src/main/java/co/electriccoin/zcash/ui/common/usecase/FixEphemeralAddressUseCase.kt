@@ -41,16 +41,22 @@ class FixEphemeralAddressUseCase(
                         when (validation) {
                             AddressType.Shielded,
                             AddressType.Tex,
-                            AddressType.Unified -> return@launch
+                            AddressType.Unified -> {
+                                return@launch
+                            }
 
-                            AddressType.Transparent -> address
-                            is AddressType.Invalid ->
+                            AddressType.Transparent -> {
+                                address
+                            }
+
+                            is AddressType.Invalid -> {
                                 getSwapStatus(depositAddress = address)
                                     .status
                                     ?.quote
                                     ?.destinationAddress
                                     ?.address
                                     ?: return@launch
+                            }
                         }
                     navigationRouter.back()
                     fetchUtxosByAddress(ephemeral)

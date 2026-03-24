@@ -83,8 +83,11 @@ class ErrorVM(
             message =
                 when (args.error) {
                     is SubmitResult.Error,
-                    is SubmitResult.GrpcFailure -> stringRes(R.string.error_shielding_message_grpc)
-                    is SubmitResult.Failure ->
+                    is SubmitResult.GrpcFailure -> {
+                        stringRes(R.string.error_shielding_message_grpc)
+                    }
+
+                    is SubmitResult.Failure -> {
                         stringRes(
                             R.string.error_shielding_message,
                             stringRes(
@@ -94,14 +97,18 @@ class ErrorVM(
                                 }
                             )
                         )
+                    }
 
-                    is SubmitResult.Partial ->
+                    is SubmitResult.Partial -> {
                         stringRes(
                             R.string.error_shielding_message,
                             args.error.statuses.joinToString()
                         )
+                    }
 
-                    is SubmitResult.Success -> stringRes("")
+                    is SubmitResult.Success -> {
+                        stringRes("")
+                    }
                 },
             positive =
                 ButtonState(
@@ -163,10 +170,22 @@ class ErrorVM(
             withContext(NonCancellable) {
                 navigationRouter.back()
                 when (args.error) {
-                    is SubmitResult.Failure -> sendEmailUseCase(args.error)
-                    is SubmitResult.GrpcFailure -> sendEmailUseCase(args.error)
-                    is SubmitResult.Partial -> sendEmailUseCase(args.error)
-                    is SubmitResult.Error -> sendEmailUseCase(args.error)
+                    is SubmitResult.Failure -> {
+                        sendEmailUseCase(args.error)
+                    }
+
+                    is SubmitResult.GrpcFailure -> {
+                        sendEmailUseCase(args.error)
+                    }
+
+                    is SubmitResult.Partial -> {
+                        sendEmailUseCase(args.error)
+                    }
+
+                    is SubmitResult.Error -> {
+                        sendEmailUseCase(args.error)
+                    }
+
                     is SubmitResult.Success -> {
                         // do nothing
                     }

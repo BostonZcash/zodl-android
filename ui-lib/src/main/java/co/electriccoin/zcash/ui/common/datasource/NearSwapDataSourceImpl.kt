@@ -27,10 +27,10 @@ import co.electriccoin.zcash.ui.common.provider.SynchronizerProvider
 import co.electriccoin.zcash.ui.util.loggableNot
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 
 class NearSwapDataSourceImpl(
@@ -135,14 +135,17 @@ class NearSwapDataSourceImpl(
                     )
                 }
 
-                e.error.message.contains("No quotes found", true) ->
+                e.error.message.contains("No quotes found", true) -> {
                     throw QuoteLowAmountException(
                         asset = originAsset,
                         amount = null,
                         amountFormatted = null
                     )
+                }
 
-                else -> throw e
+                else -> {
+                    throw e
+                }
             }
         }
     }

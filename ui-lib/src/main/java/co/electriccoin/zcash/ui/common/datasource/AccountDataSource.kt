@@ -99,15 +99,16 @@ class AccountDataSourceImpl(
                                     observeIsSelected(sdkAccount, allSdkAccounts),
                                 ) { unified, transparent, sapling, isSelected ->
                                     when (sdkAccount.keySource?.lowercase()) {
-                                        KEYSTONE_KEYSOURCE ->
+                                        KEYSTONE_KEYSOURCE -> {
                                             KeystoneAccount(
                                                 sdkAccount = sdkAccount,
                                                 unified = unified,
                                                 transparent = transparent,
                                                 isSelected = isSelected,
                                             )
+                                        }
 
-                                        else ->
+                                        else -> {
                                             ZashiAccount(
                                                 sdkAccount = sdkAccount,
                                                 unified = unified,
@@ -115,6 +116,7 @@ class AccountDataSourceImpl(
                                                 sapling = sapling!!,
                                                 isSelected = isSelected,
                                             )
+                                        }
                                     }
                                 }
                             }.combineToFlow()

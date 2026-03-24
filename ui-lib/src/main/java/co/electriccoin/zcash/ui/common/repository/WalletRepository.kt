@@ -125,15 +125,18 @@ class WalletRepositoryImpl(
                         ?.getFastestServers(lightWalletEndpointProvider.getEndpoints())
                         ?.map {
                             when (it) {
-                                FastestServersResult.Measuring ->
+                                FastestServersResult.Measuring -> {
                                     previousFastestServerState?.copy(isLoading = true)
                                         ?: FastestServersState(servers = null, isLoading = true)
+                                }
 
-                                is FastestServersResult.Validating ->
+                                is FastestServersResult.Validating -> {
                                     FastestServersState(servers = it.servers, isLoading = true)
+                                }
 
-                                is FastestServersResult.Done ->
+                                is FastestServersResult.Done -> {
                                     FastestServersState(servers = it.servers, isLoading = false)
+                                }
                             }
                         } ?: emptyFlow()
                 }.onEach {

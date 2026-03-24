@@ -1,7 +1,6 @@
 package co.electriccoin.zcash.ui.design.theme.internal
 
 import androidx.compose.material3.Typography
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
@@ -134,13 +133,11 @@ internal val SecondaryTypography =
             )
     )
 
-@Immutable
 data class Typography(
     val primary: Typography,
     val secondary: Typography
 )
 
-@Immutable
 data class BalanceWidgetTextStyles(
     val first: TextStyle,
     val second: TextStyle,
@@ -148,13 +145,11 @@ data class BalanceWidgetTextStyles(
     val fourth: TextStyle,
 )
 
-@Immutable
 data class BalanceSingleTextStyles(
     val first: TextStyle,
     val second: TextStyle,
 )
 
-@Immutable
 data class TransactionItemTextStyles(
     val titleRegular: TextStyle,
     val titleRunning: TextStyle,
@@ -171,7 +166,6 @@ data class TransactionItemTextStyles(
     val feeSecondPart: TextStyle,
 )
 
-@Immutable
 data class ExtendedTypography(
     // Grouping balances text styles to a wrapper class for BalanceWidget
     val balanceWidgetStyles: BalanceWidgetTextStyles,

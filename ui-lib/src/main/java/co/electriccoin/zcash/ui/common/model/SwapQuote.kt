@@ -9,9 +9,9 @@ import co.electriccoin.zcash.ui.common.datasource.AFFILIATE_FEE_BPS
 import co.electriccoin.zcash.ui.common.model.near.QuoteResponseDto
 import co.electriccoin.zcash.ui.common.model.near.SwapType.EXACT_INPUT
 import co.electriccoin.zcash.ui.common.model.near.SwapType.EXACT_OUTPUT
-import kotlinx.datetime.Instant
 import java.math.BigDecimal
 import java.math.MathContext
+import kotlin.time.Instant
 
 interface SwapQuote {
     val originAsset: SwapAsset

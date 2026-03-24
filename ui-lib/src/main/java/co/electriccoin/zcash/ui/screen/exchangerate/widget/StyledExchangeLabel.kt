@@ -13,7 +13,7 @@ import co.electriccoin.zcash.ui.design.newcomponent.PreviewScreens
 import co.electriccoin.zcash.ui.design.theme.ZcashTheme
 import co.electriccoin.zcash.ui.design.util.StringResource
 import co.electriccoin.zcash.ui.design.util.stringRes
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 @Suppress("LongParameterList", "ComplexCondition")
 @Composable
@@ -28,7 +28,7 @@ fun StyledExchangeLabel(
     textColor: Color = ZcashTheme.colors.textFieldHint,
 ) {
     when (state) {
-        is ExchangeRateState.Data ->
+        is ExchangeRateState.Data -> {
             if (!state.isStale && state.currencyConversion != null) {
                 Text(
                     modifier = modifier,
@@ -38,6 +38,7 @@ fun StyledExchangeLabel(
                     style = style,
                 )
             }
+        }
 
         is ExchangeRateState.OptIn -> {
             // do not show anything
