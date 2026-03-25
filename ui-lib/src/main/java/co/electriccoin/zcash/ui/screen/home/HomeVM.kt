@@ -37,6 +37,7 @@ import co.electriccoin.zcash.ui.screen.home.syncing.WalletSyncingMessageState
 import co.electriccoin.zcash.ui.screen.home.tor.EnableTorMessageState
 import co.electriccoin.zcash.ui.screen.home.updating.WalletUpdatingInfo
 import co.electriccoin.zcash.ui.screen.home.updating.WalletUpdatingMessageState
+import co.electriccoin.zcash.ui.screen.restoresuccess.WrapRestoreSuccessArgs
 import co.electriccoin.zcash.ui.screen.send.Send
 import co.electriccoin.zcash.ui.screen.tor.optin.TorOptInArgs
 import co.electriccoin.zcash.ui.util.CURRENCY_TICKER
@@ -66,6 +67,7 @@ class HomeVM(
     private val navigateToSwap: NavigateToSwapUseCase
 ) : ViewModel() {
     private var hasSyncErrorBeenShown = false
+    private var hasRestoreSuccessBeenShown = false
 
     private val messageData =
         getHomeMessage
@@ -97,16 +99,6 @@ class HomeVM(
                 initialValue = null
             )
 
-    val restoreDialogState: StateFlow<HomeRestoreSuccessDialogState?> =
-        isRestoreDialogVisible
-            .map { isVisible ->
-                HomeRestoreSuccessDialogState.takeIf { isVisible == true }
-            }.stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(ANDROID_STATE_FLOW_TIMEOUT),
-                initialValue = null
-            )
-
     val state: StateFlow<HomeState?> =
         messageState
             .map { messageState ->
@@ -120,15 +112,22 @@ class HomeVM(
             )
 
     val uiLifecyclePipeline =
-        messageData
-            .onEach {
-                hasSyncErrorBeenShown =
-                    if (it is HomeMessageData.Error) {
-                        if (!hasSyncErrorBeenShown) navigateToError.navigateToSyncError(it) else false
-                    } else {
-                        false
-                    }
-            }.map { }
+        combine(
+            messageData,
+            isRestoreDialogVisible
+        ) { message, isRestoreVisible ->
+            hasSyncErrorBeenShown =
+                if (message is HomeMessageData.Error) {
+                    if (!hasSyncErrorBeenShown) navigateToError.navigateToSyncError(message) else false
+                } else {
+                    false
+                }
+
+            if (isRestoreVisible == true && !hasRestoreSuccessBeenShown) {
+                hasRestoreSuccessBeenShown = true
+                navigationRouter.forward(WrapRestoreSuccessArgs)
+            }
+        }.map { }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(1.seconds, Duration.ZERO),

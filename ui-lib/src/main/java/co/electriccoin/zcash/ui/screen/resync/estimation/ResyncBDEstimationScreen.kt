@@ -15,8 +15,8 @@ fun ResyncBDEstimationScreen(args: ResyncBDEstimationArgs) {
     val vm = koinViewModel<ResyncBDEstimationVM> { parametersOf(args) }
     val state by vm.state.collectAsStateWithLifecycle()
     SecureScreen()
-    BackHandler { state.onBack() }
-    RestoreBDEstimationView(state)
+    BackHandler(enabled = state != null) { state?.onBack() }
+    state?.let { RestoreBDEstimationView(it) }
 }
 
 @Serializable

@@ -4,10 +4,12 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.sdk.SdkSynchronizer
+import cash.z.ecc.android.sdk.model.BlockHeight
 import cash.z.ecc.sdk.ANDROID_STATE_FLOW_TIMEOUT
 import co.electriccoin.zcash.ui.NavigationRouter
 import co.electriccoin.zcash.ui.R
 import co.electriccoin.zcash.ui.common.model.VersionInfo
+import co.electriccoin.zcash.ui.common.usecase.GetResyncDataFromHeightUseCase
 import co.electriccoin.zcash.ui.common.usecase.NavigateToEstimateBlockHeightUseCase
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.IconButtonState
@@ -33,24 +35,14 @@ class ResyncBDDateVM(
     private val navigationRouter: NavigationRouter,
     private val application: Application,
     private val navigateToEstimateBlockHeight: NavigateToEstimateBlockHeightUseCase,
+    private val getResyncDataFromHeight: GetResyncDataFromHeightUseCase
 ) : ViewModel() {
-    @Suppress("MagicNumber")
     private val selection = MutableStateFlow<YearMonth?>(null)
 
     init {
         viewModelScope.launch {
-            // val date = SdkSynchronizer
-            //     .estimateBirthdayDate(application, BlockHeight.new(args.initialBlockHeight), VersionInfo.NETWORK)
-            //
-            // val yearMonth = if (date != null) {
-            //     ZonedDateTime.ofInstant(date.toJavaInstant(), ZoneId.systemDefault())
-            //         .let { YearMonth.of(it.year, it.month) }
-            // } else {
-            //     YearMonth.of(2018, 10)
-            // }
-            //
-            // selection.update { yearMonth }
-            TODO()
+            val data = getResyncDataFromHeight(BlockHeight.new(args.initialBlockHeight))
+            selection.update { data }
         }
     }
 
@@ -71,20 +63,18 @@ class ResyncBDDateVM(
             subtitle = stringRes(R.string.resync_bd_date_subtitle),
             message = stringRes(R.string.resync_bd_date_message),
             note = stringRes(R.string.resync_bd_date_note),
-            next = ButtonState(stringRes(R.string.restore_bd_height_btn), onClick = ::onEstimateClick),
-            dialogButton =
-                IconButtonState(
-                    icon = R.drawable.ic_help,
-                    onClick = ::onInfoButtonClick,
-                ),
+            next =
+                ButtonState(stringRes(R.string.restore_bd_date_next), onClick = {
+                    onEstimateClick(selection)
+                }),
+            dialogButton = null,
             onBack = ::onBack,
             onYearMonthChange = ::onYearMonthChange,
             selection = selection
         )
 
-    private fun onEstimateClick() {
+    private fun onEstimateClick(yearMonth: YearMonth) {
         viewModelScope.launch {
-            val yearMonth = selection.value ?: return@launch
             val instant =
                 yearMonth
                     .atDay(1)
@@ -107,8 +97,6 @@ class ResyncBDDateVM(
             navigateToEstimateBlockHeight.onSelectionCancelled(args)
         }
     }
-
-    private fun onInfoButtonClick() = navigationRouter.forward(SeedInfo)
 
     private fun onYearMonthChange(yearMonth: YearMonth) = selection.update { yearMonth }
 }

@@ -9,7 +9,6 @@ import co.electriccoin.zcash.di.koinActivityViewModel
 import co.electriccoin.zcash.ui.common.appbar.ZashiTopAppBarVM
 import co.electriccoin.zcash.ui.screen.balances.BalanceWidgetArgs
 import co.electriccoin.zcash.ui.screen.balances.BalanceWidgetVM
-import co.electriccoin.zcash.ui.screen.restoresuccess.WrapRestoreSuccess
 import co.electriccoin.zcash.ui.screen.transactionhistory.widget.ActivityWidgetVM
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
@@ -30,7 +29,6 @@ internal fun AndroidHome() {
         }
     val homeVM = koinViewModel<HomeVM>()
     val activityWidgetVM = koinViewModel<ActivityWidgetVM>()
-    val restoreDialogState by homeVM.restoreDialogState.collectAsStateWithLifecycle()
     val appBarState by topAppBarVM.state.collectAsStateWithLifecycle()
     val balanceState by balanceWidgetVM.state.collectAsStateWithLifecycle()
     val state by homeVM.state.collectAsStateWithLifecycle()
@@ -44,10 +42,6 @@ internal fun AndroidHome() {
             state = it,
             transactionWidgetState = transactionWidgetState
         )
-    }
-
-    if (restoreDialogState != null) {
-        WrapRestoreSuccess()
     }
 }
 

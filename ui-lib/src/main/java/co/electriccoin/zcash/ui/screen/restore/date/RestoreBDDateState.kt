@@ -12,7 +12,7 @@ data class RestoreBDDateState(
     val note: StringResource,
     val selection: YearMonth,
     val next: ButtonState,
-    val dialogButton: IconButtonState,
+    val dialogButton: IconButtonState?,
     val onBack: () -> Unit,
     val onYearMonthChange: (YearMonth) -> Unit,
 )

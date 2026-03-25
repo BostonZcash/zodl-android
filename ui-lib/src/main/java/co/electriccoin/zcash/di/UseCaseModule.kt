@@ -37,6 +37,7 @@ import co.electriccoin.zcash.ui.common.usecase.GetKeystoneStatusUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetORSwapQuoteUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetPersistableWalletUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetProposalUseCase
+import co.electriccoin.zcash.ui.common.usecase.GetResyncDataFromHeightUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetSelectedEndpointUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetSelectedSwapAssetUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetSelectedWalletAccountUseCase
@@ -114,6 +115,7 @@ import co.electriccoin.zcash.ui.common.usecase.SharePCZTUseCase
 import co.electriccoin.zcash.ui.common.usecase.ShareQRUseCase
 import co.electriccoin.zcash.ui.common.usecase.ShieldFundsFromMessageUseCase
 import co.electriccoin.zcash.ui.common.usecase.ShieldFundsUseCase
+import co.electriccoin.zcash.ui.common.usecase.ShowErrorUseCase
 import co.electriccoin.zcash.ui.common.usecase.SubmitIncreaseEphemeralGapLimitUseCase
 import co.electriccoin.zcash.ui.common.usecase.SubmitKSProposalUseCase
 import co.electriccoin.zcash.ui.common.usecase.SubmitProposalUseCase
@@ -164,6 +166,7 @@ val useCaseModule =
         factoryOf(::GetSupportUseCase)
         factoryOf(::SendEmailUseCase)
         factoryOf(::SendSupportEmailUseCase)
+        factoryOf(::ShowErrorUseCase)
         factoryOf(::GetWalletAccountsUseCase)
         factoryOf(::SelectWalletAccountUseCase)
         factoryOf(::ObserveSelectedWalletAccountUseCase)
@@ -258,6 +261,7 @@ val useCaseModule =
         factoryOf(::GetORSwapQuoteUseCase)
         factoryOf(::ShareQRUseCase)
         factoryOf(::GetActivitiesUseCase)
+        factoryOf(::GetResyncDataFromHeightUseCase)
         factoryOf(::NavigateToExportPrivateDataUseCase)
         factoryOf(::NavigateToResetWalletUseCase)
         factoryOf(::IsScreenTimeoutDisabledDuringRestoreUseCase)

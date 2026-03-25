@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import cash.z.ecc.sdk.ANDROID_STATE_FLOW_TIMEOUT
+import co.electriccoin.zcash.ui.NavigationRouter
 import co.electriccoin.zcash.ui.common.provider.IsKeepScreenOnDuringRestoreProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,7 +16,8 @@ import kotlinx.coroutines.launch
 
 class RestoreSuccessViewModel(
     application: Application,
-    private val isKeepScreenOnDuringRestoreProvider: IsKeepScreenOnDuringRestoreProvider
+    private val isKeepScreenOnDuringRestoreProvider: IsKeepScreenOnDuringRestoreProvider,
+    private val navigationRouter: NavigationRouter
 ) : AndroidViewModel(application) {
     private val keepScreenOn = MutableStateFlow(true)
 
@@ -34,6 +36,7 @@ class RestoreSuccessViewModel(
             onCheckboxClick = { this.keepScreenOn.update { !keepScreenOn } },
             onPositiveClick = {
                 setKeepScreenOnWhileSyncing(keepScreenOn)
+                navigationRouter.backToRoot()
             }
         )
 
