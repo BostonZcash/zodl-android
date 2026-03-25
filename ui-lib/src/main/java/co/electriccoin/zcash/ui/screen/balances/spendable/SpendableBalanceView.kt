@@ -119,14 +119,18 @@ private fun BalanceActionRow(state: SpendableBalanceRowState) {
         )
         Spacer(1f)
         when (state.icon) {
-            is ImageResource.ByDrawable ->
+            is ImageResource.ByDrawable -> {
                 Image(
                     modifier = Modifier.size(20.dp),
                     painter = painterResource(state.icon.resource),
                     contentDescription = null
                 )
+            }
 
-            ImageResource.Loading -> LottieProgress(modifier = Modifier.size(20.dp))
+            ImageResource.Loading -> {
+                LottieProgress(modifier = Modifier.size(20.dp))
+            }
+
             is ImageResource.DisplayString -> {
                 // do nothing
             }

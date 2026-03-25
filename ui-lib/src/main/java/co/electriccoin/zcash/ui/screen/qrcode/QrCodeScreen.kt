@@ -17,7 +17,10 @@ internal fun QrCodeScreen(addressType: Int) {
     BackHandler {
         when (val qrCodeState = qrCodeState) {
             QrCodeState.Loading -> {}
-            is QrCodeState.Prepared -> qrCodeState.onBack.invoke()
+
+            is QrCodeState.Prepared -> {
+                qrCodeState.onBack.invoke()
+            }
         }
     }
     QrCodeView(

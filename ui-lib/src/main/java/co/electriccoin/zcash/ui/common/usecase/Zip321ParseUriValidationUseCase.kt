@@ -52,11 +52,17 @@ class Zip321ParseUriValidationUseCase(
         Twig.info { "Payment Request Zip321 validation result: $paymentRequest." }
 
         return when (paymentRequest) {
-            is ZIP321.ParserResult.Request -> Zip321ParseUriValidation.Valid(zip321Uri, paymentRequest.paymentRequest)
-            is ZIP321.ParserResult.SingleAddress ->
-                Zip321ParseUriValidation.SingleAddress(paymentRequest.singleRecipient.value)
+            is ZIP321.ParserResult.Request -> {
+                Zip321ParseUriValidation.Valid(zip321Uri, paymentRequest.paymentRequest)
+            }
 
-            else -> Zip321ParseUriValidation.Invalid
+            is ZIP321.ParserResult.SingleAddress -> {
+                Zip321ParseUriValidation.SingleAddress(paymentRequest.singleRecipient.value)
+            }
+
+            else -> {
+                Zip321ParseUriValidation.Invalid
+            }
         }
     }
 

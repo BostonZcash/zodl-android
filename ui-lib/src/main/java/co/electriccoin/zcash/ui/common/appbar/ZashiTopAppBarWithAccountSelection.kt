@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -118,7 +117,6 @@ private fun AccountSwitch(state: AccountSwitchState) {
     }
 }
 
-@Immutable
 data class ZashiMainTopAppBarState(
     val accountSwitchState: AccountSwitchState,
     val balanceVisibilityButton: IconButtonState,
@@ -127,7 +125,6 @@ data class ZashiMainTopAppBarState(
     enum class AccountType { ZASHI, KEYSTONE }
 }
 
-@Immutable
 data class AccountSwitchState(
     val onAccountTypeClick: (() -> Unit)?,
     val accountType: AccountType,

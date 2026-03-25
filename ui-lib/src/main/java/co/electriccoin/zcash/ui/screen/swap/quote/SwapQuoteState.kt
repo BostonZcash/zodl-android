@@ -1,6 +1,5 @@
 package co.electriccoin.zcash.ui.screen.swap.quote
 
-import androidx.compose.runtime.Immutable
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.ModalBottomSheetState
 import co.electriccoin.zcash.ui.design.component.SwapTokenAmountState
@@ -8,9 +7,7 @@ import co.electriccoin.zcash.ui.design.util.ImageResource
 import co.electriccoin.zcash.ui.design.util.StringResource
 import co.electriccoin.zcash.ui.design.util.StyledStringResource
 
-@Immutable
 internal sealed interface SwapQuoteState : ModalBottomSheetState {
-    @Immutable
     data class Success(
         val title: StringResource,
         val rotateIcon: Boolean,
@@ -23,7 +20,6 @@ internal sealed interface SwapQuoteState : ModalBottomSheetState {
         override val onBack: () -> Unit,
     ) : SwapQuoteState
 
-    @Immutable
     data class Error(
         val icon: ImageResource,
         val title: StringResource,
@@ -34,7 +30,6 @@ internal sealed interface SwapQuoteState : ModalBottomSheetState {
     ) : SwapQuoteState
 }
 
-@Immutable
 data class SwapQuoteInfoItem(
     val description: StringResource,
     val title: StyledStringResource,

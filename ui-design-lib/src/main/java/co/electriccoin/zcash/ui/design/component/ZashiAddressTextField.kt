@@ -91,9 +91,18 @@ private fun ellipsisVisualTransformation() =
 
                 override fun transformedToOriginal(offset: Int): Int =
                     when {
-                        text.length <= 16 -> offset
-                        offset <= maxLength -> offset
-                        offset in (maxLength + 1)..(maxLength + 2) -> maxLength
+                        text.length <= 16 -> {
+                            offset
+                        }
+
+                        offset <= maxLength -> {
+                            offset
+                        }
+
+                        offset in (maxLength + 1)..(maxLength + 2) -> {
+                            maxLength
+                        }
+
                         else -> {
                             val whole = maxLength * 2 + 3
                             val fromRight = (offset - whole).absoluteValue
@@ -107,7 +116,10 @@ private fun ellipsisVisualTransformation() =
                 .Builder()
                 .apply {
                     when {
-                        text.length <= 16 -> append(text)
+                        text.length <= 16 -> {
+                            append(text)
+                        }
+
                         text.isNotBlank() -> {
                             append(text.take(maxLength))
                             append(ellipsis)

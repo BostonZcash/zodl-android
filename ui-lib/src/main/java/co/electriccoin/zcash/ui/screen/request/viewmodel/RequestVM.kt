@@ -174,17 +174,21 @@ class RequestVM(
         exchangeRateUsd: ExchangeRateState
     ) {
         when (walletAddress) {
-            is WalletAddress.Transparent ->
+            is WalletAddress.Transparent -> {
                 onAmountAndMemoDone(
                     walletAddress.address,
                     zip321BuildUriUseCase,
                     resolveExchangeRateValue(exchangeRateUsd)
                 )
+            }
 
-            is WalletAddress.Unified, is WalletAddress.Sapling ->
+            is WalletAddress.Unified, is WalletAddress.Sapling -> {
                 onAmountDone(resolveExchangeRateValue(exchangeRateUsd))
+            }
 
-            else -> error("Unexpected address type")
+            else -> {
+                error("Unexpected address type")
+            }
         }
     }
 
@@ -315,16 +319,20 @@ class RequestVM(
 
     internal fun onBack() {
         when (stage.value) {
-            RequestStage.AMOUNT -> navigationRouter.back()
+            RequestStage.AMOUNT -> {
+                navigationRouter.back()
+            }
 
-            RequestStage.MEMO -> stage.update { RequestStage.AMOUNT }
+            RequestStage.MEMO -> {
+                stage.update { RequestStage.AMOUNT }
+            }
 
-            RequestStage.QR_CODE ->
+            RequestStage.QR_CODE -> {
                 when (ReceiveAddressType.fromOrdinal(addressTypeOrdinal)) {
                     ReceiveAddressType.Transparent -> stage.update { RequestStage.AMOUNT }
-
                     ReceiveAddressType.Unified, ReceiveAddressType.Sapling -> stage.update { RequestStage.MEMO }
                 }
+            }
         }
     }
 
@@ -334,15 +342,18 @@ class RequestVM(
         request.update {
             val memoAmount =
                 when (it.amountState.currency) {
-                    RequestCurrency.FIAT ->
+                    RequestCurrency.FIAT -> {
                         if (conversion != null) {
                             it.amountState.toZecStringFloored(conversion, application)
                         } else {
                             Twig.error { "Unexpected screen state" }
                             it.amountState.amount
                         }
+                    }
 
-                    RequestCurrency.ZEC -> it.amountState.amount
+                    RequestCurrency.ZEC -> {
+                        it.amountState.amount
+                    }
                 }
 
             it.copy(memoState = MemoState.new(DEFAULT_MEMO, memoAmount))
@@ -378,15 +389,18 @@ class RequestVM(
         request.update {
             val qrCodeAmount =
                 when (it.amountState.currency) {
-                    RequestCurrency.FIAT ->
+                    RequestCurrency.FIAT -> {
                         if (conversion != null) {
                             it.amountState.toZecStringFloored(conversion, application)
                         } else {
                             Twig.error { "Unexpected screen state" }
                             it.amountState.amount
                         }
+                    }
 
-                    RequestCurrency.ZEC -> it.amountState.amount
+                    RequestCurrency.ZEC -> {
+                        it.amountState.amount
+                    }
                 }
             it.copy(
                 qrCodeState =
@@ -416,13 +430,16 @@ class RequestVM(
         request.update {
             val newAmount =
                 when (onSwitchTo) {
-                    RequestCurrency.FIAT ->
+                    RequestCurrency.FIAT -> {
                         it.amountState.toFiatString(
                             context = application.applicationContext,
                             conversion = conversion
                         )
+                    }
 
-                    RequestCurrency.ZEC -> it.amountState.toZecString(conversion, application)
+                    RequestCurrency.ZEC -> {
+                        it.amountState.toZecString(conversion, application)
+                    }
                 }
 
             it.copy(

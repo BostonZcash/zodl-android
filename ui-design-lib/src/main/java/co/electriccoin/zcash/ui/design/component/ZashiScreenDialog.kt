@@ -4,7 +4,6 @@ import android.view.WindowManager
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
@@ -80,7 +79,6 @@ private fun Dialog(
     )
 }
 
-@Immutable
 data class DialogState(
     val positive: ButtonState,
     val negative: ButtonState,

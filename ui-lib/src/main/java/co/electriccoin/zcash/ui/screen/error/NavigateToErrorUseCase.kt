@@ -66,6 +66,7 @@ class NavigateToErrorUseCase(
                     -> true
 
                     e is UninitializedTorClientException -> true
+
                     else -> false
                 }
             }

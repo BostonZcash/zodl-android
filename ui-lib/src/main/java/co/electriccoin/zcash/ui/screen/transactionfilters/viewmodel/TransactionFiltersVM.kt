@@ -43,49 +43,61 @@ internal class TransactionFiltersVM(
                     filters =
                         TransactionFilter.entries.map {
                             when (it) {
-                                SENT ->
+                                SENT -> {
                                     TransactionFilterState(
                                         text = stringRes(R.string.transaction_filters_sent),
                                         isSelected = current.contains(SENT),
                                         onClick = { onTransactionFilterClicked(it) }
                                     )
-                                RECEIVED ->
+                                }
+
+                                RECEIVED -> {
                                     TransactionFilterState(
                                         text = stringRes(R.string.transaction_filters_received),
                                         isSelected = current.contains(RECEIVED),
                                         onClick = { onTransactionFilterClicked(it) }
                                     )
-                                MEMOS ->
+                                }
+
+                                MEMOS -> {
                                     TransactionFilterState(
                                         text = stringRes(R.string.transaction_filters_memos),
                                         isSelected = current.contains(MEMOS),
                                         onClick = { onTransactionFilterClicked(it) }
                                     )
-                                UNREAD ->
+                                }
+
+                                UNREAD -> {
                                     TransactionFilterState(
                                         text = stringRes(R.string.transaction_filters_unread),
                                         isSelected = current.contains(UNREAD),
                                         onClick = { onTransactionFilterClicked(it) }
                                     )
-                                BOOKMARKED ->
+                                }
+
+                                BOOKMARKED -> {
                                     TransactionFilterState(
                                         text = stringRes(R.string.transaction_filters_bookmarked),
                                         isSelected = current.contains(BOOKMARKED),
                                         onClick = { onTransactionFilterClicked(it) }
                                     )
-                                NOTES ->
+                                }
+
+                                NOTES -> {
                                     TransactionFilterState(
                                         text = stringRes(R.string.transaction_filters_notes),
                                         isSelected = current.contains(NOTES),
                                         onClick = { onTransactionFilterClicked(it) }
                                     )
+                                }
 
-                                SWAP ->
+                                SWAP -> {
                                     TransactionFilterState(
                                         text = stringRes(R.string.transaction_filters_swap),
                                         isSelected = current.contains(SWAP),
                                         onClick = { onTransactionFilterClicked(it) }
                                     )
+                                }
                             }
                         },
                     onBack = ::onBack,

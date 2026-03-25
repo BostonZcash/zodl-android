@@ -148,7 +148,7 @@ class ExchangeRateRepositoryImpl(
         isRefreshEnabled: Boolean,
     ): ExchangeRateState =
         when (isOptedIn) {
-            true ->
+            true -> {
                 ExchangeRateState.Data(
                     isLoading = exchangeRate.isLoading,
                     isStale = isStale,
@@ -156,8 +156,15 @@ class ExchangeRateRepositoryImpl(
                     currencyConversion = exchangeRate.currencyConversion,
                     onRefresh = ::refreshExchangeRateUsd
                 )
-            false -> ExchangeRateState.OptedOut
-            null -> ExchangeRateState.OptIn
+            }
+
+            false -> {
+                ExchangeRateState.OptedOut
+            }
+
+            null -> {
+                ExchangeRateState.OptIn
+            }
         }
 
     override fun refreshExchangeRateUsd() {

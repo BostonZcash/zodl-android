@@ -68,11 +68,13 @@ class SelectABRecipientVM(
                                 bigIcon =
                                     imageRes(
                                         when (account) {
-                                            is KeystoneAccount ->
+                                            is KeystoneAccount -> {
                                                 co.electriccoin.zcash.ui.design.R.drawable.ic_item_keystone
+                                            }
 
-                                            is ZashiAccount ->
+                                            is ZashiAccount -> {
                                                 co.electriccoin.zcash.ui.design.R.drawable.ic_item_zashi
+                                            }
                                         }
                                     ),
                                 smallIcon = null,

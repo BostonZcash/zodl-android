@@ -91,14 +91,16 @@ private fun BottomSheetContent(
             }
 
             when (item) {
-                is AccountListItem.Account ->
+                is AccountListItem.Account -> {
                     ZashiAccountListItem(
                         modifier = Modifier.padding(horizontal = 4.dp),
                         state = item.state,
                     )
+                }
 
-                is AccountListItem.Other ->
+                is AccountListItem.Other -> {
                     ZashiKeystonePromoListItem(item)
+                }
             }
         }
         if (state.isLoading) {

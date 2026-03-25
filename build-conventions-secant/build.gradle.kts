@@ -29,6 +29,9 @@ dependencies {
          ("GOOGLE_AUTH_LIB_JAVA_VERSION")}")
     implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:${rootProperties.getProperty("DETEKT_VERSION")}")
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:${rootProperties.getProperty("KOTLIN_VERSION")}")
+    implementation(
+        "org.jetbrains.kotlin:compose-compiler-gradle-plugin:${rootProperties.getProperty("KOTLIN_VERSION")}"
+    )
     implementation("wtf.emulator:gradle-plugin:${rootProperties.getProperty("EMULATOR_WTF_GRADLE_PLUGIN_VERSION")}")
     implementation(
         "org.jetbrains.kotlinx.kover:org.jetbrains.kotlinx.kover.gradle.plugin:" +

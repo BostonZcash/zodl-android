@@ -79,6 +79,7 @@ internal fun RequestAmountView(
                     )
                 }
             }
+
             else -> {
                 RequestAmountNoFiatView(
                     state = state,

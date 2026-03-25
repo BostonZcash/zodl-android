@@ -6,12 +6,12 @@ import co.electriccoin.zcash.ui.common.serialization.BigDecimalSerializer
 import co.electriccoin.zcash.ui.common.serialization.NearRecipientTypeSerializer
 import co.electriccoin.zcash.ui.common.serialization.NearRefundTypeSerializer
 import co.electriccoin.zcash.ui.common.serialization.NearSwapTypeSerializer
-import kotlinx.datetime.Instant
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
 import java.math.BigDecimal
+import kotlin.time.Instant
 
 @JsonIgnoreUnknownKeys
 @Serializable

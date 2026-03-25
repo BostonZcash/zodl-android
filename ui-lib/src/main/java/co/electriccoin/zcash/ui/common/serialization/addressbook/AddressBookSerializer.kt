@@ -5,9 +5,9 @@ import co.electriccoin.zcash.ui.common.model.AddressBookContact
 import co.electriccoin.zcash.ui.common.serialization.ADDRESS_BOOK_SERIALIZATION_V1
 import co.electriccoin.zcash.ui.common.serialization.ADDRESS_BOOK_SERIALIZATION_V2
 import co.electriccoin.zcash.ui.common.serialization.BaseSerializer
-import kotlinx.datetime.Instant
 import java.io.InputStream
 import java.io.OutputStream
+import kotlin.time.Instant
 
 class AddressBookSerializer : BaseSerializer() {
     fun serializeAddressBook(
@@ -28,7 +28,7 @@ class AddressBookSerializer : BaseSerializer() {
 
     fun deserializeAddressBook(inputStream: InputStream): AddressBook =
         when (inputStream.readInt()) {
-            ADDRESS_BOOK_SERIALIZATION_V1 ->
+            ADDRESS_BOOK_SERIALIZATION_V1 -> {
                 AddressBook(
                     version = ADDRESS_BOOK_SERIALIZATION_V1,
                     lastUpdated = inputStream.readLong().let { Instant.fromEpochMilliseconds(it) },
@@ -44,8 +44,9 @@ class AddressBookSerializer : BaseSerializer() {
                             }
                         }
                 )
+            }
 
-            ADDRESS_BOOK_SERIALIZATION_V2 ->
+            ADDRESS_BOOK_SERIALIZATION_V2 -> {
                 AddressBook(
                     version = ADDRESS_BOOK_SERIALIZATION_V2,
                     lastUpdated = inputStream.readLong().let { Instant.fromEpochMilliseconds(it) },
@@ -61,7 +62,10 @@ class AddressBookSerializer : BaseSerializer() {
                             }
                         }
                 )
+            }
 
-            else -> throw UnsupportedOperationException("Unknown version of address book")
+            else -> {
+                throw UnsupportedOperationException("Unknown version of address book")
+            }
         }
 }

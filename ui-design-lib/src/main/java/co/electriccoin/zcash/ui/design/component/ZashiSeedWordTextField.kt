@@ -12,7 +12,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -93,14 +92,12 @@ fun ZashiSeedWordTextField(
     )
 }
 
-@Immutable
 data class SeedWordTextFieldState(
     val innerState: SeedWordInnerTextFieldState,
     val isError: Boolean,
     val onValueChange: (SeedWordInnerTextFieldState) -> Unit
 )
 
-@Immutable
 data class SeedWordInnerTextFieldState(
     val value: String,
     val selection: TextSelection = TextSelection.Start,

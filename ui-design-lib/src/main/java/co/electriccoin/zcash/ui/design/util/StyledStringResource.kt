@@ -2,7 +2,6 @@ package co.electriccoin.zcash.ui.design.util
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -10,17 +9,14 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 
-@Immutable
 sealed interface StyledStringResource {
-    @Immutable
     data class ByStringResource(
         val resource: StringResource,
         val style: StyledStringStyle,
     ) : StyledStringResource
 
-    @Immutable
     data class ByResource(
-        @StringRes val resource: Int,
+        @param:StringRes val resource: Int,
         val style: StyledStringStyle,
         val args: List<Any>
     ) : StyledStringResource
@@ -30,7 +26,6 @@ sealed interface StyledStringResource {
     ): StyledStringResource = CompositeStyledStringResource(listOf(this, other))
 }
 
-@Immutable
 private data class CompositeStyledStringResource(
     val resources: List<StyledStringResource>
 ) : StyledStringResource
@@ -123,32 +118,44 @@ fun styledStringResource(
 @Composable
 fun StyledStringResource.getValue() =
     when (this) {
-        is StyledStringResource.ByStringResource ->
+        is StyledStringResource.ByStringResource -> {
             buildAnnotatedString {
                 withStyle(style = style.toSpanStyle()) {
                     append(resource.getValue())
                 }
             }
+        }
 
         is StyledStringResource.ByResource -> {
             val argsStrings =
                 args.map { arg ->
                     when (arg) {
-                        is StringResource -> arg.getValue()
+                        is StringResource -> {
+                            arg.getValue()
+                        }
+
                         is StyledStringResource -> {
                             when (arg) {
-                                is StyledStringResource.ByResource ->
+                                is StyledStringResource.ByResource -> {
                                     stringRes(
                                         arg.resource,
                                         *arg.args.map { if (it is StringResource) it.getValue() else it }.toTypedArray()
                                     ).getValue()
+                                }
 
-                                is StyledStringResource.ByStringResource -> arg.resource.getValue()
-                                is CompositeStyledStringResource -> arg.convertComposite()
+                                is StyledStringResource.ByStringResource -> {
+                                    arg.resource.getValue()
+                                }
+
+                                is CompositeStyledStringResource -> {
+                                    arg.convertComposite()
+                                }
                             }
                         }
 
-                        else -> arg
+                        else -> {
+                            arg
+                        }
                     }
                 }
 
@@ -161,25 +168,29 @@ fun StyledStringResource.getValue() =
 
                 argsStrings.forEachIndexed { index, string ->
                     when (val res = args[index]) {
-                        is StyledStringResource.ByResource ->
+                        is StyledStringResource.ByResource -> {
                             addStyle(
                                 fullString = fullString,
                                 string = string.toString(),
                                 style = res.style.toSpanStyle()
                             )
+                        }
 
-                        is StyledStringResource.ByStringResource ->
+                        is StyledStringResource.ByStringResource -> {
                             addStyle(
                                 fullString = fullString,
                                 string = string.toString(),
                                 style = res.style.toSpanStyle()
                             )
+                        }
                     }
                 }
             }
         }
 
-        is CompositeStyledStringResource -> convertComposite()
+        is CompositeStyledStringResource -> {
+            convertComposite()
+        }
     }
 
 @Composable

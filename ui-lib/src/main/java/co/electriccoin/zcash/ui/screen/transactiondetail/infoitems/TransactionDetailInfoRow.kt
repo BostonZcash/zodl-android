@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -138,11 +137,10 @@ fun TransactionDetailRowSurface(
     }
 }
 
-@Immutable
 data class TransactionDetailInfoRowState(
     val title: StringResource,
     val message: StyledStringResource? = null,
-    @DrawableRes val trailingIcon: Int? = null,
+    @field:DrawableRes val trailingIcon: Int? = null,
     val onClick: (() -> Unit)? = null,
 )
 

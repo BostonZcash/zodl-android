@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 interface ExchangeRateDataSource {
     /**
@@ -84,7 +84,6 @@ class ExchangeRateDataSourceImpl(
                         when (it) {
                             null -> flowOf(ObserveFiatCurrencyResult())
                             Synchronizer.Status.STOPPED -> emptyFlow()
-
                             else -> exchangeRate
                         }
                     }.collect { send(it) }

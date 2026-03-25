@@ -170,48 +170,55 @@ class HomeVM(
 
     private fun createMessageState(data: HomeMessageData?, isShieldFundsInfoEnabled: Boolean) =
         when (data) {
-            is HomeMessageData.Backup ->
+            is HomeMessageData.Backup -> {
                 WalletBackupMessageState(
                     onClick = ::onWalletBackupMessageClick,
                     onButtonClick = ::onWalletBackupMessageButtonClick,
                 )
+            }
 
-            HomeMessageData.Disconnected ->
+            HomeMessageData.Disconnected -> {
                 WalletDisconnectedMessageState(
                     onClick = ::onWalletDisconnectedMessageClick
                 )
+            }
 
-            HomeMessageData.EnableCurrencyConversion ->
+            HomeMessageData.EnableCurrencyConversion -> {
                 EnableCurrencyConversionMessageState(
                     onClick = ::onEnableCurrencyConversionClick,
                     onButtonClick = ::onEnableCurrencyConversionClick
                 )
+            }
 
-            HomeMessageData.EnableTor ->
+            HomeMessageData.EnableTor -> {
                 EnableTorMessageState(
                     onClick = ::onEnableTorClick,
                     onButtonClick = ::onEnableTorClick
                 )
+            }
 
-            is HomeMessageData.Error ->
+            is HomeMessageData.Error -> {
                 WalletErrorMessageState(
                     onClick = { onWalletErrorMessageClick(data) }
                 )
+            }
 
-            is HomeMessageData.Restoring ->
+            is HomeMessageData.Restoring -> {
                 WalletRestoringMessageState(
                     isSpendable = data.isSpendable,
                     progress = data.progress,
                     onClick = ::onWalletRestoringMessageClick
                 )
+            }
 
-            is HomeMessageData.Syncing ->
+            is HomeMessageData.Syncing -> {
                 WalletSyncingMessageState(
                     progress = data.progress,
                     onClick = ::onWalletSyncingMessageClick
                 )
+            }
 
-            is HomeMessageData.ShieldFunds ->
+            is HomeMessageData.ShieldFunds -> {
                 ShieldFundsMessageState(
                     subtitle =
                         stringRes(
@@ -227,19 +234,24 @@ class HomeVM(
                         },
                     onButtonClick = ::onShieldFundsMessageButtonClick,
                 )
+            }
 
-            HomeMessageData.Updating ->
+            HomeMessageData.Updating -> {
                 WalletUpdatingMessageState(
                     onClick = ::onWalletUpdatingMessageClick
                 )
+            }
 
-            HomeMessageData.CrashReport ->
+            HomeMessageData.CrashReport -> {
                 CrashReportMessageState(
                     onClick = ::onCrashReportMessageClick,
                     onButtonClick = ::onCrashReportMessageClick
                 )
+            }
 
-            null -> null
+            null -> {
+                null
+            }
         }
 
     private fun onCrashReportMessageClick() = navigationRouter.forward(CrashReportOptIn)

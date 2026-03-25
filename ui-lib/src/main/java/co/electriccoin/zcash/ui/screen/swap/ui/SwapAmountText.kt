@@ -7,7 +7,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -97,7 +96,6 @@ internal fun SwapAmountText(
     }
 }
 
-@Immutable
 data class SwapAmountTextState(
     val token: AssetCardState,
     val title: StringResource,

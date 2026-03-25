@@ -58,7 +58,9 @@ class ShieldFundsUseCase(
                 is SubmitResult.Failure,
                 is SubmitResult.GrpcFailure,
                 is SubmitResult.Error,
-                is SubmitResult.Partial -> navigateToError(ErrorArgs.ShieldingError(result))
+                is SubmitResult.Partial -> {
+                    navigateToError(ErrorArgs.ShieldingError(result))
+                }
 
                 is SubmitResult.Success -> {
                     // do nothing

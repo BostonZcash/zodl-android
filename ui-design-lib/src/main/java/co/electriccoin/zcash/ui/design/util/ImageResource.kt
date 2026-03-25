@@ -5,7 +5,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,21 +18,17 @@ import co.electriccoin.zcash.ui.design.component.ShimmerCircle
 import co.electriccoin.zcash.ui.design.component.rememberZashiShimmer
 import com.valentinilk.shimmer.shimmer
 
-@Immutable
 sealed interface ImageResource {
-    @Immutable
     @JvmInline
     value class ByDrawable(
-        @DrawableRes val resource: Int
+        @param:DrawableRes val resource: Int
     ) : ImageResource
 
     @JvmInline
-    @Immutable
     value class DisplayString(
         val value: String
     ) : ImageResource
 
-    @Immutable
     data object Loading : ImageResource
 }
 

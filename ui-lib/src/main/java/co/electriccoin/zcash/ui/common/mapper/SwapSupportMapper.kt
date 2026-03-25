@@ -14,37 +14,42 @@ import co.electriccoin.zcash.ui.design.util.stringResByDateTime
 import co.electriccoin.zcash.ui.design.util.stringResByDynamicCurrencyNumber
 import co.electriccoin.zcash.ui.design.util.styledStringResource
 import co.electriccoin.zcash.ui.design.util.withStyle
-import kotlinx.datetime.toJavaInstant
 import java.math.BigDecimal
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
+import kotlin.time.toJavaInstant
 
 class SwapSupportMapper {
     fun getMessage(quoteStatus: SwapQuoteStatus?): ZashiMessageState? =
         when (quoteStatus?.status) {
-            SwapStatus.REFUNDED ->
+            SwapStatus.REFUNDED -> {
                 ZashiMessageState(
                     title = stringRes(R.string.transaction_detail_info_refunded_title),
                     text = styledStringResource(R.string.transaction_detail_info_refunded_message),
                     type = ZashiMessageState.Type.WARNING,
                 )
+            }
 
-            SwapStatus.FAILED ->
+            SwapStatus.FAILED -> {
                 ZashiMessageState(
                     title = stringRes(R.string.transaction_detail_info_failed_title),
                     text = styledStringResource(R.string.transaction_detail_info_failed_message),
                     type = ZashiMessageState.Type.ERROR,
                 )
+            }
 
-            SwapStatus.EXPIRED ->
+            SwapStatus.EXPIRED -> {
                 ZashiMessageState(
                     title = stringRes(R.string.transaction_detail_info_expired_title),
                     text = styledStringResource(R.string.transaction_detail_info_expired_message),
                     type = ZashiMessageState.Type.ERROR,
                 )
+            }
 
-            SwapStatus.INCOMPLETE_DEPOSIT -> createIncompleteDepositMessage(quoteStatus)
+            SwapStatus.INCOMPLETE_DEPOSIT -> {
+                createIncompleteDepositMessage(quoteStatus)
+            }
 
             SwapStatus.PROCESSING -> {
                 if (isProcessingLongEnough(quoteStatus)) {
@@ -60,7 +65,9 @@ class SwapSupportMapper {
 
             SwapStatus.PENDING,
             SwapStatus.SUCCESS,
-            null -> null
+            null -> {
+                null
+            }
         }
 
     fun getButton(quoteStatus: SwapQuoteStatus?, onSupportClicked: (String) -> Unit): ButtonState? =

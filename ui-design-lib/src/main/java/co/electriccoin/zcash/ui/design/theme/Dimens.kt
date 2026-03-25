@@ -2,12 +2,10 @@ package co.electriccoin.zcash.ui.design.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-@Immutable
 data class Dimens(
     // Default spacings:
     val spacingNone: Dp,

@@ -116,13 +116,14 @@ fun SwapAssetPickerView(state: SwapAssetPickerState?) {
                     )
 
                     when (innerState.data) {
-                        is SwapAssetPickerDataState.Error ->
+                        is SwapAssetPickerDataState.Error -> {
                             CommonErrorScreen(
                                 state = innerState.data,
                                 modifier = Modifier.fillMaxSize()
                             )
+                        }
 
-                        SwapAssetPickerDataState.Loading ->
+                        SwapAssetPickerDataState.Loading -> {
                             CommonShimmerLoadingScreen(
                                 shimmerItemsCount = 10,
                                 modifier =
@@ -131,8 +132,9 @@ fun SwapAssetPickerView(state: SwapAssetPickerState?) {
                                         .padding(top = 20.dp),
                                 contentPaddingValues = PaddingValues(24.dp, 12.dp),
                             )
+                        }
 
-                        is SwapAssetPickerDataState.Success ->
+                        is SwapAssetPickerDataState.Success -> {
                             if (innerState.data.items.isEmpty()) {
                                 CommonEmptyScreen(modifier = Modifier.fillMaxSize())
                             } else {
@@ -143,6 +145,7 @@ fun SwapAssetPickerView(state: SwapAssetPickerState?) {
                                     contentPadding = padding
                                 )
                             }
+                        }
                     }
                 }
             }

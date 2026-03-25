@@ -89,17 +89,22 @@ class ActivityHistoryVM(
             Triple(activities, filters, searchHash)
         }.mapLatest { (activities, filters, searchHash) ->
             when {
-                activities == null -> createLoadingState(filtersSize = filters.size)
+                activities == null -> {
+                    createLoadingState(filtersSize = filters.size)
+                }
 
-                activities.isEmpty() -> createEmptyState(filtersSize = filters.size)
+                activities.isEmpty() -> {
+                    createEmptyState(filtersSize = filters.size)
+                }
 
-                else ->
+                else -> {
                     createDataState(
                         transactions = activities,
                         restoreTimestamp = restoreTimestampDataSource.getOrCreate(),
                         filters = filters,
                         searchHash = searchHash
                     )
+                }
             }
         }.flowOn(Dispatchers.Default)
             .stateIn(
@@ -128,17 +133,21 @@ class ActivityHistoryVM(
                             ?.atZone(ZoneId.systemDefault())
                             ?.toLocalDate() ?: now
                     when {
-                        now == other ->
+                        now == other -> {
                             stringRes(R.string.transaction_history_today) to "today"
+                        }
 
-                        other == now.minusDays(1) ->
+                        other == now.minusDays(1) -> {
                             stringRes(R.string.transaction_history_yesterday) to "yesterday"
+                        }
 
-                        other >= now.minusDays(WEEK_THRESHOLD) ->
+                        other >= now.minusDays(WEEK_THRESHOLD) -> {
                             stringRes(R.string.transaction_history_previous_7_days) to "previous_7_days"
+                        }
 
-                        other >= now.minusDays(MONTH_THRESHOLD) ->
+                        other >= now.minusDays(MONTH_THRESHOLD) -> {
                             stringRes(R.string.transaction_history_previous_30_days) to "previous_30_days"
+                        }
 
                         else -> {
                             val yearMonth = YearMonth.from(other)

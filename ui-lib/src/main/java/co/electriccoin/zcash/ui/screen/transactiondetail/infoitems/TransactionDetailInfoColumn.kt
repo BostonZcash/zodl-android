@@ -9,7 +9,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
@@ -72,7 +71,6 @@ fun TransactionDetailInfoColumn(
     }
 }
 
-@Immutable
 data class TransactionDetailInfoColumnState(
     val title: StringResource?,
     val message: StringResource,

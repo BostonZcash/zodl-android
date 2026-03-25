@@ -80,8 +80,12 @@ class SendViewTestSetup(
             onBackCount.incrementAndGet()
             when (sendStage) {
                 SendStage.Form -> {}
+
                 SendStage.Proposing -> {}
-                is SendStage.SendFailure -> setSendStage(SendStage.Form)
+
+                is SendStage.SendFailure -> {
+                    setSendStage(SendStage.Form)
+                }
             }
         }
 

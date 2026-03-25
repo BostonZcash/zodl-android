@@ -170,26 +170,33 @@ object ChangelogParser {
         languageTag: LanguageTag
     ): String =
         when (type) {
-            TitleType.ADDED ->
+            TitleType.ADDED -> {
                 when (languageTag) {
                     is LanguageTag.English -> ADDED_PART_EN
                     is LanguageTag.Spanish -> ADDED_PART_ES
                 }
-            TitleType.CHANGED ->
+            }
+
+            TitleType.CHANGED -> {
                 when (languageTag) {
                     is LanguageTag.English -> CHANGED_PART_EN
                     is LanguageTag.Spanish -> CHANGED_PART_ES
                 }
-            TitleType.FIXED ->
+            }
+
+            TitleType.FIXED -> {
                 when (languageTag) {
                     is LanguageTag.English -> FIXED_PART_EN
                     is LanguageTag.Spanish -> FIXED_PART_ES
                 }
-            TitleType.REMOVED ->
+            }
+
+            TitleType.REMOVED -> {
                 when (languageTag) {
                     is LanguageTag.English -> REMOVED_PART_EN
                     is LanguageTag.Spanish -> REMOVED_PART_ES
                 }
+            }
         }
 }
 

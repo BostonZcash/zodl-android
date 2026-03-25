@@ -125,8 +125,13 @@ class ChooseServerVM(
                         if (isSelectedEndpointCustom) selectedEndpoint else null
                     }
 
-                    is Selection.Endpoint -> userEndpointSelection.endpoint
-                    null -> null
+                    is Selection.Endpoint -> {
+                        userEndpointSelection.endpoint
+                    }
+
+                    null -> {
+                        null
+                    }
                 }
 
             val isCustomEndpointSelectedAndUpdated =
@@ -135,6 +140,7 @@ class ChooseServerVM(
                         val isSelectedEndpointCustom = !availableServers.contains(selectedEndpoint)
                         when {
                             isSelectedEndpointCustom && userCustomEndpointText == null -> false
+
                             isSelectedEndpointCustom &&
                                 selectedEndpoint?.generateUserString() !=
                                 userCustomEndpointText -> true
@@ -143,8 +149,13 @@ class ChooseServerVM(
                         }
                     }
 
-                    is Selection.Endpoint -> false
-                    null -> false
+                    is Selection.Endpoint -> {
+                        false
+                    }
+
+                    null -> {
+                        false
+                    }
                 }
 
             ButtonState(
@@ -314,8 +325,13 @@ class ChooseServerVM(
                 validated
             }
 
-            is Selection.Endpoint -> selection.endpoint
-            null -> null
+            is Selection.Endpoint -> {
+                selection.endpoint
+            }
+
+            null -> {
+                null
+            }
         }
 
     private fun showValidationErrorDialog(reason: String?) {

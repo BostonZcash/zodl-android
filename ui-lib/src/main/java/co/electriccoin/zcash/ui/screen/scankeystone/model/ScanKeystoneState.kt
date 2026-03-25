@@ -5,5 +5,5 @@ import co.electriccoin.zcash.ui.design.util.StringResource
 
 data class ScanKeystoneState(
     val message: StringResource,
-    @IntRange(from = 0, to = 100) val progress: Int?
+    @field:IntRange(from = 0, to = 100) val progress: Int?
 )

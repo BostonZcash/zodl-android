@@ -24,9 +24,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.toKotlinInstant
 import java.time.YearMonth
 import java.time.ZoneId
+import kotlin.time.toKotlinInstant
 
 class ResyncBDDateVM(
     private val args: ResyncBDDateArgs,

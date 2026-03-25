@@ -124,7 +124,7 @@ fun ActivityHistoryView(
             }
 
             when (state) {
-                is ActivityHistoryState.Data ->
+                is ActivityHistoryState.Data -> {
                     Data(
                         paddingValues = paddingValues,
                         state = state,
@@ -133,15 +133,20 @@ fun ActivityHistoryView(
                                 .weight(1f)
                                 .fillMaxWidth()
                     )
+                }
 
-                is ActivityHistoryState.Empty -> CommonEmptyScreen(modifier = Modifier.fillMaxSize())
-                is ActivityHistoryState.Loading ->
+                is ActivityHistoryState.Empty -> {
+                    CommonEmptyScreen(modifier = Modifier.fillMaxSize())
+                }
+
+                is ActivityHistoryState.Loading -> {
                     Loading(
                         modifier =
                             Modifier
                                 .fillMaxSize()
                                 .padding(top = 20.dp)
                     )
+                }
             }
         }
     }
@@ -181,7 +186,7 @@ private fun Data(
     ) {
         state.items.forEachIndexed { index, item ->
             when (item) {
-                is ActivityHistoryItem.Header ->
+                is ActivityHistoryItem.Header -> {
                     stickyHeader(
                         contentType = item.contentType,
                         key = item.key
@@ -195,8 +200,9 @@ private fun Data(
                                     .animateItem()
                         )
                     }
+                }
 
-                is ActivityHistoryItem.Activity ->
+                is ActivityHistoryItem.Activity -> {
                     item(
                         contentType = item.state.contentType,
                         key = item.state.key,
@@ -208,6 +214,7 @@ private fun Data(
                             modifier = Modifier.animateItem()
                         )
                     }
+                }
             }
         }
     }

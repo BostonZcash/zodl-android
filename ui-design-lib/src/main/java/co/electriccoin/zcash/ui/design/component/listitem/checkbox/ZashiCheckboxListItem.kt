@@ -46,14 +46,15 @@ fun ZashiCheckboxListItem(
                 contentAlignment = Alignment.Center
             ) {
                 when (state.icon) {
-                    is ImageResource.ByDrawable ->
+                    is ImageResource.ByDrawable -> {
                         Image(
                             modifier = Modifier.sizeIn(maxWidth = 48.dp, maxHeight = 48.dp),
                             painter = painterResource(state.icon.resource),
                             contentDescription = null,
                         )
+                    }
 
-                    is ImageResource.DisplayString ->
+                    is ImageResource.DisplayString -> {
                         Text(
                             modifier =
                                 Modifier
@@ -67,6 +68,7 @@ fun ZashiCheckboxListItem(
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.SemiBold,
                         )
+                    }
 
                     ImageResource.Loading -> {
                         // do nothing

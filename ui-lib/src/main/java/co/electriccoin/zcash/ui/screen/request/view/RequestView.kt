@@ -90,6 +90,7 @@ internal fun RequestView(
         RequestState.Loading -> {
             CircularScreenProgressIndicator()
         }
+
         is RequestState.Prepared -> {
             BlankBgScaffold(
                 topBar = {
@@ -145,6 +146,7 @@ private fun RequestBottomBar(
                             .padding(horizontal = 24.dp)
                 )
             }
+
             is RequestState.Memo -> {
                 ZashiButton(
                     enabled = state.request.memoState.isValid(),
@@ -156,6 +158,7 @@ private fun RequestBottomBar(
                             .padding(horizontal = 24.dp)
                 )
             }
+
             is RequestState.QrCode -> {
                 val sizePixels = with(LocalDensity.current) { DEFAULT_QR_CODE_SIZE.toPx() }.roundToInt()
                 val colors = QrCodeDefaults.colors()
@@ -198,9 +201,11 @@ private fun RequestContents(
             is RequestState.Amount -> {
                 RequestAmountView(state = state)
             }
+
             is RequestState.Memo -> {
                 RequestMemoView(state = state)
             }
+
             is RequestState.QrCode -> {
                 RequestQrCodeView(state = state)
             }

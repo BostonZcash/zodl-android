@@ -22,7 +22,10 @@ internal fun RequestScreen(addressType: Int) {
     BackHandler {
         when (requestState) {
             RequestState.Loading -> {}
-            else -> vm.onBack()
+
+            else -> {
+                vm.onBack()
+            }
         }
     }
     RequestView(

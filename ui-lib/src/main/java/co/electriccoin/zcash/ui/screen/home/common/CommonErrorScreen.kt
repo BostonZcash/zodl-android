@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -106,7 +105,6 @@ interface CommonErrorScreenState {
     val buttonState: ButtonState
 }
 
-@Immutable
 data class CommonErrorScreenStateImpl(
     override val title: StringResource,
     override val subtitle: StringResource,

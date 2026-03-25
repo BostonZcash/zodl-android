@@ -52,17 +52,27 @@ class TransactionProgressVM(
     val state: StateFlow<TransactionProgressState?> =
         combine(observeTransactionProposal(), observeTransactionSubmitState()) { proposal, submitState ->
             when (submitState) {
-                null, SubmitProposalState.Submitting -> createSendingState(proposal)
+                null, SubmitProposalState.Submitting -> {
+                    createSendingState(proposal)
+                }
+
                 is SubmitProposalState.Result -> {
                     when (submitState.submitResult) {
-                        is SubmitResult.Success -> createSuccessState(proposal, submitState.submitResult)
-                        is SubmitResult.NonResubmittableError ->
+                        is SubmitResult.Success -> {
+                            createSuccessState(proposal, submitState.submitResult)
+                        }
+
+                        is SubmitResult.NonResubmittableError -> {
                             createNonResubmittableErrorState(proposal, submitState.submitResult)
+                        }
 
-                        is SubmitResult.GrpcFailure ->
+                        is SubmitResult.GrpcFailure -> {
                             createPendingState(proposal, submitState.submitResult)
+                        }
 
-                        is SubmitResult.Partial -> createFundsStuckState(submitState.submitResult)
+                        is SubmitResult.Partial -> {
+                            createFundsStuckState(submitState.submitResult)
+                        }
                     }
                 }
             }
@@ -104,17 +114,20 @@ class TransactionProgressVM(
             },
             subtitle =
                 when (proposal) {
-                    is ShieldTransactionProposal ->
+                    is ShieldTransactionProposal -> {
                         stringRes(R.string.send_confirmation_sending_subtitle_transparent).withStyle()
+                    }
 
-                    is SwapTransactionProposal ->
+                    is SwapTransactionProposal -> {
                         stringRes(R.string.send_confirmation_swapping_subtitle_transparent).withStyle()
+                    }
 
-                    else ->
+                    else -> {
                         styledStringResource(
                             R.string.send_confirmation_sending_subtitle,
                             getAddressAbbreviated()
                         )
+                    }
                 },
             title =
                 if (proposal is ShieldTransactionProposal) {
@@ -145,25 +158,31 @@ class TransactionProgressVM(
                 },
             subtitle =
                 when (proposal) {
-                    is ShieldTransactionProposal ->
+                    is ShieldTransactionProposal -> {
                         stringRes(R.string.send_confirmation_success_subtitle_transparent).withStyle()
+                    }
 
-                    is ExactInputSwapTransactionProposal ->
+                    is ExactInputSwapTransactionProposal -> {
                         stringRes(R.string.send_confirmation_success_swap_subtitle).withStyle()
+                    }
 
-                    is ExactOutputSwapTransactionProposal ->
+                    is ExactOutputSwapTransactionProposal -> {
                         stringRes(R.string.send_confirmation_success_cross_chain_subtitle).withStyle()
+                    }
 
-                    else ->
+                    else -> {
                         styledStringResource(
                             R.string.send_confirmation_success_subtitle,
                             getAddressAbbreviated()
                         )
+                    }
                 },
             middleButton =
                 when (proposal) {
                     is ExactInputSwapTransactionProposal,
-                    is ExactOutputSwapTransactionProposal -> null
+                    is ExactOutputSwapTransactionProposal -> {
+                        null
+                    }
 
                     else -> {
                         if (txId != null) {
@@ -179,19 +198,22 @@ class TransactionProgressVM(
             secondaryButton =
                 when (proposal) {
                     is ExactInputSwapTransactionProposal,
-                    is ExactOutputSwapTransactionProposal ->
+                    is ExactOutputSwapTransactionProposal -> {
                         ButtonState(
                             text = stringRes(R.string.send_confirmation_success_btn_close),
                             onClick = ::onCloseClick,
                             style = ButtonStyle.SECONDARY
                         )
+                    }
 
-                    else -> null
+                    else -> {
+                        null
+                    }
                 },
             primaryButton =
                 when (proposal) {
                     is ExactInputSwapTransactionProposal,
-                    is ExactOutputSwapTransactionProposal ->
+                    is ExactOutputSwapTransactionProposal -> {
                         if (txId != null) {
                             ButtonState(
                                 text = stringRes(R.string.send_confirmation_success_btn_check_status),
@@ -201,13 +223,15 @@ class TransactionProgressVM(
                         } else {
                             null
                         }
+                    }
 
-                    else ->
+                    else -> {
                         ButtonState(
                             text = stringRes(R.string.send_confirmation_success_btn_close),
                             onClick = ::onCloseClick,
                             style = ButtonStyle.TERTIARY
                         )
+                    }
                 },
             image = imageRes(listOf(R.drawable.ic_fist_punch, R.drawable.ic_face_star).random())
         )
@@ -225,35 +249,44 @@ class TransactionProgressVM(
             title =
                 when (proposal) {
                     is Zip321TransactionProposal,
-                    is RegularTransactionProposal ->
+                    is RegularTransactionProposal -> {
                         stringRes(R.string.send_confirmation_pending_transaction_title)
+                    }
 
-                    is ExactInputSwapTransactionProposal ->
+                    is ExactInputSwapTransactionProposal -> {
                         stringRes(R.string.send_confirmation_pending_swap_title)
+                    }
 
-                    is ExactOutputSwapTransactionProposal ->
+                    is ExactOutputSwapTransactionProposal -> {
                         stringRes(R.string.send_confirmation_pending_payment_title)
+                    }
 
-                    is ShieldTransactionProposal ->
+                    is ShieldTransactionProposal -> {
                         stringRes(R.string.send_confirmation_pending_shielding_title)
+                    }
                 },
             subtitle =
                 when (proposal) {
                     is Zip321TransactionProposal,
-                    is RegularTransactionProposal ->
+                    is RegularTransactionProposal -> {
                         stringRes(R.string.send_confirmation_pending_transaction_subtitle)
+                    }
 
                     is ExactInputSwapTransactionProposal,
-                    is ExactOutputSwapTransactionProposal ->
+                    is ExactOutputSwapTransactionProposal -> {
                         stringRes(R.string.send_confirmation_pending_swap_subtitle)
+                    }
 
-                    is ShieldTransactionProposal ->
+                    is ShieldTransactionProposal -> {
                         stringRes(R.string.send_confirmation_pending_shielding_subtitle)
+                    }
                 }.withStyle(),
             middleButton =
                 when (proposal) {
                     is ExactInputSwapTransactionProposal,
-                    is ExactOutputSwapTransactionProposal -> null
+                    is ExactOutputSwapTransactionProposal -> {
+                        null
+                    }
 
                     else -> {
                         if (txId != null) {
@@ -269,19 +302,22 @@ class TransactionProgressVM(
             secondaryButton =
                 when (proposal) {
                     is ExactInputSwapTransactionProposal,
-                    is ExactOutputSwapTransactionProposal ->
+                    is ExactOutputSwapTransactionProposal -> {
                         ButtonState(
                             text = stringRes(R.string.send_confirmation_success_btn_close),
                             onClick = ::onCloseClick,
                             style = ButtonStyle.SECONDARY
                         )
+                    }
 
-                    else -> null
+                    else -> {
+                        null
+                    }
                 },
             primaryButton =
                 when (proposal) {
                     is ExactInputSwapTransactionProposal,
-                    is ExactOutputSwapTransactionProposal ->
+                    is ExactOutputSwapTransactionProposal -> {
                         if (txId != null) {
                             ButtonState(
                                 text = stringRes(R.string.send_confirmation_success_btn_check_status),
@@ -291,13 +327,15 @@ class TransactionProgressVM(
                         } else {
                             null
                         }
+                    }
 
-                    else ->
+                    else -> {
                         ButtonState(
                             text = stringRes(R.string.send_confirmation_success_btn_close),
                             onClick = ::onCloseClick,
                             style = ButtonStyle.TERTIARY
                         )
+                    }
                 },
             image = imageRes(listOf(R.drawable.ic_fist_punch, R.drawable.ic_face_star).random())
         )
@@ -318,14 +356,21 @@ class TransactionProgressVM(
                 },
             subtitle =
                 when (proposal) {
-                    is ExactInputSwapTransactionProposal ->
+                    is ExactInputSwapTransactionProposal -> {
                         stringRes(R.string.send_confirmation_error_swap_subtitle)
+                    }
 
-                    is ExactOutputSwapTransactionProposal ->
+                    is ExactOutputSwapTransactionProposal -> {
                         stringRes(R.string.send_confirmation_error_swap_subtitle)
+                    }
 
-                    is ShieldTransactionProposal -> stringRes(R.string.send_confirmation_failure_subtitle_transparent)
-                    else -> stringRes(R.string.send_confirmation_failure_subtitle)
+                    is ShieldTransactionProposal -> {
+                        stringRes(R.string.send_confirmation_failure_subtitle_transparent)
+                    }
+
+                    else -> {
+                        stringRes(R.string.send_confirmation_failure_subtitle)
+                    }
                 }.withStyle(),
             middleButton = null,
             secondaryButton =

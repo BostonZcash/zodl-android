@@ -172,7 +172,10 @@ class SwapDetailVM(
                 onContactSupport(it)
             }
         return when {
-            supportButton != null -> supportButton
+            supportButton != null -> {
+                supportButton
+            }
+
             swapData.error != null && swapData.status == null -> {
                 return mapper.createTransactionDetailErrorButtonState(
                     error = error,
@@ -180,7 +183,9 @@ class SwapDetailVM(
                 )
             }
 
-            else -> null
+            else -> {
+                null
+            }
         }
     }
 

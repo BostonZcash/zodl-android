@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -222,7 +221,9 @@ private fun getSelectedMonthForYear(
             if (selectedMonth in months) selectedMonth else months.findClosest(selectedMonth)
         }
 
-        else -> selectedMonth
+        else -> {
+            selectedMonth
+        }
     }
 
 private fun List<Month>.findClosest(target: Month): Month {
@@ -395,7 +396,6 @@ private fun calculateIndexToFocus(
     return index
 }
 
-@Immutable
 private data class InternalState(
     val selectedDate: YearMonth,
     val months: List<Month>,

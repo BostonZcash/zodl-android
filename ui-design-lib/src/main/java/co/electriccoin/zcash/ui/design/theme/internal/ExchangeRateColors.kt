@@ -2,12 +2,10 @@
 
 package co.electriccoin.zcash.ui.design.theme.internal
 
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
 // TODO [#1555]: replace by new design system
 // TODO [#1555]: https://github.com/Electric-Coin-Company/zashi-android/issues/1555
-@Immutable
 data class ExchangeRateColors(
     val btnSecondaryBg: Color,
     val btnSecondaryBorder: Color,
