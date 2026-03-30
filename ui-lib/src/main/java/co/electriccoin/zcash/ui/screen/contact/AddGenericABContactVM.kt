@@ -83,16 +83,25 @@ class AddGenericABContactVM(
                 }
 
             when (validation) {
-                ContactAddressValidationResult.Invalid -> stringRes(R.string.contact_address_error_invalid)
-                ContactAddressValidationResult.NotUnique ->
+                ContactAddressValidationResult.Invalid -> {
+                    stringRes(R.string.contact_address_error_invalid)
+                }
+
+                ContactAddressValidationResult.NotUnique -> {
                     if (blockchain == null || blockchain == zcashBlockchain) {
                         stringRes(R.string.contact_address_error_not_unique)
                     } else {
                         stringRes(R.string.contact_chain_address_error_not_unique)
                     }
+                }
 
-                ContactAddressValidationResult.Valid -> null
-                null -> null
+                ContactAddressValidationResult.Valid -> {
+                    null
+                }
+
+                null -> {
+                    null
+                }
             }
         }
 
@@ -126,14 +135,17 @@ class AddGenericABContactVM(
                     null
                 } else {
                     when (validateGenericABContactName(name)) {
-                        ValidateContactNameResult.TooLong ->
+                        ValidateContactNameResult.TooLong -> {
                             stringRes(R.string.contact_name_error_too_long)
+                        }
 
-                        ValidateContactNameResult.NotUnique ->
+                        ValidateContactNameResult.NotUnique -> {
                             stringRes(R.string.contact_name_error_not_unique)
+                        }
 
-                        ValidateContactNameResult.Valid ->
+                        ValidateContactNameResult.Valid -> {
                             null
+                        }
                     }
                 }
             }

@@ -2,10 +2,10 @@ package co.electriccoin.zcash.ui.fixture
 
 import co.electriccoin.zcash.ui.common.model.Changelog
 import co.electriccoin.zcash.ui.common.model.ChangelogSection
-import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import kotlin.time.Clock
 
 object ChangelogFixture {
     const val VERSION = "1.0.0"

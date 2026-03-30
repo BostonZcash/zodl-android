@@ -28,7 +28,7 @@ data class SignKeystoneTransactionState(
 }
 
 data class ZashiAccountInfoListItemState(
-    @DrawableRes val icon: Int,
+    @field:DrawableRes val icon: Int,
     val title: StringResource,
     val subtitle: StringResource,
 )

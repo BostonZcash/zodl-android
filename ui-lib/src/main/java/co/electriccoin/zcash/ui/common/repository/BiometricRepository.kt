@@ -61,19 +61,26 @@ class BiometricRepositoryImpl(
         get() =
             when {
                 // Android SDK version == 27
-                (AndroidApiVersion.isExactlyO) ->
+                (AndroidApiVersion.isExactlyO) -> {
                     BiometricManager.Authenticators.BIOMETRIC_STRONG or
                         BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                }
+
                 // Android SDK version >= 30
-                (AndroidApiVersion.isAtLeastR) ->
+                (AndroidApiVersion.isAtLeastR) -> {
                     BiometricManager.Authenticators.BIOMETRIC_STRONG or
                         BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                }
+
                 // Android SDK version == 28 || 29
-                (AndroidApiVersion.isExactlyP || AndroidApiVersion.isExactlyQ) ->
+                (AndroidApiVersion.isExactlyP || AndroidApiVersion.isExactlyQ) -> {
                     BiometricManager.Authenticators.BIOMETRIC_WEAK or
                         BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                }
 
-                else -> error("Unsupported Android SDK version")
+                else -> {
+                    error("Unsupported Android SDK version")
+                }
             }
 
     override fun onBiometricResult(result: BiometricResult) {
@@ -98,8 +105,14 @@ class BiometricRepositoryImpl(
         when (
             onBiometricsResult.filter { it.requestCode == request.requestCode }.first()
         ) {
-            is BiometricResult.Cancelled -> throw BiometricsCancelledException()
-            is BiometricResult.Failure -> throw BiometricsFailureException()
+            is BiometricResult.Cancelled -> {
+                throw BiometricsCancelledException()
+            }
+
+            is BiometricResult.Failure -> {
+                throw BiometricsFailureException()
+            }
+
             is BiometricResult.Success -> {
                 // do nothing
             }

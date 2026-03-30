@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -216,11 +215,10 @@ object QrCodeDefaults {
     )
 }
 
-@Immutable
 data class QrState(
     val qrData: String,
     val contentDescription: StringResource? = null,
-    @DrawableRes val centerImage: Int? = null,
+    @param:DrawableRes val centerImage: Int? = null,
 )
 
 private const val FULLSCREEN_DIM = .9f

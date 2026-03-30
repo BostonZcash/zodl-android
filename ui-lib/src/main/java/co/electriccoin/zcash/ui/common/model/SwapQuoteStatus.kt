@@ -9,11 +9,11 @@ import co.electriccoin.zcash.ui.common.model.near.SwapStatus.PROCESSING
 import co.electriccoin.zcash.ui.common.model.near.SwapStatus.REFUNDED
 import co.electriccoin.zcash.ui.common.model.near.SwapStatus.SUCCESS
 import co.electriccoin.zcash.ui.common.model.near.SwapStatusResponseDto
-import kotlinx.datetime.toJavaInstant
 import java.math.BigDecimal
 import java.math.MathContext
 import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.toJavaInstant
 
 interface SwapQuoteStatus {
     val quote: SwapQuote

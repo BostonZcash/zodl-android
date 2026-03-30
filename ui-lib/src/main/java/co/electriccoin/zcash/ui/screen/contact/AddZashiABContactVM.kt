@@ -43,13 +43,17 @@ class AddZashiABContactVM(
                     null
                 } else {
                     when (validateContactAddress(address)) {
-                        ContactAddressValidationResult.Invalid ->
+                        ContactAddressValidationResult.Invalid -> {
                             stringRes(R.string.contact_address_error_invalid)
+                        }
 
-                        ContactAddressValidationResult.NotUnique ->
+                        ContactAddressValidationResult.NotUnique -> {
                             stringRes(R.string.contact_address_error_not_unique)
+                        }
 
-                        ContactAddressValidationResult.Valid -> null
+                        ContactAddressValidationResult.Valid -> {
+                            null
+                        }
                     }
                 }
             }.stateIn(
@@ -77,14 +81,17 @@ class AddZashiABContactVM(
                     null
                 } else {
                     when (validateContactName(name)) {
-                        ValidateContactNameResult.TooLong ->
+                        ValidateContactNameResult.TooLong -> {
                             stringRes(R.string.contact_name_error_too_long)
+                        }
 
-                        ValidateContactNameResult.NotUnique ->
+                        ValidateContactNameResult.NotUnique -> {
                             stringRes(R.string.contact_name_error_not_unique)
+                        }
 
-                        ValidateContactNameResult.Valid ->
+                        ValidateContactNameResult.Valid -> {
                             null
+                        }
                     }
                 }
             }.stateIn(

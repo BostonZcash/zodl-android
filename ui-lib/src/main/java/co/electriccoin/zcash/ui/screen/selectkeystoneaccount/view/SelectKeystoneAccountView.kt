@@ -74,16 +74,19 @@ private fun Content(state: SelectKeystoneAccountState) {
             }
 
             when (item) {
-                is ZashiCheckboxListItemState ->
+                is ZashiCheckboxListItemState -> {
                     ZashiCheckboxListItem(
                         state = item,
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                     )
-                is ZashiExpandedCheckboxListItemState ->
+                }
+
+                is ZashiExpandedCheckboxListItemState -> {
                     ZashiExpandedCheckboxListItem(
                         state = item,
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
                     )
+                }
             }
         }
     }

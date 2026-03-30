@@ -1,12 +1,10 @@
 package co.electriccoin.zcash.ui.design.util
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 
-@Immutable
 data class StyledStringStyle(
     val color: StringResourceColor? = null,
     val fontWeight: FontWeight? = null,

@@ -66,14 +66,8 @@ tasks {
     withType<com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask> {
         gradleReleaseChannel = "current"
 
-        resolutionStrategy {
-            componentSelection {
-                all {
-                    if (isNonStable(candidate.version) && !isNonStable(currentVersion)) {
-                        reject("Unstable")
-                    }
-                }
-            }
+        rejectVersionIf {
+            isNonStable(candidate.version) && !isNonStable(currentVersion)
         }
     }
 

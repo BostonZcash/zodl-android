@@ -104,41 +104,48 @@ fun TransactionDetailView(
                         .scaffoldPadding(paddingValues, top = 24.dp),
             ) {
                 when (state.info) {
-                    is ReceiveShieldedState ->
+                    is ReceiveShieldedState -> {
                         ReceiveShielded(
                             modifier = Modifier.fillMaxWidth(),
                             state = state.info
                         )
+                    }
 
-                    is ReceiveTransparentState ->
+                    is ReceiveTransparentState -> {
                         ReceiveTransparent(
                             modifier = Modifier.fillMaxWidth(),
                             state = state.info
                         )
+                    }
 
-                    is SendShieldedState ->
+                    is SendShieldedState -> {
                         SendShielded(
                             modifier = Modifier.fillMaxWidth(),
                             state = state.info
                         )
+                    }
 
-                    is SendTransparentState ->
+                    is SendTransparentState -> {
                         SendTransparent(
                             modifier = Modifier.fillMaxWidth(),
                             state = state.info
                         )
+                    }
 
-                    is ShieldingState ->
+                    is ShieldingState -> {
                         Shielding(
                             modifier = Modifier.fillMaxWidth(),
                             state = state.info
                         )
+                    }
 
-                    is SendSwapState ->
+                    is SendSwapState -> {
                         SendSwap(
                             modifier = Modifier.fillMaxWidth(),
                             state = state.info
                         )
+                    }
+
                     null -> {
                         // do nothing
                     }

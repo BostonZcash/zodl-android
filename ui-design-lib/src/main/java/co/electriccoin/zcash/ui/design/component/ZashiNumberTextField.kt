@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -95,13 +94,19 @@ private fun createTextFieldState(state: NumberTextFieldState): EnhancedTextField
             .replace(" ", "")
     val selection =
         when (val selection = state.innerState.innerTextFieldState.selection) {
-            is TextSelection.ByTextRange ->
+            is TextSelection.ByTextRange -> {
                 TextSelection.ByTextRange(
                     TextRange(selection.range.start, selection.range.end.coerceAtMost(text.length))
                 )
+            }
 
-            TextSelection.End -> selection
-            TextSelection.Start -> selection
+            TextSelection.End -> {
+                selection
+            }
+
+            TextSelection.Start -> {
+                selection
+            }
         }
 
     val textFieldState =
@@ -149,7 +154,6 @@ private fun createTextFieldState(state: NumberTextFieldState): EnhancedTextField
     return textFieldState
 }
 
-@Immutable
 data class NumberTextFieldState(
     val innerState: NumberTextFieldInnerState = NumberTextFieldInnerState(),
     val isEnabled: Boolean = true,
@@ -160,7 +164,6 @@ data class NumberTextFieldState(
     val isError = explicitError != null || innerState.isError
 }
 
-@Immutable
 data class NumberTextFieldInnerState(
     val innerTextFieldState: InnerTextFieldState =
         InnerTextFieldState(
@@ -261,11 +264,15 @@ object ZashiNumberTextFieldParser {
         return try {
             when (val parsedNumber = decimalFormat.parse(input)) {
                 null -> null
+
                 is BigDecimal -> parsedNumber
+
                 // The following branches should rarely/never execute when isParseBigDecimal=true,
                 // but are kept as defensive fallbacks. Using string conversion to avoid precision loss.
                 is Double -> BigDecimal.valueOf(parsedNumber)
+
                 is Float -> BigDecimal(parsedNumber.toString())
+
                 else -> BigDecimal(parsedNumber.toString())
             }
         } catch (_: ParseException) {

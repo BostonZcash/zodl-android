@@ -201,14 +201,20 @@ fun ScanBottomItems(
         // Check permission request result, if any
         failureText =
             when (scanState) {
-                ScanScreenState.Permission ->
+                ScanScreenState.Permission -> {
                     stringResource(
                         id = R.string.scan_keystone_state_permission,
                         stringResource(id = R.string.app_name)
                     )
+                }
 
-                ScanScreenState.Failed -> stringResource(id = R.string.scan_keystone_state_failed)
-                ScanScreenState.Scanning -> failureText
+                ScanScreenState.Failed -> {
+                    stringResource(id = R.string.scan_keystone_state_failed)
+                }
+
+                ScanScreenState.Scanning -> {
+                    failureText
+                }
             }
 
         Text(

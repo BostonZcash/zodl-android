@@ -32,15 +32,21 @@ class OnZip321ScannedUseCase(
 ) {
     suspend operator fun invoke(zip321: Zip321ParseUriValidation.Valid, scanArgs: ScanArgs) {
         when (scanArgs.flow) {
-            ADDRESS_BOOK -> addressBookFlow(zip321)
-            SEND ->
+            ADDRESS_BOOK -> {
+                addressBookFlow(zip321)
+            }
+
+            SEND -> {
                 if (scanArgs.isScanZip321Enabled) {
                     sendFlow(zip321)
                 } else {
                     sendFlowWithDisabledZip321(zip321)
                 }
+            }
 
-            HOMEPAGE -> homepageFlow(zip321)
+            HOMEPAGE -> {
+                homepageFlow(zip321)
+            }
         }
     }
 

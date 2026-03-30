@@ -2,10 +2,8 @@
 
 package co.electriccoin.zcash.ui.design.theme.colors
 
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
-@Immutable
 data class ZashiColorsInternal(
     val Surfaces: Surfaces,
     val Text: Text,
@@ -29,7 +27,6 @@ data class ZashiColorsInternal(
     val NoTheme: NoTheme
 )
 
-@Immutable
 data class Surfaces(
     val bgPrimary: Color,
     val bgAdjust: Color,
@@ -45,7 +42,6 @@ data class Surfaces(
     val divider: Color
 )
 
-@Immutable
 data class Text(
     val textPrimary: Color,
     val textSecondary: Color,
@@ -59,7 +55,6 @@ data class Text(
     val textLightSupport: Color
 )
 
-@Immutable
 data class Btns(
     val Brand: BtnBrand,
     val Secondary: BtnSecondary,
@@ -71,7 +66,6 @@ data class Btns(
     val Ghost: BtnGhost
 )
 
-@Immutable
 data class BtnBrand(
     val btnBrandBg: Color,
     val btnBrandBgHover: Color,
@@ -81,7 +75,6 @@ data class BtnBrand(
     val btnBrandFgDisabled: Color
 )
 
-@Immutable
 data class BtnSecondary(
     val btnSecondaryBg: Color,
     val btnSecondaryBgHover: Color,
@@ -93,7 +86,6 @@ data class BtnSecondary(
     val btnSecondaryFgDisabled: Color
 )
 
-@Immutable
 data class BtnTertiary(
     val btnTertiaryBg: Color,
     val btnTertiaryBgHover: Color,
@@ -103,7 +95,6 @@ data class BtnTertiary(
     val btnTertiaryFgDisabled: Color
 )
 
-@Immutable
 data class BtnQuaternary(
     val btnQuartBg: Color,
     val btnQuartBgHover: Color,
@@ -113,7 +104,6 @@ data class BtnQuaternary(
     val btnQuartFgDisabled: Color
 )
 
-@Immutable
 data class BtnDestructive1(
     val btnDestroy1Bg: Color,
     val btnDestroy1BgHover: Color,
@@ -125,7 +115,6 @@ data class BtnDestructive1(
     val btnDestroy1FgDisabled: Color
 )
 
-@Immutable
 data class BtnDestructive2(
     val btnDestroy2Bg: Color,
     val btnDestroy2BgHover: Color,
@@ -134,7 +123,6 @@ data class BtnDestructive2(
     val btnDestroy2FgDisabled: Color
 )
 
-@Immutable
 data class BtnPrimary(
     val btnPrimaryBg: Color,
     val btnPrimaryBgHover: Color,
@@ -143,7 +131,6 @@ data class BtnPrimary(
     val btnBoldFgDisabled: Color
 )
 
-@Immutable
 data class BtnGhost(
     val btnGhostBg: Color,
     val btnGhostBgHover: Color,
@@ -152,7 +139,6 @@ data class BtnGhost(
     val btnGhostFgDisabled: Color
 )
 
-@Immutable
 data class Avatars(
     val avatarProfileBorder: Color,
     val avatarBg: Color,
@@ -163,13 +149,11 @@ data class Avatars(
     val avatarBadgeFg: Color
 )
 
-@Immutable
 data class Sliders(
     val sliderHandleBorder: Color,
     val sliderHandleBg: Color
 )
 
-@Immutable
 data class Inputs(
     val Default: InputDefault,
     val Hover: InputHover,
@@ -182,7 +166,6 @@ data class Inputs(
     val ErrorFocused: InputErrorFocused
 )
 
-@Immutable
 data class InputDefault(
     val bg: Color,
     val bgAlt: Color,
@@ -194,7 +177,6 @@ data class InputDefault(
     val stroke: Color
 )
 
-@Immutable
 data class InputHover(
     val bg: Color,
     val bgAlt: Color,
@@ -207,7 +189,6 @@ data class InputHover(
     val required: Color
 )
 
-@Immutable
 data class InputFilled(
     val bg: Color,
     val bgAlt: Color,
@@ -221,7 +202,6 @@ data class InputFilled(
     val required: Color
 )
 
-@Immutable
 data class InputFocused(
     val bg: Color,
     val asideBg: Color,
@@ -235,7 +215,6 @@ data class InputFocused(
     val defaultRequired: Color
 )
 
-@Immutable
 data class InputDisabled(
     val bg: Color,
     val stroke: Color,
@@ -247,7 +226,6 @@ data class InputDisabled(
     val required: Color
 )
 
-@Immutable
 data class InputErrorDefault(
     val bg: Color,
     val bgAlt: Color,
@@ -263,7 +241,6 @@ data class InputErrorDefault(
     val dropdown: Color
 )
 
-@Immutable
 data class InputErrorHover(
     val bg: Color,
     val bgAlt: Color,
@@ -279,7 +256,6 @@ data class InputErrorHover(
     val dropdown: Color
 )
 
-@Immutable
 data class InputErrorFilled(
     val bg: Color,
     val bgAlt: Color,
@@ -294,7 +270,6 @@ data class InputErrorFilled(
     val dropdown: Color
 )
 
-@Immutable
 data class InputErrorFocused(
     val bg: Color,
     val bgAlt: Color,
@@ -309,7 +284,6 @@ data class InputErrorFocused(
     val dropdown: Color
 )
 
-@Immutable
 data class Accordion(
     val xBtnDefaultFg: Color,
     val xBtnHoverBg: Color,
@@ -331,7 +305,6 @@ data class Accordion(
     val expandedFocusStroke: Color
 )
 
-@Immutable
 data class Switcher(
     val defaultText: Color,
     val defaultTagBg: Color,
@@ -352,7 +325,6 @@ data class Switcher(
     val surfacePrimary: Color
 )
 
-@Immutable
 data class Toggles(
     val tgDefaultBg: Color,
     val tgDefaultFg: Color,
@@ -368,7 +340,6 @@ data class Toggles(
     val tgActiveDisabledFg: Color
 )
 
-@Immutable
 data class Tags(
     val tcDefaultFg: Color,
     val tcHoverBg: Color,
@@ -380,7 +351,6 @@ data class Tags(
     val surfaceStroke: Color
 )
 
-@Immutable
 data class Dropdowns(
     val Default: DropdownDefault,
     val Filled: DropdownFilled,
@@ -389,7 +359,6 @@ data class Dropdowns(
     val Parts: DropdownParts
 )
 
-@Immutable
 data class DropdownDefault(
     val bg: Color,
     val label: Color,
@@ -401,7 +370,6 @@ data class DropdownDefault(
     val active: Color
 )
 
-@Immutable
 data class DropdownFilled(
     val bg: Color,
     val label: Color,
@@ -414,7 +382,6 @@ data class DropdownFilled(
     val active: Color
 )
 
-@Immutable
 data class DropdownFocused(
     val bg: Color,
     val stroke: Color,
@@ -428,7 +395,6 @@ data class DropdownFocused(
     val active: Color
 )
 
-@Immutable
 data class DropdownDisabled(
     val bg: Color,
     val stroke: Color,
@@ -442,7 +408,6 @@ data class DropdownDisabled(
     val active: Color
 )
 
-@Immutable
 data class DropdownParts(
     val scrollBar: Color,
     val divider: Color,
@@ -460,7 +425,6 @@ data class DropdownParts(
     val bgDisabled: Color
 )
 
-@Immutable
 data class Tabs(
     val defaultText: Color,
     val defaultIcon: Color,
@@ -480,7 +444,6 @@ data class Tabs(
     val disabledTagText: Color
 )
 
-@Immutable
 data class Checkboxes(
     val boxOffBg: Color,
     val boxOffStroke: Color,
@@ -496,14 +459,12 @@ data class Checkboxes(
     val boxOnDisabledFg: Color
 )
 
-@Immutable
 data class Loading(
     val loadingBgPrimary: Color,
     val loadingBgSecondary: Color,
     val loadingFgPrimary: Color
 )
 
-@Immutable
 data class Modals(
     val defaultBg: Color,
     val defaultFg: Color,
@@ -517,7 +478,6 @@ data class Modals(
     val surfaceStroke: Color
 )
 
-@Immutable
 data class HintTooltips(
     val surfacePrimary: Color,
     val defaultBg: Color,
@@ -530,7 +490,6 @@ data class HintTooltips(
     val disabledFg: Color
 )
 
-@Immutable
 data class TwoFA(
     val defaultBg: Color,
     val defaultStroke: Color,
@@ -546,7 +505,6 @@ data class TwoFA(
     val separatorDash: Color
 )
 
-@Immutable
 data class Utility(
     val Gray: UtilityGray,
     val SuccessGreen: UtilitySuccessGreen,
@@ -558,7 +516,6 @@ data class Utility(
     val Espresso: UtilityEspresso
 )
 
-@Immutable
 data class UtilityGray(
     val utilityGray700: Color,
     val utilityGray600: Color,
@@ -572,7 +529,6 @@ data class UtilityGray(
     val utilityGray800: Color
 )
 
-@Immutable
 data class UtilitySuccessGreen(
     val utilitySuccess600: Color,
     val utilitySuccess700: Color,
@@ -585,7 +541,6 @@ data class UtilitySuccessGreen(
     val utilitySuccess300: Color
 )
 
-@Immutable
 data class UtilityErrorRed(
     val utilityError600: Color,
     val utilityError700: Color,
@@ -598,7 +553,6 @@ data class UtilityErrorRed(
     val utilityError300: Color
 )
 
-@Immutable
 data class UtilityWarningYellow(
     val utilityOrange600: Color,
     val utilityOrange700: Color,
@@ -611,7 +565,6 @@ data class UtilityWarningYellow(
     val utilityOrange300: Color
 )
 
-@Immutable
 data class UtilityHyperBlue(
     val utilityBlueDark600: Color,
     val utilityBlueDark700: Color,
@@ -624,7 +577,6 @@ data class UtilityHyperBlue(
     val utilityBlueDark300: Color
 )
 
-@Immutable
 data class UtilityIndigo(
     val utilityIndigo600: Color,
     val utilityIndigo700: Color,
@@ -637,7 +589,6 @@ data class UtilityIndigo(
     val utilityIndigo300: Color
 )
 
-@Immutable
 data class UtilityPurple(
     val utilityPurple600: Color,
     val utilityPurple700: Color,
@@ -651,7 +602,6 @@ data class UtilityPurple(
     val utilityPurple900: Color
 )
 
-@Immutable
 data class UtilityEspresso(
     val utilityEspresso700: Color,
     val utilityEspresso600: Color,
@@ -666,12 +616,10 @@ data class UtilityEspresso(
     val utilityEspresso800: Color
 )
 
-@Immutable
 data class Transparent(
     val bgPrimary: Color
 )
 
-@Immutable
 data class NoTheme(
     val welcomeText: Color
 )

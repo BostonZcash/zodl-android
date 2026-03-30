@@ -23,7 +23,6 @@ import androidx.compose.material3.SliderColors
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -124,7 +123,6 @@ private fun BoxScope.FakeBackground(colors: SliderColors) {
     )
 }
 
-@Immutable
 data class SliderState(
     val selectedPercent: Int,
     val percentRange: IntProgression,

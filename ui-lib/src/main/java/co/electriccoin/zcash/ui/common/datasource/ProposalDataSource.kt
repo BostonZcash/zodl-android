@@ -128,6 +128,7 @@ class ProposalDataSourceImpl(
                                 )
                     ) {
                         is ZIP321.ParserResult.Request -> request.paymentRequest.payments[0]
+
                         else -> throw TransactionProposalNotCreatedException(
                             IllegalArgumentException("Invalid ZIP321 URI"),
                         )
@@ -284,15 +285,21 @@ class ProposalDataSourceImpl(
                 submitResults
                     .map {
                         when (it) {
-                            is TransactionSubmitResult.Success -> "success"
-                            is TransactionSubmitResult.Failure ->
+                            is TransactionSubmitResult.Success -> {
+                                "success"
+                            }
+
+                            is TransactionSubmitResult.Failure -> {
                                 if (it.grpcError) {
                                     it.description.orEmpty()
                                 } else {
                                     "code: ${it.code} desc: ${it.description}"
                                 }
+                            }
 
-                            is TransactionSubmitResult.NotAttempted -> "notAttempted"
+                            is TransactionSubmitResult.NotAttempted -> {
+                                "notAttempted"
+                            }
                         }
                     }
             val resubmittableFailures =
@@ -313,21 +320,25 @@ class ProposalDataSourceImpl(
 
             val result =
                 when (successCount) {
-                    0 ->
+                    0 -> {
                         if (resubmittableFailures.all { it }) {
                             SubmitResult.GrpcFailure(txIds = txIds)
                         } else {
                             SubmitResult.Failure(txIds = txIds, code = errCode, description = errDesc)
                         }
+                    }
 
-                    txIds.size -> SubmitResult.Success(txIds = txIds)
+                    txIds.size -> {
+                        SubmitResult.Success(txIds = txIds)
+                    }
 
-                    else ->
+                    else -> {
                         if (resubmittableFailures.all { it }) {
                             SubmitResult.GrpcFailure(txIds = txIds)
                         } else {
                             SubmitResult.Partial(txIds = txIds, statuses = statuses)
                         }
+                    }
                 }
 
             synchronizer.refreshTransactions()

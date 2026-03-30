@@ -21,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.State
@@ -424,7 +423,6 @@ private fun DecorationBox(
     }
 }
 
-@Immutable
 data class ZashiTextFieldColors(
     val textColor: Color,
     val hintColor: Color,
@@ -583,7 +581,6 @@ object ZashiTextFieldDefaults {
     )
 }
 
-@Immutable
 data class TextFieldState(
     val value: StringResource,
     val error: StringResource? = null,
@@ -593,7 +590,6 @@ data class TextFieldState(
     val isError = error != null
 }
 
-@Immutable
 data class EnhancedTextFieldState(
     val innerState: InnerTextFieldState,
     val error: StringResource? = null,
@@ -603,7 +599,6 @@ data class EnhancedTextFieldState(
     val isError = error != null
 }
 
-@Immutable
 data class InnerTextFieldState(
     val value: StringResource,
     val selection: TextSelection = TextSelection.Start,
@@ -617,15 +612,11 @@ data class InnerTextFieldState(
     }
 }
 
-@Immutable
 sealed interface TextSelection {
-    @Immutable
     data object End : TextSelection
 
-    @Immutable
     data object Start : TextSelection
 
-    @Immutable
     data class ByTextRange(
         val range: TextRange
     ) : TextSelection

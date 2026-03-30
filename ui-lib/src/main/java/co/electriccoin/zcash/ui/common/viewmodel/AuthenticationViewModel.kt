@@ -54,14 +54,23 @@ class AuthenticationViewModel(
     private val allowedAuthenticators: Int =
         when {
             // Android SDK version == 27
-            (AndroidApiVersion.isExactlyO) -> Authenticators.BIOMETRIC_STRONG or Authenticators.DEVICE_CREDENTIAL
-            // Android SDK version >= 30
-            (AndroidApiVersion.isAtLeastR) -> Authenticators.BIOMETRIC_STRONG or Authenticators.DEVICE_CREDENTIAL
-            // Android SDK version == 28 || 29
-            (AndroidApiVersion.isExactlyP || AndroidApiVersion.isExactlyQ) ->
-                Authenticators.BIOMETRIC_WEAK or Authenticators.DEVICE_CREDENTIAL
+            (AndroidApiVersion.isExactlyO) -> {
+                Authenticators.BIOMETRIC_STRONG or Authenticators.DEVICE_CREDENTIAL
+            }
 
-            else -> error("Unsupported Android SDK version")
+            // Android SDK version >= 30
+            (AndroidApiVersion.isAtLeastR) -> {
+                Authenticators.BIOMETRIC_STRONG or Authenticators.DEVICE_CREDENTIAL
+            }
+
+            // Android SDK version == 28 || 29
+            (AndroidApiVersion.isExactlyP || AndroidApiVersion.isExactlyQ) -> {
+                Authenticators.BIOMETRIC_WEAK or Authenticators.DEVICE_CREDENTIAL
+            }
+
+            else -> {
+                error("Unsupported Android SDK version")
+            }
         }
 
     /**
@@ -98,7 +107,10 @@ class AuthenticationViewModel(
             walletViewModel.secretState,
         ) { required: Boolean, state: AuthenticationUIState, secretState: SecretState ->
             when {
-                (!required || versionInfo.isRunningUnderTestService) -> AuthenticationUIState.NotRequired
+                (!required || versionInfo.isRunningUnderTestService) -> {
+                    AuthenticationUIState.NotRequired
+                }
+
                 (state == AuthenticationUIState.Initial) -> {
                     if (secretState == SecretState.NONE) {
                         appAccessAuthentication.value = AuthenticationUIState.NotRequired
@@ -108,7 +120,9 @@ class AuthenticationViewModel(
                     }
                 }
 
-                else -> state
+                else -> {
+                    state
+                }
             }
         }.stateIn(
             viewModelScope,
@@ -226,6 +240,7 @@ class AuthenticationViewModel(
                                 authenticationResult.value =
                                     AuthenticationResult.Error(errorCode, errorString.toString())
                             }
+
                             // The user canceled the operation. Upon receiving this, applications should use alternate
                             // authentication, such as a password. The application should also provide the user a way of
                             // returning to biometric authentication, such as a button. The operation was canceled
@@ -237,12 +252,14 @@ class AuthenticationViewModel(
                                 // = AuthenticationResult.Failed
                                 // = AuthenticationResult.Error(errorCode, errorString.toString())
                             }
+
                             // The operation was canceled because the biometric sensor is unavailable. This may happen
                             // when user is switched, the device is locked, or another pending operation prevents it.
                             BiometricPrompt.ERROR_CANCELED -> {
                                 // We could consider splitting ERROR_CANCELED from ERROR_USER_CANCELED
                                 authenticationResult.value = AuthenticationResult.Canceled
                             }
+
                             // The user does not have any biometrics enrolled
                             BiometricPrompt.ERROR_NO_BIOMETRICS,
                             // The device does not have pin, pattern, or password set up
@@ -294,10 +311,13 @@ class AuthenticationViewModel(
                             R.string.authentication_system_ui_subtitle,
                             getString(
                                 when (useCase) {
-                                    AuthenticationUseCase.AppAccess -> R.string.app_name
+                                    AuthenticationUseCase.AppAccess -> {
+                                        R.string.app_name
+                                    }
 
-                                    AuthenticationUseCase.SendFunds ->
+                                    AuthenticationUseCase.SendFunds -> {
                                         R.string.authentication_use_case_send_funds
+                                    }
                                 }
                             )
                         )

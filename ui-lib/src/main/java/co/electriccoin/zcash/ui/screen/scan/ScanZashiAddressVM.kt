@@ -36,16 +36,21 @@ internal class ScanZashiAddressVM(
                         val addressValidationResult = synchronizerProvider.getSynchronizer().validateAddress(result)
 
                         when {
-                            zip321ValidationResult is Zip321ParseUriValidation.Valid ->
+                            zip321ValidationResult is Zip321ParseUriValidation.Valid -> {
                                 onZip321Scanned(zip321ValidationResult)
+                            }
 
-                            zip321ValidationResult is Zip321ParseUriValidation.SingleAddress ->
+                            zip321ValidationResult is Zip321ParseUriValidation.SingleAddress -> {
                                 onZip321SingleAddressScanned(zip321ValidationResult)
+                            }
 
-                            addressValidationResult is AddressType.Valid ->
+                            addressValidationResult is AddressType.Valid -> {
                                 onAddressScanned(result, addressValidationResult)
+                            }
 
-                            else -> onInvalidScan()
+                            else -> {
+                                onInvalidScan()
+                            }
                         }
                     }
                 }
@@ -100,11 +105,15 @@ internal class ScanZashiAddressVM(
             mutex.withLock {
                 if (!hasBeenScannedSuccessfully) {
                     when (result) {
-                        is ImageToQrCodeResult.SingleCode -> onScanned(result.text)
+                        is ImageToQrCodeResult.SingleCode -> {
+                            onScanned(result.text)
+                        }
+
                         ImageToQrCodeResult.MultipleCodes -> {
                             hasBeenScannedSuccessfully = false
                             state.update { ScanValidationState.SEVERAL_CODES_FOUND }
                         }
+
                         ImageToQrCodeResult.NoCode -> {
                             hasBeenScannedSuccessfully = false
                             state.update { ScanValidationState.INVALID_IMAGE }

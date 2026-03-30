@@ -270,12 +270,17 @@ internal fun WrapSend(
 
     val onBackAction = {
         when (sendStage) {
-            SendStage.Form -> goBack()
+            SendStage.Form -> {
+                goBack()
+            }
+
             SendStage.Proposing -> {
                 // no action - wait until the sending is done
             }
 
-            is SendStage.SendFailure -> setSendStage(SendStage.Form)
+            is SendStage.SendFailure -> {
+                setSendStage(SendStage.Form)
+            }
         }
     }
 

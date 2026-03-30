@@ -36,10 +36,12 @@ class CancelProposalFlowUseCase(
                 swapRepository.clearQuote()
                 navigationRouter.backTo(SwapArgs::class)
             }
+
             is ExactOutputSwapTransactionProposal -> {
                 swapRepository.clearQuote()
                 navigationRouter.backTo(PayArgs::class)
             }
+
             else -> {
                 if (clearSendForm) observeClearSend.requestClear()
                 navigationRouter.backTo(Send::class)

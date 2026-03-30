@@ -24,7 +24,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -147,11 +146,10 @@ fun Activity(
     }
 }
 
-@Immutable
 data class ActivityState(
     override val key: Any,
-    @DrawableRes val bigIcon: Int,
-    @DrawableRes val smallIcon: Int?,
+    @field:DrawableRes val bigIcon: Int,
+    @field:DrawableRes val smallIcon: Int?,
     val title: StringResource,
     val subtitle: StringResource?,
     val isShielded: Boolean,

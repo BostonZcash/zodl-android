@@ -54,7 +54,7 @@ internal fun SwapQuoteView(state: SwapQuoteState?) {
         state = state,
         content = { innerState, contentPadding ->
             when (innerState) {
-                is SwapQuoteState.Success ->
+                is SwapQuoteState.Success -> {
                     Success(
                         modifier =
                             Modifier
@@ -63,8 +63,9 @@ internal fun SwapQuoteView(state: SwapQuoteState?) {
                         state = innerState,
                         contentPadding = contentPadding
                     )
+                }
 
-                is SwapQuoteState.Error ->
+                is SwapQuoteState.Error -> {
                     Error(
                         modifier =
                             Modifier
@@ -73,6 +74,7 @@ internal fun SwapQuoteView(state: SwapQuoteState?) {
                         state = innerState,
                         contentPadding = contentPadding
                     )
+                }
             }
         }
     )

@@ -164,11 +164,12 @@ class RequestSwapQuoteUseCase(
                 keystoneProposalRepository.createPCZTFromProposal()
             }
 
-            is ZashiAccount ->
+            is ZashiAccount -> {
                 when (quote.mode) {
                     EXACT_INPUT -> zashiProposalRepository.createExactInputSwapProposal(send, quote)
                     EXACT_OUTPUT -> zashiProposalRepository.createExactOutputSwapProposal(send, quote)
                 }
+            }
         }
     }
 

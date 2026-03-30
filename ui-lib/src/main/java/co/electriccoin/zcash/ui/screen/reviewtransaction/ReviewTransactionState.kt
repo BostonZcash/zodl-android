@@ -65,7 +65,7 @@ data class MessageState(
 ) : ReviewTransactionItemState
 
 data class MessagePlaceholderState(
-    @DrawableRes val icon: Int,
+    @field:DrawableRes val icon: Int,
     val title: StringResource,
     val message: StringResource,
 ) : ReviewTransactionItemState

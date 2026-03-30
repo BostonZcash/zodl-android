@@ -60,6 +60,7 @@ private fun WrapAuthenticationUseCases(
                 onFail = onFail
             )
         }
+
         AuthenticationUseCase.SendFunds -> {
             Twig.debug { "Send Funds Authentication" }
             WrapSendFundsAuth(
@@ -94,16 +95,19 @@ private fun WrapSendFundsAuth(
             Twig.info { "Authentication result: initiating" }
             // Initial state
         }
+
         AuthenticationResult.Success -> {
             Twig.info { "Authentication result: successful" }
             authenticationViewModel.resetAuthenticationResult()
             onSendFunds()
         }
+
         AuthenticationResult.Canceled -> {
             Twig.info { "Authentication result: canceled" }
             authenticationViewModel.resetAuthenticationResult()
             onCancel()
         }
+
         AuthenticationResult.Failed -> {
             Twig.warn { "Authentication result: failed" }
             authenticationViewModel.resetAuthenticationResult()
@@ -112,6 +116,7 @@ private fun WrapSendFundsAuth(
                 .makeText(activity, stringResource(id = R.string.authentication_toast_failed), Toast.LENGTH_SHORT)
                 .show()
         }
+
         is AuthenticationResult.Error -> {
             Twig.error {
                 "Authentication result: error: ${authenticationResult.errorCode}: ${authenticationResult.errorMessage}"
@@ -186,12 +191,14 @@ private fun WrapAppAccessAuth(
             Twig.debug { "Authentication result: initiating" }
             // Initial state
         }
+
         AuthenticationResult.Success -> {
             Twig.debug { "Authentication result: successful" }
             authenticationViewModel.resetAuthenticationResult()
             authenticationViewModel.setWelcomeAnimationDisplayed()
             goToAppContent()
         }
+
         AuthenticationResult.Canceled -> {
             Twig.info { "Authentication result: canceled: shutting down" }
             authenticationViewModel.resetAuthenticationResult()
@@ -200,10 +207,12 @@ private fun WrapAppAccessAuth(
                 .show()
             onCancel()
         }
+
         AuthenticationResult.Failed -> {
             Twig.warn { "Authentication result: failed" }
             onFail()
         }
+
         is AuthenticationResult.Error -> {
             Twig.error {
                 "Authentication result: error: ${authenticationResult.errorCode}: ${authenticationResult.errorMessage}"

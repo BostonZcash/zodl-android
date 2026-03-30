@@ -48,41 +48,55 @@ class BalanceWidgetVM(
             exchangeRate = if (args.isExchangeRateButtonEnabled) exchangeRateUsd else null,
             button =
                 when {
-                    !args.isBalanceButtonEnabled -> null
-                    account == null -> null
-                    account.isAllShielded -> null
+                    !args.isBalanceButtonEnabled -> {
+                        null
+                    }
+
+                    account == null -> {
+                        null
+                    }
+
+                    account.isAllShielded -> {
+                        null
+                    }
+
                     account.totalBalance > account.spendableShieldedBalance &&
                         account.isShieldedPending &&
                         account.totalShieldedBalance > Zatoshi(0) &&
-                        account.spendableShieldedBalance == Zatoshi(0) ->
+                        account.spendableShieldedBalance == Zatoshi(0) -> {
                         BalanceButtonState(
                             icon = R.drawable.ic_balances_expand,
                             text = stringRes(R.string.widget_balances_button_spendable),
                             amount = null,
                             onClick = ::onBalanceButtonClick
                         )
+                    }
 
                     account.totalBalance > account.spendableShieldedBalance &&
                         !account.isShieldedPending &&
                         account.totalShieldedBalance > Zatoshi(0) &&
                         account.spendableShieldedBalance == Zatoshi(0) &&
-                        account.totalTransparentBalance == Zatoshi(0) ->
+                        account.totalTransparentBalance == Zatoshi(0) -> {
                         BalanceButtonState(
                             icon = R.drawable.ic_balances_expand,
                             text = stringRes(R.string.widget_balances_button_spendable),
                             amount = null,
                             onClick = ::onBalanceButtonClick
                         )
+                    }
 
-                    account.totalBalance > account.spendableShieldedBalance ->
+                    account.totalBalance > account.spendableShieldedBalance -> {
                         BalanceButtonState(
                             icon = R.drawable.ic_balances_expand,
                             text = stringRes(R.string.widget_balances_button_spendable),
                             amount = account.spendableShieldedBalance,
                             onClick = ::onBalanceButtonClick
                         )
+                    }
 
-                    else -> null
+                    else -> {
+                        null
+                    }
                 },
             showDust = args.showDust
         )

@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -248,7 +247,6 @@ private fun Icon(state: SwapTokenAmountState) {
     }
 }
 
-@Immutable
 data class SwapTokenAmountState(
     val amount: StringResource,
     val fiatAmount: StringResource,

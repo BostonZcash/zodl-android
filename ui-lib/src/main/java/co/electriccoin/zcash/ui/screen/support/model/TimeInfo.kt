@@ -2,12 +2,12 @@ package co.electriccoin.zcash.ui.screen.support.model
 
 import android.content.pm.PackageInfo
 import android.os.SystemClock
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Instant
 
 // TODO [#1301]: Localize support text content
 // TODO [#1301]: https://github.com/Electric-Coin-Company/zashi-android/issues/1301

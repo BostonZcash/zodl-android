@@ -4,7 +4,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -49,7 +48,6 @@ fun ZashiCircularProgressIndicatorByPercent(
     )
 }
 
-@Immutable
 data class ZashiCircularProgressIndicatorColors(
     val progressColor: Color,
     val trackColor: Color

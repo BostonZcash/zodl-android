@@ -256,21 +256,27 @@ private fun QrCodePanel(
                 stringResource(
                     id =
                         when (state.walletAddress) {
-                            is WalletAddress.Unified ->
+                            is WalletAddress.Unified -> {
                                 when (state.qrCodeType) {
                                     QrCodeType.ZASHI -> R.string.qr_code_wallet_address_shielded
                                     QrCodeType.KEYSTONE -> R.string.qr_code_wallet_address_shielded_keystone
                                 }
+                            }
 
-                            is WalletAddress.Sapling ->
+                            is WalletAddress.Sapling -> {
                                 when (state.qrCodeType) {
                                     QrCodeType.ZASHI -> R.string.qr_code_wallet_address_sapling
                                     QrCodeType.KEYSTONE -> R.string.qr_code_wallet_address_sapling_keystone
                                 }
+                            }
 
-                            is WalletAddress.Transparent -> R.string.qr_code_wallet_address_transparent
+                            is WalletAddress.Transparent -> {
+                                R.string.qr_code_wallet_address_transparent
+                            }
 
-                            else -> error("Unsupported address type: ${state.walletAddress}")
+                            else -> {
+                                error("Unsupported address type: ${state.walletAddress}")
+                            }
                         }
                 ),
             color = ZashiColors.Text.textPrimary,
@@ -349,19 +355,21 @@ private enum class AddressType {
     @Composable
     fun badgeColors() =
         when (this) {
-            UNIFIED, SAPLING ->
+            UNIFIED, SAPLING -> {
                 ZashiBadgeColors(
                     border = ZashiColors.Utility.Purple.utilityPurple200,
                     text = ZashiColors.Utility.Purple.utilityPurple700,
                     container = ZashiColors.Utility.Purple.utilityPurple50,
                 )
+            }
 
-            TRANSPARENT ->
+            TRANSPARENT -> {
                 ZashiBadgeColors(
                     border = ZashiColors.Utility.WarningYellow.utilityOrange200,
                     text = ZashiColors.Utility.WarningYellow.utilityOrange700,
                     container = ZashiColors.Utility.WarningYellow.utilityOrange50,
                 )
+            }
         }
 
     val qrContentDescription: Int

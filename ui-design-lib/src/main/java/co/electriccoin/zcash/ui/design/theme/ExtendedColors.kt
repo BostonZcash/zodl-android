@@ -1,11 +1,9 @@
 package co.electriccoin.zcash.ui.design.theme
 
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 import co.electriccoin.zcash.ui.design.theme.internal.ButtonColors
 import co.electriccoin.zcash.ui.design.theme.internal.TopAppBarColors
 
-@Immutable
 data class ExtendedColors(
     val primaryColor: Color,
     val secondaryColor: Color,

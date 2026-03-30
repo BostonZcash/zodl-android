@@ -157,7 +157,10 @@ class ExportTaxUseCase(
                         )
                     }
 
-                    is SendTransaction.Failed -> null
+                    is SendTransaction.Failed -> {
+                        null
+                    }
+
                     is ReceiveTransaction.Success,
                     is ReceiveTransaction.Pending -> {
                         CsvEntry(
@@ -172,10 +175,15 @@ class ExportTaxUseCase(
                         )
                     }
 
-                    is ReceiveTransaction.Failed -> null
+                    is ReceiveTransaction.Failed -> {
+                        null
+                    }
+
                     is ShieldTransaction.Success,
                     is ShieldTransaction.Pending,
-                    is ShieldTransaction.Failed -> null
+                    is ShieldTransaction.Failed -> {
+                        null
+                    }
                 }
             }
 }

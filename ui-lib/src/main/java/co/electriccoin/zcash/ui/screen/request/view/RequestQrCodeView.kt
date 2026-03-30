@@ -59,6 +59,7 @@ internal fun RequestQrCodeView(
                         )
                 )
             }
+
             is WalletAddress.Unified, is WalletAddress.Sapling -> {
                 ZashiBadge(
                     text = stringResource(id = R.string.request_privacy_level_shielded),
@@ -71,7 +72,10 @@ internal fun RequestQrCodeView(
                         )
                 )
             }
-            else -> error("Unsupported address type")
+
+            else -> {
+                error("Unsupported address type")
+            }
         }
 
         Spacer(modifier = Modifier.height(ZcashTheme.dimens.spacingMid))

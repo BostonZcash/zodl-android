@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -130,7 +129,6 @@ fun ZashiCheckboxIndicator(isChecked: Boolean) {
     }
 }
 
-@Immutable
 data class CheckboxTextStyles(
     val title: TextStyle,
     val subtitle: TextStyle
@@ -155,7 +153,6 @@ object ZashiCheckboxDefaults {
     ) = CheckboxTextStyles(title = title, subtitle = subtitle)
 }
 
-@Immutable
 data class CheckboxState(
     val title: StringResource,
     val isChecked: Boolean,

@@ -329,16 +329,21 @@ internal class ExactOutputVMMapper {
         return ButtonState(
             text =
                 when {
-                    state.isEphemeralAddressLocked ->
+                    state.isEphemeralAddressLocked -> {
                         stringRes(co.electriccoin.zcash.ui.design.R.string.general_processing)
+                    }
 
-                    state.swapAssets.error != null ->
+                    state.swapAssets.error != null -> {
                         stringRes(co.electriccoin.zcash.ui.design.R.string.general_try_again)
+                    }
 
-                    state.swapAssets.isLoading && state.swapAssets.data == null ->
+                    state.swapAssets.isLoading && state.swapAssets.data == null -> {
                         stringRes(co.electriccoin.zcash.ui.design.R.string.general_loading)
+                    }
 
-                    else -> stringRes(co.electriccoin.zcash.ui.design.R.string.general_review)
+                    else -> {
+                        stringRes(co.electriccoin.zcash.ui.design.R.string.general_review)
+                    }
                 },
             style = if (state.swapAssets.error != null) ButtonStyle.DESTRUCTIVE1 else null,
             onClick = {
@@ -351,9 +356,15 @@ internal class ExactOutputVMMapper {
             },
             isEnabled =
                 when {
-                    state.isEphemeralAddressLocked -> false
-                    state.swapAssets.error != null -> !state.swapAssets.isLoading || state.swapAssets.data != null
-                    else ->
+                    state.isEphemeralAddressLocked -> {
+                        false
+                    }
+
+                    state.swapAssets.error != null -> {
+                        !state.swapAssets.isLoading || state.swapAssets.data != null
+                    }
+
+                    else -> {
                         state.swapAssets.data != null &&
                             state.asset != null &&
                             !textField.isError &&
@@ -361,6 +372,7 @@ internal class ExactOutputVMMapper {
                             amount > BigDecimal(0) &&
                             (state.address.isNotBlank() || state.selectedABContact != null) &&
                             !state.isRequestingQuote
+                    }
                 },
             isLoading =
                 state.isEphemeralAddressLocked ||

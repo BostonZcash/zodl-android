@@ -87,19 +87,21 @@ class ReceiveVM(
             },
         title =
             when (account) {
-                is KeystoneAccount ->
+                is KeystoneAccount -> {
                     if (type == Unified) {
                         stringRes(R.string.receive_wallet_address_shielded_keystone)
                     } else {
                         stringRes(R.string.receive_wallet_address_transparent_keystone)
                     }
+                }
 
-                is ZashiAccount ->
+                is ZashiAccount -> {
                     if (type == Unified) {
                         stringRes(R.string.receive_wallet_address_shielded)
                     } else {
                         stringRes(R.string.receive_wallet_address_transparent)
                     }
+                }
             },
         subtitle = stringResByAddress(value = address, middle = true),
         isShielded = type == Unified,
@@ -121,12 +123,16 @@ class ReceiveVM(
             IconButtonState(
                 when (type) {
                     Sapling,
-                    Unified ->
+                    Unified -> {
                         when (account) {
                             is KeystoneAccount -> R.drawable.ic_receive_ks_shielded_info
                             is ZashiAccount -> R.drawable.ic_receive_zashi_shielded_info
                         }
-                    Transparent -> R.drawable.ic_receive_zcash_info
+                    }
+
+                    Transparent -> {
+                        R.drawable.ic_receive_zcash_info
+                    }
                 },
                 onClick = { onAddressInfoClick(type) }
             )
@@ -146,6 +152,7 @@ class ReceiveVM(
         when (type) {
             Sapling,
             Unified -> navigationRouter.forward(ShieldedAddressInfoArgs)
+
             Transparent -> navigationRouter.forward(TransparentAddressInfoArgs)
         }
     }

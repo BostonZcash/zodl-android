@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -50,7 +49,6 @@ fun WalletUpdatingMessage(
     )
 }
 
-@Immutable
 class WalletUpdatingMessageState(
     val onClick: () -> Unit
 ) : HomeMessageState

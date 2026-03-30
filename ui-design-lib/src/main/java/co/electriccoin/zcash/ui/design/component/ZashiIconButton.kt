@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -153,9 +152,8 @@ fun ZashiImageButton(
     }
 }
 
-@Immutable
 data class IconButtonState(
-    @DrawableRes val icon: Int,
+    @param:DrawableRes val icon: Int,
     val contentDescription: StringResource? = null,
     val badge: StringResource? = null,
     val isEnabled: Boolean = true,

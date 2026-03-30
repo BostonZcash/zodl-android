@@ -93,30 +93,40 @@ class CreateFlexaTransactionUseCase(
                     memoString = ""
                 )
         ) {
-            is ZecSendExt.ZecSendValidation.Valid ->
+            is ZecSendExt.ZecSendValidation.Valid -> {
                 zecSendValidation.zecSend.copy(
                     destination =
                         when (recipientAddressState.type) {
-                            is AddressType.Invalid ->
+                            is AddressType.Invalid -> {
                                 WalletAddress.Unified.new(recipientAddressState.address)
+                            }
 
-                            AddressType.Shielded ->
+                            AddressType.Shielded -> {
                                 WalletAddress.Unified.new(recipientAddressState.address)
+                            }
 
-                            AddressType.Tex ->
+                            AddressType.Tex -> {
                                 WalletAddress.Tex.new(recipientAddressState.address)
+                            }
 
-                            AddressType.Transparent ->
+                            AddressType.Transparent -> {
                                 WalletAddress.Transparent.new(recipientAddressState.address)
+                            }
 
-                            AddressType.Unified ->
+                            AddressType.Unified -> {
                                 WalletAddress.Unified.new(recipientAddressState.address)
+                            }
 
-                            null -> WalletAddress.Unified.new(recipientAddressState.address)
+                            null -> {
+                                WalletAddress.Unified.new(recipientAddressState.address)
+                            }
                         }
                 )
+            }
 
-            is ZecSendExt.ZecSendValidation.Invalid -> throw RuntimeException("Validation failed")
+            is ZecSendExt.ZecSendValidation.Invalid -> {
+                throw RuntimeException("Validation failed")
+            }
         }
     }
 }

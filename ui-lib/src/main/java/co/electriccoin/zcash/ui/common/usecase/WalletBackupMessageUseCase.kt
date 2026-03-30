@@ -42,16 +42,23 @@ class WalletBackupMessageUseCaseImpl(
             Triple(isBackedUp, count, timestamp)
         }.flatMapLatest { (isBackedUp, count, timestamp) ->
             when {
-                isBackedUp -> flowOf(WalletBackupData.Unavailable)
-                timestamp == null -> flowOf(WalletBackupData.Available(WalletBackupLockoutDuration.TWO_DAYS))
-                count == 1 ->
+                isBackedUp -> {
+                    flowOf(WalletBackupData.Unavailable)
+                }
+
+                timestamp == null -> {
+                    flowOf(WalletBackupData.Available(WalletBackupLockoutDuration.TWO_DAYS))
+                }
+
+                count == 1 -> {
                     calculateNext(
                         lastTimestamp = timestamp,
                         lastLockoutDuration = WalletBackupLockoutDuration.TWO_DAYS,
                         nextLockoutDuration = WalletBackupLockoutDuration.TWO_WEEKS
                     )
+                }
 
-                else ->
+                else -> {
                     calculateNext(
                         lastTimestamp = timestamp,
                         lastLockoutDuration =
@@ -62,6 +69,7 @@ class WalletBackupMessageUseCaseImpl(
                             },
                         nextLockoutDuration = WalletBackupLockoutDuration.ONE_MONTH
                     )
+                }
             }
         }.flatMapLatest { backup ->
             combine(
@@ -109,7 +117,7 @@ sealed interface WalletBackupData {
 
 enum class WalletBackupLockoutDuration(
     val duration: Duration,
-    @StringRes val res: Int
+    @field:StringRes val res: Int
 ) {
     TWO_DAYS(2.days, R.string.general_remind_me_in_two_days),
     TWO_WEEKS(14.days, R.string.general_remind_me_in_two_weeks),

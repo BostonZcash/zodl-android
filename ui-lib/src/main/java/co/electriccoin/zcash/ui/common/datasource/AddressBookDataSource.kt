@@ -15,8 +15,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 interface AddressBookDataSource {
     fun observe(key: AddressBookKey): Flow<AddressBook?>
@@ -115,22 +115,26 @@ class AddressBookDataSourceImpl(
                 runCatching { addressBookStorageProvider.getLegacyUnencryptedStorageFile() }.getOrNull()
 
             return when {
-                encryptedFile != null ->
+                encryptedFile != null -> {
                     runCatching {
                         addressBookProvider
                             .readAddressBookFromFile(encryptedFile, addressBookKey)
                             .also { unencryptedFile?.deleteSuspend() }
                     }.onFailure { e -> Twig.warn(e) { "Failed to decrypt address book" } }.getOrNull()
+                }
 
-                unencryptedFile != null ->
+                unencryptedFile != null -> {
                     addressBookProvider
                         .readLegacyUnencryptedAddressBookFromFile(unencryptedFile)
                         .also { unencryptedAddressBook ->
                             writeToLocalStorage(unencryptedAddressBook, addressBookKey)
                             unencryptedFile.deleteSuspend()
                         }
+                }
 
-                else -> null
+                else -> {
+                    null
+                }
             }
         }
 

@@ -1,14 +1,12 @@
 package co.electriccoin.zcash.ui.screen.accountlist
 
 import androidx.annotation.DrawableRes
-import androidx.compose.runtime.Immutable
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.ModalBottomSheetState
 import co.electriccoin.zcash.ui.design.component.listitem.ListItemState
 import co.electriccoin.zcash.ui.design.util.StringResource
 import co.electriccoin.zcash.ui.design.util.StyledStringResource
 
-@Immutable
 data class AccountListState(
     val items: List<AccountListItem>?,
     val isLoading: Boolean,
@@ -16,23 +14,19 @@ data class AccountListState(
     override val onBack: () -> Unit,
 ) : ModalBottomSheetState
 
-@Immutable
 data class ZashiAccountListItemState(
-    @DrawableRes val icon: Int,
+    @field:DrawableRes val icon: Int,
     val title: StringResource,
     val subtitle: StyledStringResource,
     val isSelected: Boolean,
     val onClick: () -> Unit
 )
 
-@Immutable
 sealed interface AccountListItem {
-    @Immutable
     data class Account(
         val state: ZashiAccountListItemState
     ) : AccountListItem
 
-    @Immutable
     data class Other(
         val state: ListItemState
     ) : AccountListItem

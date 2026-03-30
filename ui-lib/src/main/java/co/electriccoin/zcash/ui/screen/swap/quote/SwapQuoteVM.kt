@@ -34,8 +34,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import java.math.BigDecimal
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
 internal class SwapQuoteVM(
@@ -93,7 +93,7 @@ internal class SwapQuoteVM(
         val message =
             when {
                 quote.exception is QuoteLowAmountException &&
-                    quote.exception.amountFormatted != null ->
+                    quote.exception.amountFormatted != null -> {
                     stringRes(
                         R.string.swap_quote_error_too_low_try_at_least,
                         stringResByDynamicCurrencyNumber(
@@ -101,18 +101,24 @@ internal class SwapQuoteVM(
                             ticker = quote.exception.asset.tokenTicker
                         )
                     )
+                }
 
-                quote.exception is QuoteLowAmountException -> stringRes(R.string.swap_quote_error_too_low_try_higher)
+                quote.exception is QuoteLowAmountException -> {
+                    stringRes(R.string.swap_quote_error_too_low_try_higher)
+                }
+
                 quote.exception is ResponseWithNearErrorException &&
                     !quote.exception.error.message
-                        .contains("failed to get quote", ignoreCase = true) ->
+                        .contains("failed to get quote", ignoreCase = true) -> {
                     stringRes(quote.exception.error.message)
+                }
 
-                else ->
+                else -> {
                     when (quote.mode) {
                         EXACT_INPUT -> stringRes(R.string.swap_quote_error_getting_quote_swap)
                         EXACT_OUTPUT -> stringRes(R.string.swap_quote_error_getting_quote)
                     }
+                }
             }
 
         return SwapQuoteState.Error(

@@ -17,10 +17,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.yield
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 class UpdateSwapActivityMetadataUseCase(
     accountDataSource: AccountDataSource,
@@ -53,14 +53,16 @@ class UpdateSwapActivityMetadataUseCase(
         scope.launch {
             val depositAddress =
                 when (activity) {
-                    is ActivityData.BySwap ->
+                    is ActivityData.BySwap -> {
                         activity.swap.depositAddress
                             .takeIf { !activity.swap.status.isTerminal }
+                    }
 
-                    is ActivityData.ByTransaction ->
+                    is ActivityData.ByTransaction -> {
                         activity.metadata.swapMetadata
                             ?.depositAddress
                             ?.takeIf { !activity.metadata.swapMetadata.status.isTerminal }
+                    }
                 }
 
             if (depositAddress != null) {

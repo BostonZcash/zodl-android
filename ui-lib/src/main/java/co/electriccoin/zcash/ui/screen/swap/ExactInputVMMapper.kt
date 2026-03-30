@@ -171,7 +171,7 @@ internal class ExactInputVMMapper {
             title = stringRes(R.string.swap_from),
             error =
                 when (state.mode) {
-                    SWAP_FROM_ZEC ->
+                    SWAP_FROM_ZEC -> {
                         if (originAmount != null &&
                             state.totalSpendableBalance.value < originAmount.convertZecToZatoshi().value
                         ) {
@@ -179,20 +179,24 @@ internal class ExactInputVMMapper {
                         } else {
                             null
                         }
+                    }
 
-                    SWAP_INTO_ZEC -> null
+                    SWAP_INTO_ZEC -> {
+                        null
+                    }
                 },
             token =
                 when (state.mode) {
-                    SWAP_FROM_ZEC ->
+                    SWAP_FROM_ZEC -> {
                         AssetCardState.Data(
                             token = stringRes(cash.z.ecc.sdk.ext.R.string.zcash_token_zec),
                             bigIcon = imageRes(R.drawable.ic_zec_round_full),
                             smallIcon = imageRes(co.electriccoin.zcash.ui.design.R.drawable.ic_zec_shielded),
                             onClick = null
                         )
+                    }
 
-                    SWAP_INTO_ZEC ->
+                    SWAP_INTO_ZEC -> {
                         if (state.swapAsset == null) {
                             AssetCardState.Loading(
                                 onClick = onSwapAssetPickerClick,
@@ -208,20 +212,23 @@ internal class ExactInputVMMapper {
                                 isEnabled = !state.isRequestingQuote
                             )
                         }
+                    }
                 },
             textFieldPrefix =
                 when (state.mode) {
-                    SWAP_FROM_ZEC ->
+                    SWAP_FROM_ZEC -> {
                         when (state.currencyType) {
                             TOKEN -> imageRes(R.drawable.ic_send_zashi)
                             FIAT -> imageRes(R.drawable.ic_send_usd)
                         }
+                    }
 
-                    SWAP_INTO_ZEC ->
+                    SWAP_INTO_ZEC -> {
                         when (state.currencyType) {
                             TOKEN -> null
                             FIAT -> imageRes(R.drawable.ic_send_usd)
                         }
+                    }
                 },
             textField =
                 NumberTextFieldState(
@@ -231,17 +238,19 @@ internal class ExactInputVMMapper {
                 ),
             secondaryText =
                 when (state.currencyType) {
-                    TOKEN ->
+                    TOKEN -> {
                         stringResByDynamicCurrencyNumber(
                             amount = amountFiat ?: BigDecimal(0),
                             ticker = FiatCurrency.USD.symbol,
                         )
+                    }
 
-                    FIAT ->
+                    FIAT -> {
                         stringResByDynamicCurrencyNumber(
                             originAmount ?: BigDecimal(0),
                             state.originAsset?.tokenTicker.orEmpty()
                         )
+                    }
                 },
             max =
                 when (state.mode) {
@@ -250,17 +259,22 @@ internal class ExactInputVMMapper {
                 },
             onSwapChange = {
                 when (state.currencyType) {
-                    TOKEN -> onSwapCurrencyTypeClick(amountFiat.takeIf { it != BigDecimal.ZERO })
+                    TOKEN -> {
+                        onSwapCurrencyTypeClick(amountFiat.takeIf { it != BigDecimal.ZERO })
+                    }
+
                     FIAT -> {
                         if (originAmount == null) {
                             onSwapCurrencyTypeClick(null)
                         } else {
                             when (state.mode) {
-                                SWAP_FROM_ZEC ->
+                                SWAP_FROM_ZEC -> {
                                     onSwapCurrencyTypeClick(originAmount)
+                                }
 
-                                SWAP_INTO_ZEC ->
+                                SWAP_INTO_ZEC -> {
                                     onSwapCurrencyTypeClick(originAmount)
+                                }
                             }
                         }
                     }
@@ -285,34 +299,39 @@ internal class ExactInputVMMapper {
             account.totalBalance > account.spendableShieldedBalance &&
                 account.isShieldedPending &&
                 account.totalShieldedBalance > Zatoshi(0) &&
-                account.spendableShieldedBalance == Zatoshi(0) ->
+                account.spendableShieldedBalance == Zatoshi(0) -> {
                 ButtonState(
                     text = stringRes(R.string.swap_max_standalone),
                     isLoading = true,
                     onClick = onBalanceButtonClick
                 )
+            }
 
             account.totalBalance > account.spendableShieldedBalance &&
                 !account.isShieldedPending &&
                 account.totalShieldedBalance > Zatoshi(0) &&
                 account.spendableShieldedBalance == Zatoshi(0) &&
-                account.totalTransparentBalance == Zatoshi(0) ->
+                account.totalTransparentBalance == Zatoshi(0) -> {
                 ButtonState(
                     text = stringRes(R.string.swap_max_standalone),
                     isLoading = true,
                     onClick = onBalanceButtonClick
                 )
+            }
 
             else -> {
                 val amount =
                     when (state.currencyType) {
-                        TOKEN -> stringRes(state.totalSpendableBalance, TickerLocation.HIDDEN)
+                        TOKEN -> {
+                            stringRes(state.totalSpendableBalance, TickerLocation.HIDDEN)
+                        }
 
-                        FIAT ->
+                        FIAT -> {
                             stringResByDynamicCurrencyNumber(
                                 state.getTotalSpendableFiatBalance(),
                                 FiatCurrency.USD.symbol
                             )
+                        }
                     }
 
                 ButtonState(
@@ -338,7 +357,7 @@ internal class ExactInputVMMapper {
         return SwapAmountTextState(
             token =
                 when (state.mode) {
-                    SWAP_FROM_ZEC ->
+                    SWAP_FROM_ZEC -> {
                         if (state.swapAsset == null) {
                             AssetCardState.Loading(
                                 onClick = onSwapAssetPickerClick,
@@ -354,14 +373,16 @@ internal class ExactInputVMMapper {
                                 isEnabled = !state.isRequestingQuote
                             )
                         }
+                    }
 
-                    SWAP_INTO_ZEC ->
+                    SWAP_INTO_ZEC -> {
                         AssetCardState.Data(
                             token = stringRes(cash.z.ecc.sdk.ext.R.string.zcash_token_zec),
                             bigIcon = imageRes(R.drawable.ic_zec_round_full),
                             smallIcon = imageRes(co.electriccoin.zcash.ui.design.R.drawable.ic_zec_shielded),
                             onClick = null
                         )
+                    }
                 },
             title = stringRes(R.string.swap_to),
             subtitle = null,
@@ -372,7 +393,10 @@ internal class ExactInputVMMapper {
                 },
             secondaryText =
                 when (state.currencyType) {
-                    TOKEN -> fiatText
+                    TOKEN -> {
+                        fiatText
+                    }
+
                     FIAT -> {
                         if (state.swapAsset?.tokenTicker == null) {
                             stringResByDynamicNumber(state.getDestinationAssetAmount() ?: 0)
@@ -442,16 +466,21 @@ internal class ExactInputVMMapper {
         return ButtonState(
             text =
                 when {
-                    state.isEphemeralAddressLocked ->
+                    state.isEphemeralAddressLocked -> {
                         stringRes(co.electriccoin.zcash.ui.design.R.string.general_processing)
+                    }
 
-                    state.swapAssets.error != null ->
+                    state.swapAssets.error != null -> {
                         stringRes(co.electriccoin.zcash.ui.design.R.string.general_try_again)
+                    }
 
-                    state.swapAssets.isLoading && state.swapAssets.data == null ->
+                    state.swapAssets.isLoading && state.swapAssets.data == null -> {
                         stringRes(co.electriccoin.zcash.ui.design.R.string.general_loading)
+                    }
 
-                    else -> stringRes(R.string.swap_confirm)
+                    else -> {
+                        stringRes(R.string.swap_confirm)
+                    }
                 },
             style = if (state.swapAssets.error != null) ButtonStyle.DESTRUCTIVE1 else null,
             onClick = {
@@ -464,9 +493,15 @@ internal class ExactInputVMMapper {
             },
             isEnabled =
                 when {
-                    state.isEphemeralAddressLocked -> false
-                    state.swapAssets.error != null -> !state.swapAssets.isLoading || state.swapAssets.data != null
-                    else ->
+                    state.isEphemeralAddressLocked -> {
+                        false
+                    }
+
+                    state.swapAssets.error != null -> {
+                        !state.swapAssets.isLoading || state.swapAssets.data != null
+                    }
+
+                    else -> {
                         state.swapAssets.data != null &&
                             state.swapAsset != null &&
                             !textField.isError &&
@@ -474,6 +509,7 @@ internal class ExactInputVMMapper {
                             amount > BigDecimal(0) &&
                             (state.addressText.isNotBlank() || state.selectedContact != null) &&
                             !state.isRequestingQuote
+                    }
                 },
             isLoading =
                 state.isEphemeralAddressLocked ||
@@ -581,19 +617,25 @@ private data class ExactInputInternalState(
                 }
             }
 
-            FIAT -> amountTextState.amount
+            FIAT -> {
+                amountTextState.amount
+            }
         }
 
     fun getOriginTokenAmount(): BigDecimal? {
         val fiatAmount = amountTextState.amount
         return when (currencyType) {
-            TOKEN -> fiatAmount
-            FIAT ->
+            TOKEN -> {
+                fiatAmount
+            }
+
+            FIAT -> {
                 if (fiatAmount == null || originAsset == null) {
                     null
                 } else {
                     fiatAmount.divide(originAsset.usdPrice, MathContext.DECIMAL128)
                 }
+            }
         }
     }
 

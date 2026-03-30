@@ -26,9 +26,11 @@ class OnAddressScannedUseCase(
                 navigationRouter.back()
             }
 
-            ADDRESS_BOOK -> navigationRouter.replace(AddZashiABContactArgs(address))
+            ADDRESS_BOOK -> {
+                navigationRouter.replace(AddZashiABContactArgs(address))
+            }
 
-            HOMEPAGE ->
+            HOMEPAGE -> {
                 navigationRouter.replace(
                     Send(
                         address,
@@ -41,6 +43,7 @@ class OnAddressScannedUseCase(
                         }
                     )
                 )
+            }
         }
     }
 }
