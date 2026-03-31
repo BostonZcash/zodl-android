@@ -50,7 +50,7 @@
     <string name="resync_bd_date_note">If you\'re not sure, choose an earlier date.</string>
 
     <string name="resync_bd_estimation_subtitle">Estimated Block Height</string>
-    <string name="resync_bd_estimation_message">Zodl will scan and recover all transactions made after the following block number.</string>
+    <string name="resync_bd_estimation_message">Your wallet will be resynced from %1$s (%2$s blocks). Zodl will scan and recover all transactions made after the following block number.</string>
     <string name="resync_bd_estimation_btn">Set this height</string>
 
     <string name="confirm_resync_title">Confirm Resync</string>

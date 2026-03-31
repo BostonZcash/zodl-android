@@ -9,5 +9,3 @@ data class HomeState(
     val fourthButton: BigIconButtonState,
     val message: HomeMessageState?
 )
-
-data object HomeRestoreSuccessDialogState

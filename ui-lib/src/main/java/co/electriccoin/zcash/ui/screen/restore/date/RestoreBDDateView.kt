@@ -133,8 +133,10 @@ private fun AppBar(state: RestoreBDDateState) {
             )
         },
         regularActions = {
-            ZashiIconButton(state.dialogButton, modifier = Modifier.size(40.dp))
-            Spacer(Modifier.width(20.dp))
+            state.dialogButton?.let {
+                ZashiIconButton(it, modifier = Modifier.size(40.dp))
+                Spacer(Modifier.width(20.dp))
+            }
         },
         colors =
             ZcashTheme.colors.topAppBarColors orDark

@@ -248,7 +248,7 @@ class GetHomeMessageUseCase(
             HomeMessageData.Restoring(walletSnapshot.isSpendable && someBalance, progress)
         } else {
             if (!syncMessageShownBefore) {
-                if (progress >= .98f || progress == 0f) null else HomeMessageData.Syncing(progress = progress)
+                if (progress >= 98f || progress == 0f) null else HomeMessageData.Syncing(progress = progress)
             } else {
                 HomeMessageData.Syncing(progress = progress)
             }

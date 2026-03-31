@@ -39,6 +39,7 @@ import co.electriccoin.zcash.ui.design.util.getValue
 import co.electriccoin.zcash.ui.design.util.orDark
 import co.electriccoin.zcash.ui.design.util.scaffoldPadding
 import co.electriccoin.zcash.ui.design.util.stringRes
+import co.electriccoin.zcash.ui.design.util.withStyle
 
 @Composable
 fun RestoreBDEstimationView(state: RestoreBDEstimationState) {
@@ -113,8 +114,10 @@ private fun AppBar(state: RestoreBDEstimationState) {
             )
         },
         regularActions = {
-            ZashiIconButton(state.dialogButton, modifier = Modifier.size(40.dp))
-            Spacer(Modifier.width(20.dp))
+            state.dialogButton?.let {
+                ZashiIconButton(it, modifier = Modifier.size(40.dp))
+                Spacer(Modifier.width(20.dp))
+            }
         },
         colors =
             ZcashTheme.colors.topAppBarColors orDark
@@ -137,7 +140,7 @@ private fun Preview() =
                         stringRes(
                             "Zashi will scan and recover all transactions made after the " +
                                 "following block number."
-                        ),
+                        ).withStyle(),
                     restore = ButtonState(stringRes("Estimate")) {},
                     dialogButton = IconButtonState(R.drawable.ic_help) {},
                     onBack = {},
