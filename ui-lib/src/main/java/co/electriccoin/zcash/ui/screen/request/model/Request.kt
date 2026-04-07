@@ -2,13 +2,12 @@ package co.electriccoin.zcash.ui.screen.request.model
 
 import android.content.Context
 import cash.z.ecc.android.sdk.ext.convertUsdToZec
-import cash.z.ecc.android.sdk.ext.convertZatoshiToZec
 import cash.z.ecc.android.sdk.ext.convertZecToZatoshi
 import cash.z.ecc.android.sdk.model.FiatCurrencyConversion
 import cash.z.ecc.android.sdk.model.Memo
 import cash.z.ecc.android.sdk.model.Zatoshi
-import cash.z.ecc.android.sdk.model.fromZecString
 import cash.z.ecc.sdk.extension.floor
+import co.electriccoin.zcash.ui.design.util.TickerLocation
 import co.electriccoin.zcash.ui.design.util.getPreferredLocale
 import co.electriccoin.zcash.ui.design.util.getString
 import co.electriccoin.zcash.ui.design.util.stringRes
@@ -44,21 +43,16 @@ data class AmountState(
                 .toBigDecimalLocalized(locale)
                 .convertUsdToZec(conversion.priceOfZec.toBigDecimal())
                 .convertZecToZatoshi()
-                .floor()
+                .floor(),
+            tickerLocation = TickerLocation.HIDDEN
         ).getString(context)
     }
 
     fun toFiatString(context: Context, conversion: FiatCurrencyConversion): String {
-        val zec =
-            Zatoshi
-                .fromZecString(
-                    zecString = amount,
-                    locale = context.resources.configuration.getPreferredLocale(),
-                )?.convertZatoshiToZec()
+        val locale = context.resources.configuration.getPreferredLocale()
+        val zecAmount = amount.toBigDecimalLocalized(locale) ?: return ""
         val priceOfZec = BigDecimal(conversion.priceOfZec)
-        val fiat =
-            zec
-                ?.multiply(priceOfZec, MathContext.DECIMAL128) ?: BigDecimal(0)
+        val fiat = zecAmount.multiply(priceOfZec, MathContext.DECIMAL128)
         return stringResByNumber(fiat, maxDecimals = 2).getString(context)
     }
 }
