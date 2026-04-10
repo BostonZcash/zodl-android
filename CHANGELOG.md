@@ -6,6 +6,11 @@ and this application adheres to [Semantic Versioning](https://semver.org/spec/v2
 
 ## [Unreleased]
 
+## [3.3.1 (1643)] - 2026-04-10
+
+### Fixed:
+- We fixed ktor dependency clash.
+
 ## [3.3.1 (1641)] - 2026-04-10
 
 ### Added:
