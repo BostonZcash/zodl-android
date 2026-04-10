@@ -3,10 +3,10 @@
 package co.electriccoin.zcash.ui.design.theme.internal
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
+@Immutable
 interface TopAppBarColors {
     val containerColor: Color
     val navigationColor: Color
@@ -14,10 +14,9 @@ interface TopAppBarColors {
     val subTitleColor: Color
     val actionColor: Color
 
-    @Composable
     @OptIn(ExperimentalMaterial3Api::class)
     fun toMaterialTopAppBarColors() =
-        TopAppBarDefaults.topAppBarColors(
+        androidx.compose.material3.TopAppBarColors(
             containerColor = containerColor,
             scrolledContainerColor = containerColor,
             navigationIconContentColor = navigationColor,
@@ -34,6 +33,7 @@ interface TopAppBarColors {
     ): TopAppBarColors
 }
 
+@Immutable
 internal data class DefaultTopAppBarColors(
     override val containerColor: Color = Color.Unspecified,
     override val navigationColor: Color = Color.Unspecified,
@@ -56,6 +56,7 @@ internal data class DefaultTopAppBarColors(
     )
 }
 
+@Immutable
 internal data class LightTopAppBarColors(
     override val containerColor: Color = Color(0xFFFFFFFF),
     override val navigationColor: Color = Color(0xFF000000),
@@ -78,6 +79,7 @@ internal data class LightTopAppBarColors(
     )
 }
 
+@Immutable
 internal data class DarkTopAppBarColors(
     override val containerColor: Color = Color(0xFF231F20),
     override val navigationColor: Color = Color(0xFFFFFFFF),
@@ -100,6 +102,7 @@ internal data class DarkTopAppBarColors(
     )
 }
 
+@Immutable
 internal data class TransparentTopAppBarColors(
     override val containerColor: Color = Color(0x00000000),
     override val navigationColor: Color = Color(0xFFFFFFFF),

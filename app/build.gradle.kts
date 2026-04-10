@@ -223,18 +223,6 @@ android {
     }
 }
 
-configurations.all {
-    resolutionStrategy {
-        // Flexa SDK (core 1.x) depends on okhttp:4.12.0, logging-interceptor:4.12.0,
-        // and okhttp-sse:4.12.0 — all of which reference okhttp3.internal.Util, a class
-        // removed in OkHttp 5.x. Ktor 3.4.0 pulls in okhttp:5.x as a transitive dependency,
-        // causing a runtime NoClassDefFoundError in RestRepository and HeadersInterceptor.
-        // Forcing all three Flexa OkHttp artifacts to 5.x resolves the conflict.
-        force("com.squareup.okhttp3:okhttp:5.3.2")
-        force("com.squareup.okhttp3:logging-interceptor:5.3.2")
-        force("com.squareup.okhttp3:okhttp-sse:5.3.2")
-    }
-}
 
 dependencies {
     implementation(libs.androidx.activity)
