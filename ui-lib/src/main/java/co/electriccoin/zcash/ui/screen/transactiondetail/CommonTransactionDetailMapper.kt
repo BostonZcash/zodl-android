@@ -13,11 +13,11 @@ import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.ButtonStyle
 import co.electriccoin.zcash.ui.design.component.SwapQuoteHeaderState
 import co.electriccoin.zcash.ui.design.component.SwapTokenAmountState
-import co.electriccoin.zcash.ui.design.util.isServiceUnavailable
 import co.electriccoin.zcash.ui.design.util.stringRes
 import co.electriccoin.zcash.ui.design.util.stringResByDateTime
 import co.electriccoin.zcash.ui.design.util.stringResByDynamicCurrencyNumber
 import co.electriccoin.zcash.ui.design.util.stringResByNumber
+import co.electriccoin.zcash.ui.util.isServiceUnavailable
 import io.ktor.client.plugins.ResponseException
 import java.time.Instant
 import java.time.ZoneId

@@ -1,4 +1,4 @@
-package co.electriccoin.zcash.ui.design.util
+package co.electriccoin.zcash.ui.util
 
 import io.ktor.http.HttpStatusCode
 

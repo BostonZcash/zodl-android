@@ -16,6 +16,14 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.datetime)
+
+    api(enforcedPlatform(libs.ktor.bom))
+    api(libs.ktor.core)
+    api(libs.ktor.okhttp)
+    api(libs.ktor.negotiation)
+    api(libs.ktor.json)
+    api(libs.ktor.logging)
+
     api(libs.zcash.sdk)
     api(libs.zcash.sdk.incubator)
     api(libs.zcash.bip39)
