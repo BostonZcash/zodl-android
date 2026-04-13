@@ -6,6 +6,33 @@ and this application adheres to [Semantic Versioning](https://semver.org/spec/v2
 
 ## [Unreleased]
 
+## [3.3.1 (1643)] - 2026-04-10
+
+### Fixed:
+- We fixed ktor dependency clash.
+
+## [3.3.1 (1641)] - 2026-04-10
+
+### Added:
+- We added a feature for disconnecting a Keystone hardware wallet.
+
+### Changed:
+- We updated all dependencies.
+
+### Fixed:
+- We fixed a few UX/UI issues.
+
+## [3.3.1 (1639)] - 2026-04-09
+
+### Added:
+- We added a feature for disconnecting a Keystone hardware wallet.
+
+### Changed:
+- We updated all dependencies.
+
+### Fixed:
+- We fixed a few UX/UI issues.
+
 ## [3.3.0 (1637)] - 2026-04-08
 
 ### Added:

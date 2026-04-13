@@ -13,11 +13,6 @@ kotlin {
         getByName("commonMain") {
             dependencies {
                 api(libs.kotlinx.coroutines.core)
-                api(libs.ktor.core)
-                api(libs.ktor.okhttp)
-                api(libs.ktor.negotiation)
-                api(libs.ktor.json)
-                api(libs.ktor.logging)
             }
         }
         getByName("commonTest") {

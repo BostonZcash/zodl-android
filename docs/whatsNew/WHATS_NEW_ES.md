@@ -12,6 +12,39 @@ directly impact users rather than highlighting other key architectural updates.*
 
 ## [Unreleased]
 
+## [3.3.1 (1643)] - 2026-04-10
+
+### Añadido:
+- Añadimos una función para desconectar una billetera de hardware Keystone.
+
+### Cambiado:
+- Actualizamos todas las dependencias.
+
+### Corregido:
+- Solucionamos algunos problemas de interfaz de usuario.
+
+## [3.3.1 (1641)] - 2026-04-10
+
+### Añadido:
+- Añadimos una función para desconectar una billetera de hardware Keystone.
+
+### Cambiado:
+- Actualizamos todas las dependencias.
+
+### Corregido:
+- Solucionamos algunos problemas de interfaz de usuario.
+
+## [3.3.1 (1639)] - 2026-04-09
+
+### Añadido:
+- Añadimos una función para desconectar una billetera de hardware Keystone.
+
+### Cambiado:
+- Actualizamos todas las dependencias.
+
+### Corregido:
+- Solucionamos algunos problemas de interfaz de usuario.
+
 ## [3.3.0 (1637)] - 2026-04-08
 
 ### Añadido:

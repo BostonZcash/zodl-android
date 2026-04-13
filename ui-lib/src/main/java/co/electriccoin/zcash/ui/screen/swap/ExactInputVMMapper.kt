@@ -21,7 +21,6 @@ import co.electriccoin.zcash.ui.design.component.listitem.SimpleListItemState
 import co.electriccoin.zcash.ui.design.util.TickerLocation
 import co.electriccoin.zcash.ui.design.util.asPrivacySensitive
 import co.electriccoin.zcash.ui.design.util.imageRes
-import co.electriccoin.zcash.ui.design.util.isServiceUnavailable
 import co.electriccoin.zcash.ui.design.util.stringRes
 import co.electriccoin.zcash.ui.design.util.stringResByDynamicCurrencyNumber
 import co.electriccoin.zcash.ui.design.util.stringResByDynamicNumber
@@ -33,6 +32,7 @@ import co.electriccoin.zcash.ui.screen.swap.Mode.SWAP_INTO_ZEC
 import co.electriccoin.zcash.ui.screen.swap.ui.SwapAmountTextFieldState
 import co.electriccoin.zcash.ui.screen.swap.ui.SwapAmountTextState
 import co.electriccoin.zcash.ui.util.CURRENCY_TICKER
+import co.electriccoin.zcash.ui.util.isServiceUnavailable
 import io.ktor.client.plugins.ResponseException
 import java.math.BigDecimal
 import java.math.MathContext
