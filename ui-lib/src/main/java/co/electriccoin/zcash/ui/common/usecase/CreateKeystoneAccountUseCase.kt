@@ -5,6 +5,8 @@ import cash.z.ecc.android.sdk.model.BlockHeight
 import co.electriccoin.zcash.ui.NavigationRouter
 import co.electriccoin.zcash.ui.common.datasource.AccountDataSource
 import co.electriccoin.zcash.ui.screen.connectkeystone.connected.KeystoneConnectedArgs
+import co.electriccoin.zcash.ui.screen.keepopen.KeepOpenArgs
+import co.electriccoin.zcash.ui.screen.keepopen.KeepOpenFlow
 import com.keystone.module.ZcashAccount
 import com.keystone.module.ZcashAccounts
 
@@ -26,6 +28,10 @@ class CreateKeystoneAccountUseCase(
                 birthday = birthday,
             )
         accountDataSource.selectAccount(createdAccount)
-        navigationRouter.forward(KeystoneConnectedArgs)
+        if (birthday != null) {
+            navigationRouter.forward(KeepOpenArgs(KeepOpenFlow.KEYSTONE))
+        } else {
+            navigationRouter.forward(KeystoneConnectedArgs)
+        }
     }
 }

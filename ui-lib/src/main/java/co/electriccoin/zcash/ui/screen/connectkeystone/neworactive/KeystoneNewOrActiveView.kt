@@ -18,6 +18,8 @@ import co.electriccoin.zcash.ui.design.component.BlankBgScaffold
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.ZashiButton
 import co.electriccoin.zcash.ui.design.component.ZashiButtonDefaults
+import co.electriccoin.zcash.ui.design.component.ZashiConfirmationBottomSheet
+import co.electriccoin.zcash.ui.design.component.ZashiConfirmationState
 import co.electriccoin.zcash.ui.design.component.ZashiSmallTopAppBar
 import co.electriccoin.zcash.ui.design.component.ZashiTopAppBarBackNavigation
 import co.electriccoin.zcash.ui.design.newcomponent.PreviewScreens
@@ -29,7 +31,11 @@ import co.electriccoin.zcash.ui.design.util.scaffoldPadding
 import co.electriccoin.zcash.ui.design.util.stringRes
 
 @Composable
-fun KeystoneNewOrActiveView(state: KeystoneNewOrActiveState) {
+fun KeystoneNewOrActiveView(
+    state: KeystoneNewOrActiveState,
+    errorState: ZashiConfirmationState? = null,
+) {
+    ZashiConfirmationBottomSheet(errorState)
     BlankBgScaffold(
         topBar = {
             ZashiSmallTopAppBar(

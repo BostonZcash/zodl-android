@@ -14,11 +14,11 @@ import co.electriccoin.zcash.ui.screen.advancedsettings.debug.db.DebugDBVM
 import co.electriccoin.zcash.ui.screen.balances.BalanceWidgetVM
 import co.electriccoin.zcash.ui.screen.balances.spendable.SpendableBalanceVM
 import co.electriccoin.zcash.ui.screen.chooseserver.ChooseServerVM
-import co.electriccoin.zcash.ui.screen.connectkeystone.ConnectKeystoneVM
-import co.electriccoin.zcash.ui.screen.connectkeystone.firsttransaction.KeystoneFirstTransactionVM
-import co.electriccoin.zcash.ui.screen.connectkeystone.firsttransaction.estimation.KeystoneFirstTransactionEstimationVM
+import co.electriccoin.zcash.ui.screen.connectkeystone.connect.KeystoneConnectVM
+import co.electriccoin.zcash.ui.screen.connectkeystone.date.KeystoneDateVM
+import co.electriccoin.zcash.ui.screen.connectkeystone.estimation.KeystoneEstimationVM
+import co.electriccoin.zcash.ui.screen.connectkeystone.height.KeystoneHeightVM
 import co.electriccoin.zcash.ui.screen.connectkeystone.neworactive.KeystoneNewOrActiveVM
-import co.electriccoin.zcash.ui.screen.connectkeystone.wbh.KeystoneWBHVM
 import co.electriccoin.zcash.ui.screen.contact.AddGenericABContactVM
 import co.electriccoin.zcash.ui.screen.contact.AddZashiABContactVM
 import co.electriccoin.zcash.ui.screen.contact.UpdateGenericABContactVM
@@ -41,6 +41,7 @@ import co.electriccoin.zcash.ui.screen.hotfix.enhancement.EnhancementHotfixVM
 import co.electriccoin.zcash.ui.screen.hotfix.ephemeral.EphemeralHotfixVM
 import co.electriccoin.zcash.ui.screen.insufficientfunds.InsufficientFundsVM
 import co.electriccoin.zcash.ui.screen.integrations.IntegrationsVM
+import co.electriccoin.zcash.ui.screen.keepopen.KeepOpenVM
 import co.electriccoin.zcash.ui.screen.more.MoreVM
 import co.electriccoin.zcash.ui.screen.pay.PayVM
 import co.electriccoin.zcash.ui.screen.qrcode.QrCodeVM
@@ -55,6 +56,7 @@ import co.electriccoin.zcash.ui.screen.restoresuccess.RestoreSuccessViewModel
 import co.electriccoin.zcash.ui.screen.resync.confirm.ConfirmResyncVM
 import co.electriccoin.zcash.ui.screen.resync.date.ResyncBDDateVM
 import co.electriccoin.zcash.ui.screen.resync.estimation.ResyncBDEstimationVM
+import co.electriccoin.zcash.ui.screen.resync.height.ResyncBlockHeightVM
 import co.electriccoin.zcash.ui.screen.reviewtransaction.ReviewTransactionVM
 import co.electriccoin.zcash.ui.screen.scan.ScanGenericAddressVM
 import co.electriccoin.zcash.ui.screen.scan.ScanZashiAddressVM
@@ -140,6 +142,7 @@ val viewModelModule =
         viewModelOf(::ConfirmResyncVM)
         viewModelOf(::ResyncBDDateVM)
         viewModelOf(::ResyncBDEstimationVM)
+        viewModelOf(::ResyncBlockHeightVM)
         viewModelOf(::ShieldFundsInfoVM)
         viewModelOf(::WalletBackupInfoViewModel)
         viewModelOf(::ExchangeRateSettingsVM)
@@ -180,9 +183,10 @@ val viewModelModule =
         viewModelOf(::RestoreTorVM)
         viewModelOf(::ResetZashiVM)
         viewModelOf(::DisconnectVM)
-        viewModelOf(::ConnectKeystoneVM)
+        viewModelOf(::KeystoneConnectVM)
         viewModelOf(::KeystoneNewOrActiveVM)
-        viewModelOf(::KeystoneFirstTransactionVM)
-        viewModelOf(::KeystoneFirstTransactionEstimationVM)
-        viewModelOf(::KeystoneWBHVM)
+        viewModelOf(::KeystoneDateVM)
+        viewModelOf(::KeystoneEstimationVM)
+        viewModelOf(::KeystoneHeightVM)
+        viewModelOf(::KeepOpenVM)
     }

@@ -4,85 +4,67 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.sdk.exception.InitializeException
-import cash.z.ecc.sdk.ANDROID_STATE_FLOW_TIMEOUT
-import co.electriccoin.zcash.spackle.Twig
 import co.electriccoin.zcash.ui.NavigationRouter
 import co.electriccoin.zcash.ui.R
+import co.electriccoin.zcash.ui.common.model.guardLoading
+import co.electriccoin.zcash.ui.common.model.mutableLce
+import co.electriccoin.zcash.ui.common.model.stateIn
 import co.electriccoin.zcash.ui.common.usecase.CreateKeystoneAccountUseCase
+import co.electriccoin.zcash.ui.common.usecase.ErrorStateMapperUseCase
 import co.electriccoin.zcash.ui.common.usecase.ParseKeystoneUrToZashiAccountsUseCase
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.util.stringRes
-import co.electriccoin.zcash.ui.screen.connectkeystone.firsttransaction.KeystoneFirstTransactionArgs
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.WhileSubscribed
+import co.electriccoin.zcash.ui.screen.connectkeystone.date.KeystoneDateArgs
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class KeystoneNewOrActiveVM(
     private val args: KeystoneNewOrActiveArgs,
     parseKeystoneUrToZashiAccounts: ParseKeystoneUrToZashiAccountsUseCase,
     private val createKeystoneAccount: CreateKeystoneAccountUseCase,
+    private val errorStateMapper: ErrorStateMapperUseCase,
     private val navigationRouter: NavigationRouter,
 ) : ViewModel() {
     private val accounts = parseKeystoneUrToZashiAccounts(args.ur)
-    private val isCreatingAccount = MutableStateFlow(false)
+    private val createAccountLce = mutableLce<Unit>()
 
-    val state: StateFlow<KeystoneNewOrActiveState> =
-        isCreatingAccount
-            .map { createState(it) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(ANDROID_STATE_FLOW_TIMEOUT),
-                initialValue = createState(false),
-            )
+    val errorState = errorStateMapper(createAccountLce, viewModelScope)
 
-    private fun createState(isCreating: Boolean) =
-        KeystoneNewOrActiveState(
-            subtitle = stringRes(R.string.keystone_new_or_active_subtitle),
-            message = stringRes(R.string.keystone_new_or_active_message),
-            newDevice =
-                ButtonState(
-                    text = stringRes(R.string.keystone_new_device_button),
-                    isLoading = isCreating,
-                    onClick = ::onNewDeviceClick,
-                    hapticFeedbackType = HapticFeedbackType.Confirm,
-                ),
-            activeDevice =
-                ButtonState(
-                    text = stringRes(R.string.keystone_active_device_button),
-                    isEnabled = !isCreating,
-                    onClick = ::onActiveDeviceClick,
-                ),
-            onBack = ::onBack,
-        )
+    val state =
+        createAccountLce.state
+            .map { lce ->
+                KeystoneNewOrActiveState(
+                    subtitle = stringRes(R.string.keystone_new_or_active_subtitle),
+                    message = stringRes(R.string.keystone_new_or_active_message),
+                    newDevice =
+                        ButtonState(
+                            text = stringRes(R.string.keystone_new_device_button),
+                            isLoading = lce.loading,
+                            onClick = ::onNewDeviceClick,
+                            hapticFeedbackType = HapticFeedbackType.Confirm,
+                        ),
+                    activeDevice =
+                        ButtonState(
+                            text = stringRes(R.string.keystone_active_device_button),
+                            isEnabled = !lce.loading,
+                            onClick = ::onActiveDeviceClick,
+                        ),
+                    onBack = ::onBack,
+                )
+            }.stateIn(this)
 
-    private fun onNewDeviceClick() {
-        if (isCreatingAccount.value) return
-        val account = accounts.accounts.firstOrNull() ?: return
-        viewModelScope.launch {
-            try {
-                isCreatingAccount.update { true }
-                createKeystoneAccount(accounts, account, birthday = null)
-            } catch (e: InitializeException.ImportAccountException) {
-                Twig.error(e) { "Error importing Keystone account" }
-            } finally {
-                isCreatingAccount.update { false }
-            }
+    private fun onNewDeviceClick() =
+        createAccountLce.execute {
+            val account = accounts.accounts.firstOrNull() ?: throw InitializeException.NoAccountLoaded
+            createKeystoneAccount(accounts, account, birthday = null)
         }
-    }
 
-    private fun onActiveDeviceClick() {
-        if (isCreatingAccount.value) return
-        navigationRouter.forward(KeystoneFirstTransactionArgs(args.ur))
-    }
+    private fun onActiveDeviceClick() =
+        createAccountLce.guardLoading {
+            navigationRouter.forward(KeystoneDateArgs(args.ur))
+        }
 
-    private fun onBack() {
-        if (!isCreatingAccount.value) {
+    private fun onBack() =
+        createAccountLce.guardLoading {
             navigationRouter.back()
         }
-    }
 }

@@ -11,6 +11,9 @@ import org.koin.core.parameter.parametersOf
 fun KeystoneNewOrActiveScreen(args: KeystoneNewOrActiveArgs) {
     val vm = koinViewModel<KeystoneNewOrActiveVM> { parametersOf(args) }
     val state by vm.state.collectAsStateWithLifecycle()
-    BackHandler { state.onBack() }
-    KeystoneNewOrActiveView(state)
+    val errorState by vm.errorState.collectAsStateWithLifecycle()
+    state?.let {
+        BackHandler { it.onBack() }
+        KeystoneNewOrActiveView(state = it, errorState = errorState)
+    }
 }

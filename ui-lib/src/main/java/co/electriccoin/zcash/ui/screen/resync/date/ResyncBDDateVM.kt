@@ -14,9 +14,10 @@ import co.electriccoin.zcash.ui.common.usecase.NavigateToEstimateBlockHeightUseC
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.IconButtonState
 import co.electriccoin.zcash.ui.design.util.stringRes
-import co.electriccoin.zcash.ui.screen.restore.date.RestoreBDDateState
-import co.electriccoin.zcash.ui.screen.restore.info.SeedInfo
+import co.electriccoin.zcash.ui.screen.common.BirthdayPickerState
+import co.electriccoin.zcash.ui.screen.heightinfo.HeightInfoArgs
 import co.electriccoin.zcash.ui.screen.resync.estimation.ResyncBDEstimationArgs
+import co.electriccoin.zcash.ui.screen.resync.height.ResyncBlockHeightArgs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -46,7 +47,7 @@ class ResyncBDDateVM(
         }
     }
 
-    val state: StateFlow<RestoreBDDateState?> =
+    val state: StateFlow<BirthdayPickerState?> =
         selection
             .filterNotNull()
             .map {
@@ -58,16 +59,25 @@ class ResyncBDDateVM(
             )
 
     private fun createState(selection: YearMonth) =
-        RestoreBDDateState(
+        BirthdayPickerState(
             title = stringRes(R.string.resync_title),
             subtitle = stringRes(R.string.resync_bd_date_subtitle),
             message = stringRes(R.string.resync_bd_date_message),
-            note = stringRes(R.string.resync_bd_date_note),
-            next =
+            logo = null,
+            primaryButton =
                 ButtonState(stringRes(R.string.restore_bd_date_next), onClick = {
                     onEstimateClick(selection)
                 }),
-            dialogButton = null,
+            secondaryButton =
+                ButtonState(
+                    text = stringRes(R.string.keystone_first_transaction_enter_height),
+                    onClick = ::onEnterBlockHeightClick,
+                ),
+            dialogButton =
+                IconButtonState(
+                    icon = R.drawable.ic_help,
+                    onClick = ::onInfoClick,
+                ),
             onBack = ::onBack,
             onYearMonthChange = ::onYearMonthChange,
             selection = selection
@@ -97,6 +107,10 @@ class ResyncBDDateVM(
             navigateToEstimateBlockHeight.onSelectionCancelled(args)
         }
     }
+
+    private fun onEnterBlockHeightClick() = navigationRouter.forward(ResyncBlockHeightArgs)
+
+    private fun onInfoClick() = navigationRouter.forward(HeightInfoArgs)
 
     private fun onYearMonthChange(yearMonth: YearMonth) = selection.update { yearMonth }
 }

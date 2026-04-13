@@ -39,7 +39,7 @@ fun KeystoneConnectedView(state: KeystoneConnectedState) {
                         brush =
                             Brush.verticalGradient(
                                 0f to ZashiColors.Utility.SuccessGreen.utilitySuccess100,
-                                0.4f to ZashiColors.Surfaces.bgPrimary,
+                                GRADIENT_OFFSET to ZashiColors.Surfaces.bgPrimary,
                             )
                     )
         ) {
@@ -81,6 +81,8 @@ fun KeystoneConnectedView(state: KeystoneConnectedState) {
         }
     }
 }
+
+private const val GRADIENT_OFFSET = 0.4f
 
 @PreviewScreens
 @Composable

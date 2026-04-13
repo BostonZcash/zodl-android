@@ -2,13 +2,14 @@ package co.electriccoin.zcash.ui.screen.swap.slippage
 
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.ModalBottomSheetState
+import co.electriccoin.zcash.ui.design.component.ZashiDisclaimerState
 import co.electriccoin.zcash.ui.design.util.StringResource
 import co.electriccoin.zcash.ui.design.util.StyledStringResource
 
 data class SwapSlippageState(
     val picker: SlippagePickerState,
     val info: SwapSlippageInfoState?,
-    val warning: StyledStringResource?,
+    val warning: ZashiDisclaimerState?,
     val primary: ButtonState,
     override val onBack: () -> Unit
 ) : ModalBottomSheetState

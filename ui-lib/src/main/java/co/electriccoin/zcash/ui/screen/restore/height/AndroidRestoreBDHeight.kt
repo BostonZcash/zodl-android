@@ -15,7 +15,8 @@ fun AndroidRestoreBDHeight(args: RestoreBDHeight) {
     val state by vm.state.collectAsStateWithLifecycle()
     SecureScreen()
     BackHandler { state.onBack() }
-    RestoreBDHeightView(state)
+    co.electriccoin.zcash.ui.screen.common
+        .BlockHeightView(state)
 }
 
 @Serializable

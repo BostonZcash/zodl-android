@@ -10,6 +10,7 @@ import co.electriccoin.zcash.ui.design.component.IconButtonState
 import co.electriccoin.zcash.ui.design.util.stringRes
 import co.electriccoin.zcash.ui.design.util.stringResByNumber
 import co.electriccoin.zcash.ui.design.util.withStyle
+import co.electriccoin.zcash.ui.screen.common.EstimatedBlockHeightState
 import co.electriccoin.zcash.ui.screen.restore.info.SeedInfo
 import co.electriccoin.zcash.ui.screen.restore.tor.RestoreTorArgs
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,27 +22,28 @@ class RestoreBDEstimationVM(
     private val navigationRouter: NavigationRouter,
     private val copyToClipboard: CopyToClipboardUseCase
 ) : ViewModel() {
-    val state: StateFlow<RestoreBDEstimationState> = MutableStateFlow(createState()).asStateFlow()
+    val state: StateFlow<EstimatedBlockHeightState> = MutableStateFlow(createState()).asStateFlow()
 
     private fun createState() =
-        RestoreBDEstimationState(
+        EstimatedBlockHeightState(
             title = stringRes(R.string.restore_title),
             subtitle = stringRes(R.string.restore_bd_estimation_subtitle),
             message = stringRes(R.string.restore_bd_estimation_message).withStyle(),
+            logo = null,
             dialogButton =
                 IconButtonState(
                     icon = R.drawable.ic_help,
                     onClick = ::onInfoButtonClick,
                 ),
             onBack = ::onBack,
-            text = stringResByNumber(args.blockHeight, 0),
-            copy =
+            blockHeightText = stringResByNumber(args.blockHeight, 0),
+            copyButton =
                 ButtonState(
                     text = stringRes(R.string.restore_bd_estimation_copy),
                     icon = R.drawable.ic_copy,
                     onClick = ::onCopyClick
                 ),
-            restore =
+            primaryButton =
                 ButtonState(
                     text = stringRes(R.string.restore_bd_estimation_restore),
                     onClick = ::onRestoreClick,

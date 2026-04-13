@@ -12,6 +12,7 @@ import co.electriccoin.zcash.ui.design.component.IconButtonState
 import co.electriccoin.zcash.ui.design.component.NumberTextFieldInnerState
 import co.electriccoin.zcash.ui.design.component.NumberTextFieldState
 import co.electriccoin.zcash.ui.design.util.stringRes
+import co.electriccoin.zcash.ui.screen.common.BlockHeightState
 import co.electriccoin.zcash.ui.screen.restore.date.RestoreBDDateArgs
 import co.electriccoin.zcash.ui.screen.restore.info.SeedInfo
 import co.electriccoin.zcash.ui.screen.restore.tor.RestoreTorArgs
@@ -29,7 +30,7 @@ class RestoreBDHeightVM(
 ) : ViewModel() {
     private val blockHeightText = MutableStateFlow(NumberTextFieldInnerState())
 
-    val state: StateFlow<RestoreBDHeightState> =
+    val state: StateFlow<BlockHeightState> =
         blockHeightText
             .map { text ->
                 createState(text)
@@ -39,7 +40,7 @@ class RestoreBDHeightVM(
                 initialValue = createState(blockHeightText.value)
             )
 
-    private fun createState(blockHeight: NumberTextFieldInnerState): RestoreBDHeightState {
+    private fun createState(blockHeight: NumberTextFieldInnerState): BlockHeightState {
         val isHigherThanSaplingActivationHeight =
             blockHeight
                 .amount
@@ -49,10 +50,11 @@ class RestoreBDHeightVM(
                 ?: false
         val isValid = !blockHeight.innerTextFieldState.value.isEmpty() && isHigherThanSaplingActivationHeight
 
-        return RestoreBDHeightState(
+        return BlockHeightState(
             title = stringRes(R.string.restore_title),
             subtitle = stringRes(R.string.restore_bd_subtitle),
             message = stringRes(R.string.restore_bd_message),
+            logo = null,
             textFieldTitle = stringRes(R.string.restore_bd_text_field_title),
             textFieldHint = stringRes(R.string.restore_bd_text_field_hint),
             textFieldNote = stringRes(R.string.restore_bd_text_field_note),
@@ -62,14 +64,14 @@ class RestoreBDHeightVM(
                     icon = R.drawable.ic_help,
                     onClick = ::onInfoButtonClick,
                 ),
-            restore =
+            primaryButton =
                 ButtonState(
                     stringRes(R.string.restore_bd_restore_btn),
                     onClick = ::onRestoreClick,
                     isEnabled = isValid,
                     hapticFeedbackType = HapticFeedbackType.Confirm
                 ),
-            estimate = ButtonState(stringRes(R.string.restore_bd_height_btn), onClick = ::onEstimateClick),
+            secondaryButton = ButtonState(stringRes(R.string.restore_bd_height_btn), onClick = ::onEstimateClick),
             blockHeight = NumberTextFieldState(innerState = blockHeight, onValueChange = ::onValueChanged)
         )
     }

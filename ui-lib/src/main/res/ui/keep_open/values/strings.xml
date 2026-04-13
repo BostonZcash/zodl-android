@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="keep_open_title">Keep Zodl open!</string>
+    <string name="keep_open_description">Zodl is scanning the blockchain to retrieve your transactions. Older wallets can take hours to sync. Follow these steps to prevent interruption:</string>
+    <string name="keep_open_bullet_1">Keep the Zodl app open on an active phone screen.</string>
+    <string name="keep_open_bullet_2">To prevent your phone screen from going dark, turn off power-saving mode and keep your phone plugged in.</string>
+
+    <string name="keep_open_keystone_subtitle">Your wallet is being synced.</string>
+    <string name="keep_open_keystone_warning">Keep the app open until your Keystone wallet is synced.</string>
+    <string name="keep_open_keystone_checkbox">Keep screen on while syncing</string>
+    <string name="keep_open_resync_subtitle">Your wallet is being resynced.</string>
+    <string name="keep_open_resync_warning">Keep the app open until your wallet is resynced.</string>
+    <string name="keep_open_resync_checkbox">Keep screen on while resyncing</string>
+
+    <string name="keep_open_restore_subtitle">Your wallet is being restored.</string>
+    <string name="keep_open_restore_warning">Keep the app open until your wallet is fully restored.</string>
+    <string name="keep_open_restore_checkbox">Keep screen on while restoring</string>
+</resources>

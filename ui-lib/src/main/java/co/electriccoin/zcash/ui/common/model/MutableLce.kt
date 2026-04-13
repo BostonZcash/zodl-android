@@ -29,6 +29,17 @@ fun <T> Flow<T>.stateIn(
     started: SharingStarted = SharingStarted.WhileSubscribed(ANDROID_STATE_FLOW_TIMEOUT),
 ): StateFlow<T?> = stateIn(viewModel.viewModelScope, started, null)
 
+fun <T> Flow<T>.stateIn(
+    scope: CoroutineScope,
+    started: SharingStarted = SharingStarted.WhileSubscribed(ANDROID_STATE_FLOW_TIMEOUT),
+): StateFlow<T?> = stateIn(scope, started, null)
+
+fun <T> MutableLce<T>.guardLoading(exec: () -> Unit) {
+    if (!state.value.loading) {
+        exec()
+    }
+}
+
 class MutableLce<T>(
     private val scope: CoroutineScope,
     initial: Lce<T>? = null,

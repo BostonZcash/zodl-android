@@ -15,7 +15,8 @@ fun RestoreBDEstimationScreen(args: RestoreBDEstimationArgs) {
     val state by vm.state.collectAsStateWithLifecycle()
     SecureScreen()
     BackHandler { state.onBack() }
-    RestoreBDEstimationView(state)
+    co.electriccoin.zcash.ui.screen.common
+        .EstimatedBlockHeightView(state)
 }
 
 @Serializable

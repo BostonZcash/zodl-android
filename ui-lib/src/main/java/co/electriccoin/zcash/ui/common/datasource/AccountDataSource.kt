@@ -67,7 +67,12 @@ interface AccountDataSource {
 
     suspend fun selectAccount(account: WalletAccount)
 
-    suspend fun importKeystoneAccount(ufvk: String, seedFingerprint: String, index: Long, birthday: BlockHeight? = null): Account
+    suspend fun importKeystoneAccount(
+        ufvk: String,
+        seedFingerprint: String,
+        index: Long,
+        birthday: BlockHeight? = null
+    ): Account
 
     suspend fun requestNextShieldedAddress()
 

@@ -10,5 +10,4 @@
     <string name="tex_unsupported_step_2_badge">Paso 2</string>
     <string name="tex_unsupported_step_2_title">Envía desde Zodl a la dirección TEX</string>
     <string name="tex_unsupported_step_2_description">Una vez recibido en Zodl, envía los tokens a tu dirección TEX de destino final</string>
-    <string name="tex_unsupported_button">Entendido</string>
 </resources>

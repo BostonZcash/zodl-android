@@ -13,6 +13,7 @@ import co.electriccoin.zcash.ui.common.repository.DEFAULT_SLIPPAGE
 import co.electriccoin.zcash.ui.common.usecase.GetSlippageUseCase
 import co.electriccoin.zcash.ui.common.usecase.SetSlippageUseCase
 import co.electriccoin.zcash.ui.design.component.ButtonState
+import co.electriccoin.zcash.ui.design.component.ZashiDisclaimerState
 import co.electriccoin.zcash.ui.design.util.StringResourceColor
 import co.electriccoin.zcash.ui.design.util.StyledStringResource
 import co.electriccoin.zcash.ui.design.util.StyledStringStyle
@@ -81,12 +82,21 @@ class SwapSlippageVM(
                             color = StringResourceColor.WARNING,
                             fontWeight = FontWeight.Bold
                         )
-                    styledStringResource(
-                        R.string.swap_slippage_low_warning,
-                        StyledStringStyle(StringResourceColor.WARNING),
-                        styledStringResource(R.string.swap_slippage_low_warning_1, style),
-                        styledStringResource(resource = R.string.swap_slippage_low_warning_2, style, DEFAULT_SLIPPAGE),
-                        styledStringResource(resource = R.string.swap_slippage_low_warning_3, style, DEFAULT_SLIPPAGE)
+                    ZashiDisclaimerState.warning(
+                        styledStringResource(
+                            R.string.swap_slippage_low_warning,
+                            StyledStringStyle(StringResourceColor.WARNING),
+                            styledStringResource(
+                                resource = R.string.swap_slippage_low_warning_1,
+                                style,
+                                DEFAULT_SLIPPAGE
+                            ),
+                            styledStringResource(
+                                resource = R.string.swap_slippage_low_warning_2,
+                                style,
+                                DEFAULT_SLIPPAGE
+                            )
+                        )
                     )
                 } else {
                     null
@@ -120,7 +130,7 @@ class SwapSlippageVM(
     private fun createState(
         slippagePickerState: SlippagePickerState,
         slippageInfoState: SwapSlippageInfoState?,
-        slippageWarning: StyledStringResource?,
+        slippageWarning: ZashiDisclaimerState?,
         confirmButtonState: ButtonState
     ) = SwapSlippageState(
         picker = slippagePickerState,

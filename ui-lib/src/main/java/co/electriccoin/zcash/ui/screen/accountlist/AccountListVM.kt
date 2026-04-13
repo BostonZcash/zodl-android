@@ -15,7 +15,7 @@ import co.electriccoin.zcash.ui.design.component.listitem.ListItemState
 import co.electriccoin.zcash.ui.design.util.stringRes
 import co.electriccoin.zcash.ui.design.util.stringResByAddress
 import co.electriccoin.zcash.ui.screen.ExternalUrl
-import co.electriccoin.zcash.ui.screen.connectkeystone.ConnectKeystoneArgs
+import co.electriccoin.zcash.ui.screen.connectkeystone.connect.ConnectKeystoneArgs
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.map

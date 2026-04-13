@@ -4,7 +4,8 @@ import cash.z.ecc.android.sdk.model.BlockHeight
 import co.electriccoin.zcash.ui.NavigationRouter
 import co.electriccoin.zcash.ui.common.provider.IsKeepScreenOnDuringRestoreProvider
 import co.electriccoin.zcash.ui.common.provider.SynchronizerProvider
-import co.electriccoin.zcash.ui.screen.restoresuccess.WrapRestoreSuccessArgs
+import co.electriccoin.zcash.ui.screen.keepopen.KeepOpenArgs
+import co.electriccoin.zcash.ui.screen.keepopen.KeepOpenFlow
 
 class ConfirmResyncUseCase(
     private val synchronizerProvider: SynchronizerProvider,
@@ -16,6 +17,6 @@ class ConfirmResyncUseCase(
         // synchronizer.rescanFromHeight(blockHeight)
         synchronizerProvider.resetSynchronizer()
         isKeepScreenOnDuringRestoreProvider.clear()
-        navigationRouter.replaceAll(WrapRestoreSuccessArgs)
+        navigationRouter.replaceAll(KeepOpenArgs(KeepOpenFlow.RESYNC))
     }
 }

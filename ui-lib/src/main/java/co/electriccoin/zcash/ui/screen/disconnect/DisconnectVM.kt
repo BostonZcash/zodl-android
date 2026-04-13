@@ -7,54 +7,56 @@ import co.electriccoin.zcash.ui.R
 import co.electriccoin.zcash.ui.common.model.KeystoneAccount
 import co.electriccoin.zcash.ui.common.model.mutableLce
 import co.electriccoin.zcash.ui.common.model.stateIn
-import co.electriccoin.zcash.ui.common.usecase.CreateLceErrorConfirmationStateUseCase
 import co.electriccoin.zcash.ui.common.usecase.DisconnectUseCase
+import co.electriccoin.zcash.ui.common.usecase.ErrorStateMapperUseCase
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.ButtonStyle
 import co.electriccoin.zcash.ui.design.component.ZashiConfirmationState
 import co.electriccoin.zcash.ui.design.util.stringRes
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 
 class DisconnectVM(
     private val disconnect: DisconnectUseCase,
     private val navigationRouter: NavigationRouter,
-    private val createLceErrorConfirmationState: CreateLceErrorConfirmationStateUseCase,
+    private val errorStateMapper: ErrorStateMapperUseCase,
 ) : ViewModel() {
     private val keystoneAccountFlow = MutableStateFlow<KeystoneAccount?>(null)
     private val confirmationDialogFlow = MutableStateFlow<ZashiConfirmationState?>(null)
     private val disconnectLce = mutableLce<Unit>()
 
+    private val errorState =
+        errorStateMapper(
+            disconnectLce,
+            viewModelScope,
+            title = stringRes(R.string.disconnect_hardware_wallet_error_title),
+            message = stringRes(R.string.disconnect_hardware_wallet_error_message),
+        )
+
+    init {
+        viewModelScope.launch {
+            val keystoneAccount = disconnect.getKeystoneAccount()
+            if (keystoneAccount != null) {
+                keystoneAccountFlow.value = keystoneAccount
+            } else {
+                navigationRouter.back()
+            }
+        }
+    }
+
     val state: StateFlow<DisconnectState?> =
         combine(
-            flow {
-                val keystoneAccount = disconnect.getKeystoneAccount()
-                if (keystoneAccount != null) {
-                    keystoneAccountFlow.value = keystoneAccount
-                    emit(keystoneAccount)
-                } else {
-                    navigationRouter.back()
-                    emit(null)
-                }
-            },
+            keystoneAccountFlow,
             confirmationDialogFlow,
             disconnectLce.state,
-        ) { keystoneAccount, confirmationDialog, lce ->
+            errorState,
+        ) { keystoneAccount, confirmationDialog, lce, errorDialog ->
             keystoneAccount?.let {
                 createState(
                     keystoneAccount = it,
-                    confirmationDialog =
-                        lce.error?.let {
-                            createLceErrorConfirmationState(
-                                error = it,
-                                scope = viewModelScope,
-                                title = stringRes(R.string.disconnect_hardware_wallet_error_title),
-                                message = stringRes(R.string.disconnect_hardware_wallet_error_message),
-                            )
-                        } ?: confirmationDialog,
+                    confirmationDialog = errorDialog ?: confirmationDialog,
                     isLoading = lce.loading,
                 )
             }

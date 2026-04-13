@@ -173,7 +173,7 @@ private fun RestoreSuccessContent(
         ZashiButton(
             modifier = Modifier.fillMaxWidth(),
             onClick = state.onPositiveClick,
-            text = stringResource(id = R.string.restore_success_button)
+            text = stringResource(id = co.electriccoin.zcash.ui.design.R.string.general_got_it)
         )
     }
 }

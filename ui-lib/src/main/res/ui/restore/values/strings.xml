@@ -15,7 +15,6 @@
         blockchain) at which your wallet was created. If you ever lose access to your Zodl app and need to recover
         your funds, providing the block height along with your recovery phrase can significantly speed up the process.
     </string>
-    <string name="restore_dialog_button">Got it!</string>
 
     <string name="restore_bd_height_btn">Estimate my block height</string>
     <string name="restore_bd_restore_btn">Restore</string>
@@ -48,18 +47,21 @@
     <string name="resync_bd_date_subtitle">First Wallet Transaction</string>
     <string name="resync_bd_date_message">Decide how far Zodl should resync. Enter a date before your first received transaction.</string>
     <string name="resync_bd_date_note">If you\'re not sure, choose an earlier date.</string>
+    <string name="resync_bd_date_next">Next</string>
 
     <string name="resync_bd_estimation_subtitle">Estimated Block Height</string>
     <string name="resync_bd_estimation_message">Your wallet will be resynced from %1$s (%2$s blocks). Zodl will scan and recover all transactions made after the following block number.</string>
-    <string name="resync_bd_estimation_btn">Set this height</string>
+    <string name="resync_bd_estimation_btn">Confirm</string>
 
     <string name="confirm_resync_title">Confirm Resync</string>
-    <string name="confirm_resync_subtitle">Resync the current wallet without resetting the app. This can be used to
-        troubleshoot issues that would normally require restoring your wallet like fixing your Keystone balance
-        .\n\nUnless you specify otherwise below, Zodl will resync from the date displayed. </string>
+    <string name="confirm_resync_subtitle">Resync the current wallet without resetting the app. This can be used to troubleshoot issues that would normally require restoring your wallet like fixing your Keystone balance.</string>
     <string name="confirm_resync_message">Unless you specify otherwise below, Zodl will resync from the date displayed.</string>
     <string name="confirm_resync_info">Your wallet will be resynced from %1$s (%2$s blocks). Use the button below if you wish to change it.</string>
     <string name="confirm_resync_change">Change</string>
     <string name="confirm_resync_confirm">Confirm</string>
+
+    <string name="resync_wbh_subtitle">Wallet Birthday Height</string>
+    <string name="resync_wbh_message">Entering your Wallet Birthday Height helps speed up the resync process.</string>
+    <string name="resync_wbh_confirm_button">Confirm</string>
 
 </resources>

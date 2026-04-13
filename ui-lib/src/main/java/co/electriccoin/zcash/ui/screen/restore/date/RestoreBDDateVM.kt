@@ -11,6 +11,8 @@ import co.electriccoin.zcash.ui.common.model.VersionInfo
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.IconButtonState
 import co.electriccoin.zcash.ui.design.util.stringRes
+import co.electriccoin.zcash.ui.fixture.WalletFixture
+import co.electriccoin.zcash.ui.screen.common.BirthdayPickerState
 import co.electriccoin.zcash.ui.screen.restore.estimation.RestoreBDEstimationArgs
 import co.electriccoin.zcash.ui.screen.restore.info.SeedInfo
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,9 +33,9 @@ class RestoreBDDateVM(
     private val application: Application,
 ) : ViewModel() {
     @Suppress("MagicNumber")
-    private val selection = MutableStateFlow<YearMonth>(YearMonth.of(2018, 10))
+    private val selection = MutableStateFlow(WalletFixture.SAPLING_ACTIVATION_YEAR_MONTH)
 
-    val state: StateFlow<RestoreBDDateState?> =
+    val state: StateFlow<BirthdayPickerState?> =
         selection
             .map {
                 createState(it)
@@ -44,12 +46,13 @@ class RestoreBDDateVM(
             )
 
     private fun createState(selection: YearMonth) =
-        RestoreBDDateState(
+        BirthdayPickerState(
             title = stringRes(R.string.restore_title),
             subtitle = stringRes(R.string.restore_bd_date_subtitle),
             message = stringRes(R.string.restore_bd_date_message),
-            note = stringRes(R.string.restore_bd_date_note),
-            next = ButtonState(stringRes(R.string.restore_bd_height_btn), onClick = ::onEstimateClick),
+            logo = null,
+            primaryButton = ButtonState(stringRes(R.string.restore_bd_height_btn), onClick = ::onEstimateClick),
+            secondaryButton = null,
             dialogButton =
                 IconButtonState(
                     icon = R.drawable.ic_help,

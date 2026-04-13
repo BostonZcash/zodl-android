@@ -1,6 +1,5 @@
 package co.electriccoin.zcash.ui.screen.resync.estimation
 
-import android.R.attr.height
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.sdk.model.BlockHeight
@@ -12,13 +11,15 @@ import co.electriccoin.zcash.ui.common.usecase.CopyToClipboardUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetResyncDataFromHeightUseCase
 import co.electriccoin.zcash.ui.common.usecase.ShowErrorUseCase
 import co.electriccoin.zcash.ui.design.component.ButtonState
+import co.electriccoin.zcash.ui.design.component.IconButtonState
 import co.electriccoin.zcash.ui.design.util.StringResourceColor
 import co.electriccoin.zcash.ui.design.util.StyledStringStyle
 import co.electriccoin.zcash.ui.design.util.stringRes
 import co.electriccoin.zcash.ui.design.util.stringResByNumber
 import co.electriccoin.zcash.ui.design.util.styledStringResource
 import co.electriccoin.zcash.ui.design.util.withStyle
-import co.electriccoin.zcash.ui.screen.restore.estimation.RestoreBDEstimationState
+import co.electriccoin.zcash.ui.screen.common.EstimatedBlockHeightState
+import co.electriccoin.zcash.ui.screen.heightinfo.HeightInfoArgs
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -42,7 +43,7 @@ class ResyncBDEstimationVM(
             emit(getResyncDataFromHeight(BlockHeight.new(args.blockHeight)))
         }
 
-    val state: StateFlow<RestoreBDEstimationState?> =
+    val state: StateFlow<EstimatedBlockHeightState?> =
         yearMonthFlow
             .map { createState(it) }
             .stateIn(
@@ -51,8 +52,8 @@ class ResyncBDEstimationVM(
                 initialValue = null
             )
 
-    private fun createState(yearMonth: YearMonth): RestoreBDEstimationState =
-        RestoreBDEstimationState(
+    private fun createState(yearMonth: YearMonth): EstimatedBlockHeightState =
+        EstimatedBlockHeightState(
             title = stringRes(R.string.resync_title),
             subtitle = stringRes(R.string.resync_bd_estimation_subtitle),
             message =
@@ -76,16 +77,21 @@ class ResyncBDEstimationVM(
                             )
                     )
                 ),
-            dialogButton = null,
+            logo = null,
+            dialogButton =
+                IconButtonState(
+                    icon = R.drawable.ic_help,
+                    onClick = ::onInfoClick,
+                ),
             onBack = ::onBack,
-            text = stringResByNumber(args.blockHeight, 0),
-            copy =
+            blockHeightText = stringResByNumber(args.blockHeight, 0),
+            copyButton =
                 ButtonState(
                     text = stringRes(R.string.restore_bd_estimation_copy),
                     icon = R.drawable.ic_copy,
                     onClick = ::onCopyClick
                 ),
-            restore =
+            primaryButton =
                 ButtonState(
                     text = stringRes(R.string.confirm_resync_confirm),
                     onClick = ::onConfirmClick,
@@ -107,6 +113,8 @@ class ResyncBDEstimationVM(
             }
         }
     }
+
+    private fun onInfoClick() = navigationRouter.forward(HeightInfoArgs)
 
     private fun onBack() = navigationRouter.back()
 }

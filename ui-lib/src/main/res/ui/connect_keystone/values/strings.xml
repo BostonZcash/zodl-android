@@ -48,10 +48,14 @@
     <string name="keystone_explainer_about_message">Keystone is a popular hardware wallet brand that offers air-gapped security with QR code signing. It\'s one of many trusted hardware wallet options, alongside Ledger and others.</string>
     <string name="keystone_explainer_button">Got It</string>
 
+    <!-- Wallet Birthday Height Info -->
+    <string name="keystone_wbh_info_title">Need to know more?</string>
+    <string name="keystone_wbh_info_message_bold">The Wallet Birthday Height</string>
+    <string name="keystone_wbh_info_message">is the block height (block # in the blockchain) at which your wallet was created. It is important to provide the correct height because that determines the range of blocks we will scan to display your transaction history and wallet balance. If you have recovered a seed from a different hardware device, make sure to enter the block height of your original hardware device.</string>
+
     <!-- Wallet Birthday Height -->
     <string name="keystone_wbh_title">Connect Hardware Wallet</string>
     <string name="keystone_wbh_subtitle">Wallet Birthday Height</string>
     <string name="keystone_wbh_message">Enter the block height at which your wallet was first used. This helps speed up the scanning process.</string>
-    <string name="keystone_wbh_estimate_button">Estimate my block height</string>
     <string name="keystone_wbh_confirm_button">Connect</string>
 </resources>
