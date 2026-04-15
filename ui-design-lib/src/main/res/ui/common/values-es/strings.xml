@@ -34,7 +34,7 @@
     <string name="general_share_qr">Compartir QR</string>
     <string name="general_cancel">Cancelar</string>
     <string name="general_on">en</string>
-    <string name="general_warning">Advertencia: </string>
+    <string name="general_warning">Advertencia:&#160;</string>
 
     <string name="common_empty_screen_title">Sin resultados</string>
     <string name="common_empty_screen_subtitle">Lo intentamos, pero no pudimos encontrar nada.</string>

@@ -15,7 +15,7 @@ import co.electriccoin.zcash.ui.design.component.SeedTextFieldState
 import co.electriccoin.zcash.ui.design.component.SeedWordInnerTextFieldState
 import co.electriccoin.zcash.ui.design.component.SeedWordTextFieldState
 import co.electriccoin.zcash.ui.design.util.stringRes
-import co.electriccoin.zcash.ui.screen.restore.height.RestoreBDHeight
+import co.electriccoin.zcash.ui.screen.restore.height.RestoreHeight
 import co.electriccoin.zcash.ui.screen.restore.info.SeedInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -156,7 +156,7 @@ class RestoreSeedVM(
     private fun onNextClicked() {
         viewModelScope.launch {
             val seed = validSeed.first() ?: return@launch
-            navigationRouter.forward(RestoreBDHeight(seed.joinToString()))
+            navigationRouter.forward(RestoreHeight(seed.joinToString()))
         }
     }
 

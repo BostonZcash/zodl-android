@@ -9,7 +9,6 @@ import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.IconButtonState
 import co.electriccoin.zcash.ui.design.util.stringRes
 import co.electriccoin.zcash.ui.design.util.stringResByNumber
-import co.electriccoin.zcash.ui.design.util.withStyle
 import co.electriccoin.zcash.ui.screen.common.EstimatedBlockHeightState
 import co.electriccoin.zcash.ui.screen.restore.info.SeedInfo
 import co.electriccoin.zcash.ui.screen.restore.tor.RestoreTorArgs
@@ -17,8 +16,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class RestoreBDEstimationVM(
-    private val args: RestoreBDEstimationArgs,
+class RestoreEstimationVM(
+    private val args: RestoreEstimationArgs,
     private val navigationRouter: NavigationRouter,
     private val copyToClipboard: CopyToClipboardUseCase
 ) : ViewModel() {
@@ -27,8 +26,6 @@ class RestoreBDEstimationVM(
     private fun createState() =
         EstimatedBlockHeightState(
             title = stringRes(R.string.restore_title),
-            subtitle = stringRes(R.string.restore_bd_estimation_subtitle),
-            message = stringRes(R.string.restore_bd_estimation_message).withStyle(),
             logo = null,
             dialogButton =
                 IconButtonState(
@@ -39,7 +36,7 @@ class RestoreBDEstimationVM(
             blockHeightText = stringResByNumber(args.blockHeight, 0),
             copyButton =
                 ButtonState(
-                    text = stringRes(R.string.restore_bd_estimation_copy),
+                    text = stringRes(R.string.wbh_copy),
                     icon = R.drawable.ic_copy,
                     onClick = ::onCopyClick
                 ),

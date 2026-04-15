@@ -5,7 +5,7 @@ import co.electriccoin.zcash.ui.design.component.IconButtonState
 import co.electriccoin.zcash.ui.design.util.StringResource
 import java.time.YearMonth
 
-data class RestoreBDDateState(
+data class RestoreDateState(
     val title: StringResource,
     val subtitle: StringResource,
     val message: StringResource,

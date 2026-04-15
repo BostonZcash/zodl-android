@@ -24,8 +24,6 @@ import androidx.compose.ui.unit.dp
 import co.electriccoin.zcash.ui.design.component.BlankBgScaffold
 import co.electriccoin.zcash.ui.design.component.ZashiButton
 import co.electriccoin.zcash.ui.design.component.ZashiButtonDefaults
-import co.electriccoin.zcash.ui.design.component.ZashiConfirmationBottomSheet
-import co.electriccoin.zcash.ui.design.component.ZashiConfirmationState
 import co.electriccoin.zcash.ui.design.component.ZashiIconButton
 import co.electriccoin.zcash.ui.design.component.ZashiNumberTextField
 import co.electriccoin.zcash.ui.design.component.ZashiSmallTopAppBar
@@ -39,11 +37,7 @@ import co.electriccoin.zcash.ui.design.util.orDark
 import co.electriccoin.zcash.ui.design.util.scaffoldPadding
 
 @Composable
-fun BlockHeightView(
-    state: BlockHeightState,
-    errorState: ZashiConfirmationState? = null,
-) {
-    ZashiConfirmationBottomSheet(errorState)
+fun BlockHeightView(state: BlockHeightState) {
     BlankBgScaffold(
         topBar = { AppBar(state) },
         bottomBar = {},

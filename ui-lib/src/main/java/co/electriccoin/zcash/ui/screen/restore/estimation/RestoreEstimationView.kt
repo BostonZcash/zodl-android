@@ -1,39 +1,36 @@
 @file:Suppress("TooManyFunctions")
 
-package co.electriccoin.zcash.ui.screen.restore.date
+package co.electriccoin.zcash.ui.screen.restore.estimation
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import co.electriccoin.zcash.ui.R
 import co.electriccoin.zcash.ui.common.appbar.ZashiTopAppBarTags
 import co.electriccoin.zcash.ui.design.component.BlankBgScaffold
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.IconButtonState
+import co.electriccoin.zcash.ui.design.component.Spacer
+import co.electriccoin.zcash.ui.design.component.VerticalSpacer
 import co.electriccoin.zcash.ui.design.component.ZashiButton
+import co.electriccoin.zcash.ui.design.component.ZashiButtonDefaults
 import co.electriccoin.zcash.ui.design.component.ZashiIconButton
 import co.electriccoin.zcash.ui.design.component.ZashiSmallTopAppBar
 import co.electriccoin.zcash.ui.design.component.ZashiTopAppBarBackNavigation
-import co.electriccoin.zcash.ui.design.component.ZashiYearMonthWheelDatePicker
 import co.electriccoin.zcash.ui.design.newcomponent.PreviewScreens
 import co.electriccoin.zcash.ui.design.theme.ZcashTheme
 import co.electriccoin.zcash.ui.design.theme.colors.ZashiColors
@@ -42,10 +39,10 @@ import co.electriccoin.zcash.ui.design.util.getValue
 import co.electriccoin.zcash.ui.design.util.orDark
 import co.electriccoin.zcash.ui.design.util.scaffoldPadding
 import co.electriccoin.zcash.ui.design.util.stringRes
-import java.time.YearMonth
+import co.electriccoin.zcash.ui.design.util.withStyle
 
 @Composable
-fun RestoreBDDateView(state: RestoreBDDateState) {
+fun RestoreEstimationView(state: RestoreEstimationState) {
     BlankBgScaffold(
         topBar = { AppBar(state) },
         bottomBar = {},
@@ -64,7 +61,7 @@ fun RestoreBDDateView(state: RestoreBDDateState) {
 
 @Composable
 private fun Content(
-    state: RestoreBDDateState,
+    state: RestoreEstimationState,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -76,54 +73,38 @@ private fun Content(
             color = ZashiColors.Text.textPrimary,
             fontWeight = FontWeight.SemiBold
         )
-        Spacer(Modifier.height(8.dp))
+        VerticalSpacer(8.dp)
         Text(
             text = state.message.getValue(),
             style = ZashiTypography.textSm,
             color = ZashiColors.Text.textPrimary
         )
-        Spacer(Modifier.height(24.dp))
-
-        ZashiYearMonthWheelDatePicker(
-            selection = state.selection,
-            onSelectionChange = state.onYearMonthChange,
+        VerticalSpacer(56.dp)
+        Text(
             modifier = Modifier.fillMaxWidth(),
+            text = state.text.getValue(),
+            color = ZashiColors.Text.textPrimary,
+            style = ZashiTypography.header2,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center
         )
-
-        Spacer(Modifier.height(24.dp))
-
-        Spacer(Modifier.weight(1f))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Image(
-                painterResource(co.electriccoin.zcash.ui.design.R.drawable.ic_info),
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(color = ZashiColors.Utility.Indigo.utilityIndigo700)
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                modifier = Modifier.padding(top = 2.dp),
-                text = state.note.getValue(),
-                style = ZashiTypography.textXs,
-                fontWeight = FontWeight.Medium,
-                color = ZashiColors.Utility.Indigo.utilityIndigo700
-            )
-        }
-
-        Spacer(Modifier.height(24.dp))
-
+        VerticalSpacer(12.dp)
         ZashiButton(
-            state.next,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            state = state.copy,
+            defaultPrimaryColors = ZashiButtonDefaults.tertiaryColors()
+        )
+        VerticalSpacer(24.dp)
+        Spacer(1f)
+        ZashiButton(
+            state = state.restore,
             modifier = Modifier.fillMaxWidth(),
         )
     }
 }
 
 @Composable
-private fun AppBar(state: RestoreBDDateState) {
+private fun AppBar(state: RestoreEstimationState) {
     ZashiSmallTopAppBar(
         title = state.title.getValue(),
         navigationAction = {
@@ -150,22 +131,21 @@ private fun AppBar(state: RestoreBDDateState) {
 @Composable
 private fun Preview() =
     ZcashTheme {
-        RestoreBDDateView(
+        RestoreEstimationView(
             state =
-                RestoreBDDateState(
+                RestoreEstimationState(
                     title = stringRes("Restore"),
-                    subtitle = stringRes("First Wallet Transaction"),
+                    subtitle = stringRes("Estimated Block Height"),
                     message =
                         stringRes(
-                            "Decide how far Zashi should resync. " +
-                                "Enter a date before your first received transaction."
-                        ),
-                    note = stringRes("If you're not sure, choose an earlier date."),
-                    next = ButtonState(stringRes("Estimate")) {},
+                            "Zashi will scan and recover all transactions made after the " +
+                                "following block number."
+                        ).withStyle(),
+                    restore = ButtonState(stringRes("Estimate")) {},
                     dialogButton = IconButtonState(R.drawable.ic_help) {},
                     onBack = {},
-                    onYearMonthChange = {},
-                    selection = YearMonth.now()
+                    text = stringRes("123456"),
+                    copy = ButtonState(stringRes("Copy"), icon = R.drawable.ic_copy) {}
                 )
         )
     }

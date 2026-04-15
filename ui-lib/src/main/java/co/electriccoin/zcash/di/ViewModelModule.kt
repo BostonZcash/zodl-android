@@ -47,16 +47,15 @@ import co.electriccoin.zcash.ui.screen.pay.PayVM
 import co.electriccoin.zcash.ui.screen.qrcode.QrCodeVM
 import co.electriccoin.zcash.ui.screen.receive.ReceiveVM
 import co.electriccoin.zcash.ui.screen.request.viewmodel.RequestVM
-import co.electriccoin.zcash.ui.screen.restore.date.RestoreBDDateVM
-import co.electriccoin.zcash.ui.screen.restore.estimation.RestoreBDEstimationVM
-import co.electriccoin.zcash.ui.screen.restore.height.RestoreBDHeightVM
+import co.electriccoin.zcash.ui.screen.restore.date.RestoreDateVM
+import co.electriccoin.zcash.ui.screen.restore.estimation.RestoreEstimationVM
+import co.electriccoin.zcash.ui.screen.restore.height.RestoreHeightVM
 import co.electriccoin.zcash.ui.screen.restore.seed.RestoreSeedVM
 import co.electriccoin.zcash.ui.screen.restore.tor.RestoreTorVM
-import co.electriccoin.zcash.ui.screen.restoresuccess.RestoreSuccessViewModel
-import co.electriccoin.zcash.ui.screen.resync.confirm.ConfirmResyncVM
-import co.electriccoin.zcash.ui.screen.resync.date.ResyncBDDateVM
-import co.electriccoin.zcash.ui.screen.resync.estimation.ResyncBDEstimationVM
-import co.electriccoin.zcash.ui.screen.resync.height.ResyncBlockHeightVM
+import co.electriccoin.zcash.ui.screen.resync.confirm.ResyncConfirmVM
+import co.electriccoin.zcash.ui.screen.resync.date.ResyncDateVM
+import co.electriccoin.zcash.ui.screen.resync.estimation.ResyncEstimationVM
+import co.electriccoin.zcash.ui.screen.resync.height.ResyncHeightVM
 import co.electriccoin.zcash.ui.screen.reviewtransaction.ReviewTransactionVM
 import co.electriccoin.zcash.ui.screen.scan.ScanGenericAddressVM
 import co.electriccoin.zcash.ui.screen.scan.ScanZashiAddressVM
@@ -105,7 +104,6 @@ val viewModelModule =
         viewModelOf(::MoreVM)
         viewModelOf(::AdvancedSettingsVM)
         viewModelOf(::SupportViewModel)
-        viewModelOf(::RestoreSuccessViewModel)
         viewModelOf(::WhatsNewViewModel)
         viewModelOf(::ChooseServerVM)
         viewModelOf(::ReceiveVM)
@@ -136,13 +134,13 @@ val viewModelModule =
         viewModelOf(::CrashReportingViewModel)
         viewModelOf(::BalanceWidgetVM)
         viewModelOf(::HomeVM)
-        viewModelOf(::RestoreBDHeightVM)
-        viewModelOf(::RestoreBDDateVM)
-        viewModelOf(::RestoreBDEstimationVM)
-        viewModelOf(::ConfirmResyncVM)
-        viewModelOf(::ResyncBDDateVM)
-        viewModelOf(::ResyncBDEstimationVM)
-        viewModelOf(::ResyncBlockHeightVM)
+        viewModelOf(::RestoreHeightVM)
+        viewModelOf(::RestoreDateVM)
+        viewModelOf(::RestoreEstimationVM)
+        viewModelOf(::ResyncConfirmVM)
+        viewModelOf(::ResyncDateVM)
+        viewModelOf(::ResyncEstimationVM)
+        viewModelOf(::ResyncHeightVM)
         viewModelOf(::ShieldFundsInfoVM)
         viewModelOf(::WalletBackupInfoViewModel)
         viewModelOf(::ExchangeRateSettingsVM)

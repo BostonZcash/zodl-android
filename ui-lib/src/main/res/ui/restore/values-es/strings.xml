@@ -14,20 +14,8 @@
     <string name="restore_bd_height_btn">Estimar mi altura de bloque</string>
     <string name="restore_bd_restore_btn">Restaurar</string>
 
-    <string name="restore_bd_subtitle">Altura de Cumpleaños de la Billetera</string>
-    <string name="restore_bd_message">Ingresar la Altura de Cumpleaños de tu billetera ayuda a acelerar el proceso de restauración.</string>
-    <string name="restore_bd_text_field_title">Altura de Bloque</string>
-    <string name="restore_bd_text_field_hint">Ingresa un número</string>
-    <string name="restore_bd_text_field_note">La Altura de Cumpleaños de la Billetera es el momento en que se creó tu billetera.</string>
+    <string name="restore_bd_date_message">Decide hasta dónde debe escanear Zodl. Ingresa una fecha anterior a tu primera transacción recibida. Si no estás seguro/a, elige una fecha anterior.</string>
 
-    <string name="restore_bd_date_subtitle">Primera Transacción de la Billetera</string>
-    <string name="restore_bd_date_message">Ingresar la altura de bloque en la que se creó tu billetera reduce la cantidad de bloques que deben escanearse para restaurarla.</string>
-    <string name="restore_bd_date_note">Si no estás seguro, elige una fecha anterior.</string>
-    <string name="restore_bd_date_next">Siguiente</string>
-
-    <string name="restore_bd_estimation_subtitle">Altura de Bloque Estimada</string>
-    <string name="restore_bd_estimation_message">Zodl escaneará y recuperará todas las transacciones realizadas después del siguiente número de bloque.</string>
-    <string name="restore_bd_estimation_copy">Copiar</string>
     <string name="restore_bd_estimation_restore">Restaurar</string>
 
     <string name="restore_seed_warning_suggestions">Esta palabra no está en el diccionario de frases de recuperación. Por favor selecciona la correcta de las sugerencias.</string>
@@ -38,14 +26,9 @@
     <string name="restore_tor_checkbox_subtitle">Redirige tu conexión a través de la red Tor para mayor anonimato y protección de privacidad.</string>
 
     <string name="resync_title">Resincronizar Billetera</string>
-    <string name="resync_bd_date_subtitle">Primera Transacción de Billetera</string>
-    <string name="resync_bd_date_message">Decide hasta dónde debe resincronizarse Zodl. Ingresa una fecha anterior a tu primera transacción recibida.</string>
-    <string name="resync_bd_date_note">Si no estás seguro/a, elige una fecha anterior.</string>
-    <string name="resync_bd_date_next">Siguiente</string>
+    <string name="resync_bd_date_message">Decide hasta dónde debe resincronizarse Zodl. Ingresa una fecha anterior a tu primera transacción recibida. Si no estás seguro/a, elige una fecha anterior.</string>
 
-    <string name="resync_bd_estimation_subtitle">Altura de Bloque Estimada</string>
     <string name="resync_bd_estimation_message">Tu billetera se resincronizará desde %1$s (%2$s bloques). Zodl escaneará y recuperará todas las transacciones realizadas después del siguiente número de bloque.</string>
-    <string name="resync_bd_estimation_btn">Confirmar</string>
 
     <string name="confirm_resync_title">Confirmar Resincronización</string>
     <string name="confirm_resync_subtitle">Resincroniza la billetera actual sin restablecer la app. Esto puede usarse para solucionar problemas que normalmente requerirían restaurar tu billetera como corregir tu balance de Keystone.</string>
@@ -54,8 +37,9 @@
     <string name="confirm_resync_change">Cambiar</string>
     <string name="confirm_resync_confirm">Confirmar</string>
 
-    <string name="resync_wbh_subtitle">Altura de Cumpleaños de la Billetera</string>
-    <string name="resync_wbh_message">Ingresar la Altura de Cumpleaños de tu billetera ayuda a acelerar el proceso de resincronización.</string>
-    <string name="resync_wbh_confirm_button">Confirmar</string>
+<string name="resync_wbh_confirm_button">Confirmar</string>
+
+    <string name="resync_confirm_failed_title">Error de resincronización</string>
+    <string name="resync_confirm_failed_message">No se pudo completar la resincronización de la billetera. Inténtalo de nuevo o informa del problema.</string>
 
 </resources>

@@ -1,40 +1,39 @@
 @file:Suppress("TooManyFunctions")
 
-package co.electriccoin.zcash.ui.screen.restore.height
+package co.electriccoin.zcash.ui.screen.restore.date
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import co.electriccoin.zcash.ui.R
 import co.electriccoin.zcash.ui.common.appbar.ZashiTopAppBarTags
 import co.electriccoin.zcash.ui.design.component.BlankBgScaffold
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.IconButtonState
-import co.electriccoin.zcash.ui.design.component.NumberTextFieldState
 import co.electriccoin.zcash.ui.design.component.ZashiButton
-import co.electriccoin.zcash.ui.design.component.ZashiButtonDefaults
 import co.electriccoin.zcash.ui.design.component.ZashiIconButton
-import co.electriccoin.zcash.ui.design.component.ZashiNumberTextField
 import co.electriccoin.zcash.ui.design.component.ZashiSmallTopAppBar
-import co.electriccoin.zcash.ui.design.component.ZashiTextFieldPlaceholder
 import co.electriccoin.zcash.ui.design.component.ZashiTopAppBarBackNavigation
+import co.electriccoin.zcash.ui.design.component.ZashiYearMonthWheelDatePicker
 import co.electriccoin.zcash.ui.design.newcomponent.PreviewScreens
 import co.electriccoin.zcash.ui.design.theme.ZcashTheme
 import co.electriccoin.zcash.ui.design.theme.colors.ZashiColors
@@ -43,9 +42,10 @@ import co.electriccoin.zcash.ui.design.util.getValue
 import co.electriccoin.zcash.ui.design.util.orDark
 import co.electriccoin.zcash.ui.design.util.scaffoldPadding
 import co.electriccoin.zcash.ui.design.util.stringRes
+import java.time.YearMonth
 
 @Composable
-fun RestoreBDHeightView(state: RestoreBDHeightState) {
+fun RestoreDateView(state: RestoreDateState) {
     BlankBgScaffold(
         topBar = { AppBar(state) },
         bottomBar = {},
@@ -64,7 +64,7 @@ fun RestoreBDHeightView(state: RestoreBDHeightState) {
 
 @Composable
 private fun Content(
-    state: RestoreBDHeightState,
+    state: RestoreDateState,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -82,59 +82,48 @@ private fun Content(
             style = ZashiTypography.textSm,
             color = ZashiColors.Text.textPrimary
         )
-        Spacer(Modifier.height(32.dp))
-        Text(
-            text = state.textFieldTitle.getValue(),
-            style = ZashiTypography.textSm,
-            color = ZashiColors.Inputs.Default.label,
-            fontWeight = FontWeight.Medium
-        )
-        Spacer(Modifier.height(6.dp))
-        ZashiNumberTextField(
-            state = state.blockHeight,
+        Spacer(Modifier.height(24.dp))
+
+        ZashiYearMonthWheelDatePicker(
+            selection = state.selection,
+            onSelectionChange = state.onYearMonthChange,
             modifier = Modifier.fillMaxWidth(),
-            placeholder = {
-                ZashiTextFieldPlaceholder(
-                    state.textFieldHint
-                )
-            },
-            keyboardOptions =
-                KeyboardOptions(
-                    capitalization = KeyboardCapitalization.None,
-                    autoCorrectEnabled = false,
-                    imeAction = ImeAction.Done,
-                    keyboardType = KeyboardType.Number
-                ),
         )
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = state.textFieldNote.getValue(),
-            style = ZashiTypography.textXs,
-            color = ZashiColors.Text.textTertiary
-        )
+
+        Spacer(Modifier.height(24.dp))
+
         Spacer(Modifier.weight(1f))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painterResource(co.electriccoin.zcash.ui.design.R.drawable.ic_info),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(color = ZashiColors.Utility.Indigo.utilityIndigo700)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                modifier = Modifier.padding(top = 2.dp),
+                text = state.note.getValue(),
+                style = ZashiTypography.textXs,
+                fontWeight = FontWeight.Medium,
+                color = ZashiColors.Utility.Indigo.utilityIndigo700
+            )
+        }
+
         Spacer(Modifier.height(24.dp))
 
         ZashiButton(
-            state.estimate,
+            state.next,
             modifier = Modifier.fillMaxWidth(),
-            defaultPrimaryColors = ZashiButtonDefaults.secondaryColors()
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        ZashiButton(
-            state.restore,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .testTag(RestoreBDHeightTags.RESTORE_BTN),
         )
     }
 }
 
 @Composable
-private fun AppBar(state: RestoreBDHeightState) {
+private fun AppBar(state: RestoreDateState) {
     ZashiSmallTopAppBar(
         title = state.title.getValue(),
         navigationAction = {
@@ -144,8 +133,10 @@ private fun AppBar(state: RestoreBDHeightState) {
             )
         },
         regularActions = {
-            ZashiIconButton(state.dialogButton, modifier = Modifier.size(40.dp))
-            Spacer(Modifier.width(20.dp))
+            state.dialogButton?.let {
+                ZashiIconButton(it, modifier = Modifier.size(40.dp))
+                Spacer(Modifier.width(20.dp))
+            }
         },
         colors =
             ZcashTheme.colors.topAppBarColors orDark
@@ -159,24 +150,22 @@ private fun AppBar(state: RestoreBDHeightState) {
 @Composable
 private fun Preview() =
     ZcashTheme {
-        RestoreBDHeightView(
+        RestoreDateView(
             state =
-                RestoreBDHeightState(
+                RestoreDateState(
                     title = stringRes("Restore"),
-                    subtitle = stringRes("Wallet Birthday Height"),
-                    message = stringRes("Entering your Wallet Birthday Height helps speed up the restore process."),
-                    textFieldTitle = stringRes("Block Height"),
-                    textFieldHint = stringRes("Enter number"),
-                    textFieldNote =
+                    subtitle = stringRes("First Wallet Transaction"),
+                    message =
                         stringRes(
-                            "Wallet Birthday Height is the point in time when your wallet " +
-                                "was created."
+                            "Decide how far Zashi should resync. " +
+                                "Enter a date before your first received transaction."
                         ),
-                    onBack = {},
+                    note = stringRes("If you're not sure, choose an earlier date."),
+                    next = ButtonState(stringRes("Estimate")) {},
                     dialogButton = IconButtonState(R.drawable.ic_help) {},
-                    blockHeight = NumberTextFieldState {},
-                    estimate = ButtonState(stringRes("Estimate")) {},
-                    restore = ButtonState(stringRes("Restore")) {}
+                    onBack = {},
+                    onYearMonthChange = {},
+                    selection = YearMonth.now()
                 )
         )
     }

@@ -24,8 +24,6 @@ import co.electriccoin.zcash.ui.design.component.Spacer
 import co.electriccoin.zcash.ui.design.component.VerticalSpacer
 import co.electriccoin.zcash.ui.design.component.ZashiButton
 import co.electriccoin.zcash.ui.design.component.ZashiButtonDefaults
-import co.electriccoin.zcash.ui.design.component.ZashiConfirmationBottomSheet
-import co.electriccoin.zcash.ui.design.component.ZashiConfirmationState
 import co.electriccoin.zcash.ui.design.component.ZashiIconButton
 import co.electriccoin.zcash.ui.design.component.ZashiSmallTopAppBar
 import co.electriccoin.zcash.ui.design.component.ZashiTopAppBarBackNavigation
@@ -37,11 +35,7 @@ import co.electriccoin.zcash.ui.design.util.orDark
 import co.electriccoin.zcash.ui.design.util.scaffoldPadding
 
 @Composable
-fun EstimatedBlockHeightView(
-    state: EstimatedBlockHeightState,
-    errorState: ZashiConfirmationState? = null,
-) {
-    ZashiConfirmationBottomSheet(errorState)
+fun EstimatedBlockHeightView(state: EstimatedBlockHeightState) {
     BlankBgScaffold(
         topBar = { AppBar(state) },
         bottomBar = {},

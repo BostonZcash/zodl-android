@@ -137,6 +137,7 @@ private fun KeepOpenViewPreview() =
     ZcashTheme {
         KeepOpenView(
             KeepOpenState(
+                description = stringRes(R.string.keep_open_restore_description),
                 subtitle = stringRes(R.string.keep_open_restore_subtitle),
                 disclaimer = ZashiDisclaimerState.warning(stringRes(R.string.keep_open_keystone_warning)),
                 checkboxLabel = stringRes(R.string.keep_open_restore_checkbox),

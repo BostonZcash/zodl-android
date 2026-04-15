@@ -53,7 +53,7 @@ fun KeystoneConnectedView(state: KeystoneConnectedState) {
                 Spacer(Modifier.weight(1f))
                 Image(
                     modifier = Modifier.size(120.dp),
-                    painter = painterResource(R.drawable.img_success_dialog),
+                    painter = painterResource(R.drawable.ic_face_star),
                     contentDescription = null,
                 )
                 Spacer(Modifier.height(32.dp))

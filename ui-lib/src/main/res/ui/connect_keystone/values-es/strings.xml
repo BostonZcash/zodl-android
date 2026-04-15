@@ -6,7 +6,7 @@
     <string name="connect_keystone_item_1">Desbloquea tu Keystone</string>
     <string name="connect_keystone_item_2">Toca el ícono del menú</string>
     <string name="connect_keystone_item_3">Selecciona Conectar Billetera de Software</string>
-    <string name="connect_keystone_item_4">Elige la app Zodl (Zashi) y escanea el código QR</string>
+    <string name="connect_keystone_item_4">Elige la app Zodl y escanea el código QR</string>
     <string name="connect_keystone_item_title">Instrucciones:</string>
     <string name="connect_keystone_positive">Listo para Escanear</string>
 
@@ -23,16 +23,11 @@
 
     <!-- First Transaction -->
     <string name="keystone_first_transaction_title">Conectar Billetera de Hardware</string>
-    <string name="keystone_first_transaction_subtitle">Primera Transacción de Billetera</string>
     <string name="keystone_first_transaction_message">Ingresar la altura de bloque en la que se creó tu billetera garantiza que se escanee el número correcto de bloques. Si no estás seguro/a, elige una fecha anterior.</string>
     <string name="keystone_first_transaction_note">Si no estás seguro/a, elige una fecha anterior.</string>
-    <string name="keystone_first_transaction_next">Siguiente</string>
-    <string name="keystone_first_transaction_enter_height">Ingresar altura de bloque</string>
 
     <!-- First Transaction Estimation -->
     <string name="keystone_first_transaction_estimation_title">Conectar Billetera de Hardware</string>
-    <string name="keystone_first_transaction_estimation_subtitle">Altura de Bloque Estimada</string>
-    <string name="keystone_first_transaction_estimation_message">Zodl escaneará las transacciones a partir de %1$s (%2$s bloques).</string>
     <string name="keystone_first_transaction_estimation_confirm">Conectar</string>
 
     <!-- Hardware Wallet Explainer -->
@@ -55,7 +50,5 @@
 
     <!-- Wallet Birthday Height -->
     <string name="keystone_wbh_title">Conectar Billetera de Hardware</string>
-    <string name="keystone_wbh_subtitle">Altura de Cumpleaños de la Billetera</string>
-    <string name="keystone_wbh_message">Ingresa la altura de bloque en la que tu billetera fue utilizada por primera vez. Esto ayuda a acelerar el proceso de escaneo.</string>
     <string name="keystone_wbh_confirm_button">Conectar</string>
 </resources>

@@ -5,7 +5,7 @@ import co.electriccoin.zcash.ui.design.component.IconButtonState
 import co.electriccoin.zcash.ui.design.component.NumberTextFieldState
 import co.electriccoin.zcash.ui.design.util.StringResource
 
-data class RestoreBDHeightState(
+data class RestoreHeightState(
     val title: StringResource,
     val subtitle: StringResource,
     val message: StringResource,

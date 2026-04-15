@@ -1,15 +1,18 @@
 package co.electriccoin.zcash.ui.screen.resync.estimation
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.sdk.model.BlockHeight
-import cash.z.ecc.sdk.ANDROID_STATE_FLOW_TIMEOUT
 import co.electriccoin.zcash.ui.NavigationRouter
 import co.electriccoin.zcash.ui.R
+import co.electriccoin.zcash.ui.common.model.LceState
+import co.electriccoin.zcash.ui.common.model.groupLce
+import co.electriccoin.zcash.ui.common.model.mutableLce
+import co.electriccoin.zcash.ui.common.model.stateIn
+import co.electriccoin.zcash.ui.common.model.withLce
 import co.electriccoin.zcash.ui.common.usecase.ConfirmResyncUseCase
 import co.electriccoin.zcash.ui.common.usecase.CopyToClipboardUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetResyncDataFromHeightUseCase
-import co.electriccoin.zcash.ui.common.usecase.ShowErrorUseCase
+import co.electriccoin.zcash.ui.common.usecase.ResyncErrorMapperUseCase
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.IconButtonState
 import co.electriccoin.zcash.ui.design.util.StringResourceColor
@@ -20,42 +23,40 @@ import co.electriccoin.zcash.ui.design.util.styledStringResource
 import co.electriccoin.zcash.ui.design.util.withStyle
 import co.electriccoin.zcash.ui.screen.common.EstimatedBlockHeightState
 import co.electriccoin.zcash.ui.screen.heightinfo.HeightInfoArgs
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.WhileSubscribed
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.combine
 import java.time.YearMonth
 
-class ResyncBDEstimationVM(
-    private val args: ResyncBDEstimationArgs,
+class ResyncEstimationVM(
+    private val args: ResyncEstimationArgs,
     private val navigationRouter: NavigationRouter,
     private val copyToClipboard: CopyToClipboardUseCase,
     private val getResyncDataFromHeight: GetResyncDataFromHeightUseCase,
     private val confirmResync: ConfirmResyncUseCase,
-    private val showError: ShowErrorUseCase,
+    private val errorStateMapper: ResyncErrorMapperUseCase,
 ) : ViewModel() {
-    private val yearMonthFlow: Flow<YearMonth> =
-        flow {
-            emit(getResyncDataFromHeight(BlockHeight.new(args.blockHeight)))
+    private val initLce = mutableLce<YearMonth>()
+    private val confirmLce = mutableLce<Unit>()
+
+    init {
+        initLce.execute {
+            getResyncDataFromHeight(BlockHeight.new(args.blockHeight))
         }
+    }
 
-    val state: StateFlow<EstimatedBlockHeightState?> =
-        yearMonthFlow
-            .map { createState(it) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(ANDROID_STATE_FLOW_TIMEOUT),
-                initialValue = null
-            )
+    val state: StateFlow<LceState<EstimatedBlockHeightState>> =
+        combine(
+            initLce.state,
+            confirmLce.state,
+        ) { init, confirm ->
+            val yearMonth = init.success ?: return@combine null
+            createState(yearMonth, isLoading = confirm.loading)
+        }.withLce(groupLce(initLce, confirmLce), errorStateMapper::mapToState)
+            .stateIn(this)
 
-    private fun createState(yearMonth: YearMonth): EstimatedBlockHeightState =
+    private fun createState(yearMonth: YearMonth, isLoading: Boolean): EstimatedBlockHeightState =
         EstimatedBlockHeightState(
             title = stringRes(R.string.resync_title),
-            subtitle = stringRes(R.string.resync_bd_estimation_subtitle),
             message =
                 styledStringResource(
                     resource = R.string.resync_bd_estimation_message,
@@ -87,13 +88,14 @@ class ResyncBDEstimationVM(
             blockHeightText = stringResByNumber(args.blockHeight, 0),
             copyButton =
                 ButtonState(
-                    text = stringRes(R.string.restore_bd_estimation_copy),
+                    text = stringRes(R.string.wbh_copy),
                     icon = R.drawable.ic_copy,
                     onClick = ::onCopyClick
                 ),
             primaryButton =
                 ButtonState(
                     text = stringRes(R.string.confirm_resync_confirm),
+                    isLoading = isLoading,
                     onClick = ::onConfirmClick,
                 ),
         )
@@ -104,15 +106,10 @@ class ResyncBDEstimationVM(
         )
     }
 
-    private fun onConfirmClick() {
-        viewModelScope.launch {
-            try {
-                confirmResync(BlockHeight.new(args.blockHeight))
-            } catch (_: Exception) {
-                showError()
-            }
+    private fun onConfirmClick() =
+        confirmLce.execute {
+            confirmResync(BlockHeight.new(args.blockHeight))
         }
-    }
 
     private fun onInfoClick() = navigationRouter.forward(HeightInfoArgs)
 

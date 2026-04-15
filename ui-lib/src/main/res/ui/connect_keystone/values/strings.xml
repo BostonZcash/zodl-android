@@ -6,7 +6,7 @@
     <string name="connect_keystone_item_1">Unlock your Keystone</string>
     <string name="connect_keystone_item_2">Tap the menu icon</string>
     <string name="connect_keystone_item_3">Tap on Connect Software Wallet</string>
-    <string name="connect_keystone_item_4">Select Zodl (Zashi) app and scan QR code</string>
+    <string name="connect_keystone_item_4">Select Zodl app and scan QR code</string>
     <string name="connect_keystone_item_title">Instructions:</string>
     <string name="connect_keystone_positive">Ready to Scan</string>
 
@@ -23,16 +23,11 @@
 
     <!-- First Transaction -->
     <string name="keystone_first_transaction_title">Connect Hardware Wallet</string>
-    <string name="keystone_first_transaction_subtitle">First Wallet Transaction</string>
     <string name="keystone_first_transaction_message">Entering the block height at which your wallet was created ensures that correct number of blocks will be scanned. If you\’re not sure, choose an earlier date.</string>
     <string name="keystone_first_transaction_note">If you\’re not sure, choose an earlier date.</string>
-    <string name="keystone_first_transaction_next">Next</string>
-    <string name="keystone_first_transaction_enter_height">Enter block height</string>
 
     <!-- First Transaction Estimation -->
     <string name="keystone_first_transaction_estimation_title">Connect Hardware Wallet</string>
-    <string name="keystone_first_transaction_estimation_subtitle">Estimated Block Height</string>
-    <string name="keystone_first_transaction_estimation_message">Zodl will scan for transactions starting from %1$s (%2$s blocks).</string>
     <string name="keystone_first_transaction_estimation_confirm">Connect</string>
 
     <!-- Hardware Wallet Explainer -->
@@ -55,7 +50,5 @@
 
     <!-- Wallet Birthday Height -->
     <string name="keystone_wbh_title">Connect Hardware Wallet</string>
-    <string name="keystone_wbh_subtitle">Wallet Birthday Height</string>
-    <string name="keystone_wbh_message">Enter the block height at which your wallet was first used. This helps speed up the scanning process.</string>
     <string name="keystone_wbh_confirm_button">Connect</string>
 </resources>

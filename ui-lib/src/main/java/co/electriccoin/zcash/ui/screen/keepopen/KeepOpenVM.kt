@@ -45,6 +45,7 @@ class KeepOpenVM(
         when (flow) {
             KeepOpenFlow.RESTORE -> {
                 KeepOpenState(
+                    description = stringRes(R.string.keep_open_restore_description),
                     subtitle = stringRes(R.string.keep_open_restore_subtitle),
                     disclaimer = getDisclaimer(R.string.keep_open_restore_warning),
                     checkboxLabel = stringRes(R.string.keep_open_restore_checkbox),
@@ -60,6 +61,7 @@ class KeepOpenVM(
 
             KeepOpenFlow.RESYNC -> {
                 KeepOpenState(
+                    description = stringRes(R.string.keep_open_resync_description),
                     subtitle = stringRes(R.string.keep_open_resync_subtitle),
                     disclaimer = getDisclaimer(R.string.keep_open_resync_warning),
                     checkboxLabel = stringRes(R.string.keep_open_resync_checkbox),
@@ -75,6 +77,7 @@ class KeepOpenVM(
 
             KeepOpenFlow.KEYSTONE -> {
                 KeepOpenState(
+                    description = stringRes(R.string.keep_open_keystone_description),
                     subtitle = stringRes(R.string.keep_open_keystone_subtitle),
                     disclaimer = getDisclaimer(R.string.keep_open_keystone_warning),
                     checkboxLabel = stringRes(R.string.keep_open_keystone_checkbox),

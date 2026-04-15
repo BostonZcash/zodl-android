@@ -12,40 +12,22 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 fun <T> ViewModel.mutableLce(initial: Lce<T>? = null) = MutableLce<T>(viewModelScope, initial)
 
-fun <T> Flow<T>.stateIn(
-    viewModel: ViewModel,
-    initialValue: T,
-    started: SharingStarted = SharingStarted.WhileSubscribed(ANDROID_STATE_FLOW_TIMEOUT),
-): StateFlow<T> = stateIn(viewModel.viewModelScope, started, initialValue)
-
-fun <T> Flow<T>.stateIn(
-    viewModel: ViewModel,
-    started: SharingStarted = SharingStarted.WhileSubscribed(ANDROID_STATE_FLOW_TIMEOUT),
-): StateFlow<T?> = stateIn(viewModel.viewModelScope, started, null)
-
-fun <T> Flow<T>.stateIn(
-    scope: CoroutineScope,
-    started: SharingStarted = SharingStarted.WhileSubscribed(ANDROID_STATE_FLOW_TIMEOUT),
-): StateFlow<T?> = stateIn(scope, started, null)
-
-fun <T> MutableLce<T>.guardLoading(exec: () -> Unit) {
-    if (!state.value.loading) {
-        exec()
-    }
-}
-
 class MutableLce<T>(
     private val scope: CoroutineScope,
     initial: Lce<T>? = null,
-) {
+) : LceSource {
     private val _state = MutableStateFlow(initial ?: Lce())
     val state: StateFlow<Lce<T>> = _state.asStateFlow()
+
+    override val loading: Flow<Boolean> = state.map { it.loading }
+    override val error: Flow<LceContent.Error?> = state.map { it.error }
 
     private var job: Job? = null
 
@@ -75,5 +57,11 @@ class MutableLce<T>(
                     }
                 }
             }
+    }
+}
+
+fun <T> MutableLce<T>.guardLoading(exec: () -> Unit) {
+    if (!state.value.loading) {
+        exec()
     }
 }

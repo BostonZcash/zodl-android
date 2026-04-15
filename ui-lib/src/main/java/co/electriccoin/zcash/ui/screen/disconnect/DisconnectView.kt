@@ -33,6 +33,7 @@ import co.electriccoin.zcash.ui.design.component.ButtonStyle
 import co.electriccoin.zcash.ui.design.component.Spacer
 import co.electriccoin.zcash.ui.design.component.ZashiBulletText
 import co.electriccoin.zcash.ui.design.component.ZashiButton
+import co.electriccoin.zcash.ui.design.component.ZashiConfirmationBottomSheet
 import co.electriccoin.zcash.ui.design.component.ZashiSmallTopAppBar
 import co.electriccoin.zcash.ui.design.component.ZashiTopAppBarBackNavigation
 import co.electriccoin.zcash.ui.design.newcomponent.PreviewScreens
@@ -62,7 +63,7 @@ fun DisconnectView(state: DisconnectState) {
         }
     )
 
-    co.electriccoin.zcash.ui.design.component.ZashiConfirmationBottomSheet(
+    ZashiConfirmationBottomSheet(
         state = state.confirmationDialog,
     )
 }

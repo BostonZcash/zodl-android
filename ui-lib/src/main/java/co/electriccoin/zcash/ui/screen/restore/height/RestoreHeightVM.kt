@@ -13,7 +13,7 @@ import co.electriccoin.zcash.ui.design.component.NumberTextFieldInnerState
 import co.electriccoin.zcash.ui.design.component.NumberTextFieldState
 import co.electriccoin.zcash.ui.design.util.stringRes
 import co.electriccoin.zcash.ui.screen.common.BlockHeightState
-import co.electriccoin.zcash.ui.screen.restore.date.RestoreBDDateArgs
+import co.electriccoin.zcash.ui.screen.restore.date.RestoreDateArgs
 import co.electriccoin.zcash.ui.screen.restore.info.SeedInfo
 import co.electriccoin.zcash.ui.screen.restore.tor.RestoreTorArgs
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,8 +24,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
-class RestoreBDHeightVM(
-    private val restoreBDHeight: RestoreBDHeight,
+class RestoreHeightVM(
+    private val restoreHeight: RestoreHeight,
     private val navigationRouter: NavigationRouter,
 ) : ViewModel() {
     private val blockHeightText = MutableStateFlow(NumberTextFieldInnerState())
@@ -52,12 +52,7 @@ class RestoreBDHeightVM(
 
         return BlockHeightState(
             title = stringRes(R.string.restore_title),
-            subtitle = stringRes(R.string.restore_bd_subtitle),
-            message = stringRes(R.string.restore_bd_message),
             logo = null,
-            textFieldTitle = stringRes(R.string.restore_bd_text_field_title),
-            textFieldHint = stringRes(R.string.restore_bd_text_field_hint),
-            textFieldNote = stringRes(R.string.restore_bd_text_field_note),
             onBack = ::onBack,
             dialogButton =
                 IconButtonState(
@@ -76,12 +71,12 @@ class RestoreBDHeightVM(
         )
     }
 
-    private fun onEstimateClick() = navigationRouter.forward(RestoreBDDateArgs(seed = restoreBDHeight.seed))
+    private fun onEstimateClick() = navigationRouter.forward(RestoreDateArgs(seed = restoreHeight.seed))
 
     private fun onRestoreClick() {
         navigationRouter.forward(
             RestoreTorArgs(
-                seed = restoreBDHeight.seed.trim(),
+                seed = restoreHeight.seed.trim(),
                 blockHeight = blockHeightText.value.amount?.toLong() ?: return
             )
         )

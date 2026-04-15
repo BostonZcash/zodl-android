@@ -5,7 +5,7 @@ import co.electriccoin.zcash.ui.design.component.IconButtonState
 import co.electriccoin.zcash.ui.design.util.StringResource
 import co.electriccoin.zcash.ui.design.util.StyledStringResource
 
-data class RestoreBDEstimationState(
+data class RestoreEstimationState(
     val title: StringResource,
     val subtitle: StringResource,
     val message: StyledStringResource,
