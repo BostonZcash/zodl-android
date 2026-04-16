@@ -49,7 +49,7 @@ import co.electriccoin.zcash.ui.screen.balances.BalanceTag
 import co.electriccoin.zcash.ui.screen.feedback.FeedbackArgs
 import co.electriccoin.zcash.ui.screen.home.HomeTags
 import co.electriccoin.zcash.ui.screen.more.MoreArgs
-import co.electriccoin.zcash.ui.screen.restore.height.RestoreBDHeightTags
+import co.electriccoin.zcash.ui.screen.restore.height.RestoreHeightTags
 import co.electriccoin.zcash.ui.screen.restore.seed.RestoreSeedTag
 import co.electriccoin.zcash.ui.screen.send.SendTag
 import co.electriccoin.zcash.ui.screen.walletbackup.WalletBackup
@@ -262,11 +262,11 @@ class ScreenshotTest : UiTestPrerequisites() {
         takeScreenshot(tag, "Import 3")
 
         composeTestRule.waitUntilAtLeastOneExists(
-            hasTestTag(RestoreBDHeightTags.RESTORE_BTN),
+            hasTestTag(RestoreHeightTags.RESTORE_BTN),
             timeoutMillis = DEFAULT_TIMEOUT_MILLISECONDS
         )
 
-        composeTestRule.onNodeWithTag(RestoreBDHeightTags.RESTORE_BTN).also {
+        composeTestRule.onNodeWithTag(RestoreHeightTags.RESTORE_BTN).also {
             it.performScrollTo()
             it.performClick()
         }

@@ -14,6 +14,11 @@ import co.electriccoin.zcash.ui.screen.advancedsettings.debug.db.DebugDBVM
 import co.electriccoin.zcash.ui.screen.balances.BalanceWidgetVM
 import co.electriccoin.zcash.ui.screen.balances.spendable.SpendableBalanceVM
 import co.electriccoin.zcash.ui.screen.chooseserver.ChooseServerVM
+import co.electriccoin.zcash.ui.screen.connectkeystone.connect.KeystoneConnectVM
+import co.electriccoin.zcash.ui.screen.connectkeystone.date.KeystoneDateVM
+import co.electriccoin.zcash.ui.screen.connectkeystone.estimation.KeystoneEstimationVM
+import co.electriccoin.zcash.ui.screen.connectkeystone.height.KeystoneHeightVM
+import co.electriccoin.zcash.ui.screen.connectkeystone.neworactive.KeystoneNewOrActiveVM
 import co.electriccoin.zcash.ui.screen.contact.AddGenericABContactVM
 import co.electriccoin.zcash.ui.screen.contact.AddZashiABContactVM
 import co.electriccoin.zcash.ui.screen.contact.UpdateGenericABContactVM
@@ -36,20 +41,21 @@ import co.electriccoin.zcash.ui.screen.hotfix.enhancement.EnhancementHotfixVM
 import co.electriccoin.zcash.ui.screen.hotfix.ephemeral.EphemeralHotfixVM
 import co.electriccoin.zcash.ui.screen.insufficientfunds.InsufficientFundsVM
 import co.electriccoin.zcash.ui.screen.integrations.IntegrationsVM
+import co.electriccoin.zcash.ui.screen.keepopen.KeepOpenVM
 import co.electriccoin.zcash.ui.screen.more.MoreVM
 import co.electriccoin.zcash.ui.screen.pay.PayVM
 import co.electriccoin.zcash.ui.screen.qrcode.QrCodeVM
 import co.electriccoin.zcash.ui.screen.receive.ReceiveVM
 import co.electriccoin.zcash.ui.screen.request.viewmodel.RequestVM
-import co.electriccoin.zcash.ui.screen.restore.date.RestoreBDDateVM
-import co.electriccoin.zcash.ui.screen.restore.estimation.RestoreBDEstimationVM
-import co.electriccoin.zcash.ui.screen.restore.height.RestoreBDHeightVM
+import co.electriccoin.zcash.ui.screen.restore.date.RestoreDateVM
+import co.electriccoin.zcash.ui.screen.restore.estimation.RestoreEstimationVM
+import co.electriccoin.zcash.ui.screen.restore.height.RestoreHeightVM
 import co.electriccoin.zcash.ui.screen.restore.seed.RestoreSeedVM
 import co.electriccoin.zcash.ui.screen.restore.tor.RestoreTorVM
-import co.electriccoin.zcash.ui.screen.restoresuccess.RestoreSuccessViewModel
-import co.electriccoin.zcash.ui.screen.resync.confirm.ConfirmResyncVM
-import co.electriccoin.zcash.ui.screen.resync.date.ResyncBDDateVM
-import co.electriccoin.zcash.ui.screen.resync.estimation.ResyncBDEstimationVM
+import co.electriccoin.zcash.ui.screen.resync.confirm.ResyncConfirmVM
+import co.electriccoin.zcash.ui.screen.resync.date.ResyncDateVM
+import co.electriccoin.zcash.ui.screen.resync.estimation.ResyncEstimationVM
+import co.electriccoin.zcash.ui.screen.resync.height.ResyncHeightVM
 import co.electriccoin.zcash.ui.screen.reviewtransaction.ReviewTransactionVM
 import co.electriccoin.zcash.ui.screen.scan.ScanGenericAddressVM
 import co.electriccoin.zcash.ui.screen.scan.ScanZashiAddressVM
@@ -98,7 +104,6 @@ val viewModelModule =
         viewModelOf(::MoreVM)
         viewModelOf(::AdvancedSettingsVM)
         viewModelOf(::SupportViewModel)
-        viewModelOf(::RestoreSuccessViewModel)
         viewModelOf(::WhatsNewViewModel)
         viewModelOf(::ChooseServerVM)
         viewModelOf(::ReceiveVM)
@@ -129,12 +134,13 @@ val viewModelModule =
         viewModelOf(::CrashReportingViewModel)
         viewModelOf(::BalanceWidgetVM)
         viewModelOf(::HomeVM)
-        viewModelOf(::RestoreBDHeightVM)
-        viewModelOf(::RestoreBDDateVM)
-        viewModelOf(::RestoreBDEstimationVM)
-        viewModelOf(::ConfirmResyncVM)
-        viewModelOf(::ResyncBDDateVM)
-        viewModelOf(::ResyncBDEstimationVM)
+        viewModelOf(::RestoreHeightVM)
+        viewModelOf(::RestoreDateVM)
+        viewModelOf(::RestoreEstimationVM)
+        viewModelOf(::ResyncConfirmVM)
+        viewModelOf(::ResyncDateVM)
+        viewModelOf(::ResyncEstimationVM)
+        viewModelOf(::ResyncHeightVM)
         viewModelOf(::ShieldFundsInfoVM)
         viewModelOf(::WalletBackupInfoViewModel)
         viewModelOf(::ExchangeRateSettingsVM)
@@ -175,4 +181,10 @@ val viewModelModule =
         viewModelOf(::RestoreTorVM)
         viewModelOf(::ResetZashiVM)
         viewModelOf(::DisconnectVM)
+        viewModelOf(::KeystoneConnectVM)
+        viewModelOf(::KeystoneNewOrActiveVM)
+        viewModelOf(::KeystoneDateVM)
+        viewModelOf(::KeystoneEstimationVM)
+        viewModelOf(::KeystoneHeightVM)
+        viewModelOf(::KeepOpenVM)
     }

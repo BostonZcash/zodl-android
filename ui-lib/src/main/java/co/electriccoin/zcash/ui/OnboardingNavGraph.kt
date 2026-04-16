@@ -18,12 +18,12 @@ import co.electriccoin.zcash.ui.screen.error.ErrorDialog
 import co.electriccoin.zcash.ui.screen.onboarding.Onboarding
 import co.electriccoin.zcash.ui.screen.onboarding.persistExistingWalletWithSeedPhrase
 import co.electriccoin.zcash.ui.screen.onboarding.view.Onboarding
-import co.electriccoin.zcash.ui.screen.restore.date.RestoreBDDateArgs
-import co.electriccoin.zcash.ui.screen.restore.date.RestoreBDDateScreen
-import co.electriccoin.zcash.ui.screen.restore.estimation.RestoreBDEstimationArgs
-import co.electriccoin.zcash.ui.screen.restore.estimation.RestoreBDEstimationScreen
-import co.electriccoin.zcash.ui.screen.restore.height.AndroidRestoreBDHeight
-import co.electriccoin.zcash.ui.screen.restore.height.RestoreBDHeight
+import co.electriccoin.zcash.ui.screen.restore.date.RestoreDateArgs
+import co.electriccoin.zcash.ui.screen.restore.date.RestoreDateScreen
+import co.electriccoin.zcash.ui.screen.restore.estimation.RestoreEstimationArgs
+import co.electriccoin.zcash.ui.screen.restore.estimation.RestoreEstimationScreen
+import co.electriccoin.zcash.ui.screen.restore.height.AndroidRestoreHeight
+import co.electriccoin.zcash.ui.screen.restore.height.RestoreHeight
 import co.electriccoin.zcash.ui.screen.restore.info.AndroidSeedInfo
 import co.electriccoin.zcash.ui.screen.restore.info.SeedInfo
 import co.electriccoin.zcash.ui.screen.restore.seed.RestoreSeedArgs
@@ -75,9 +75,9 @@ fun NavGraphBuilder.onboardingNavGraph(
             )
         }
         composable<RestoreSeedArgs> { RestoreSeedScreen() }
-        composable<RestoreBDHeight> { AndroidRestoreBDHeight(it.toRoute()) }
-        composable<RestoreBDDateArgs> { RestoreBDDateScreen(it.toRoute()) }
-        composable<RestoreBDEstimationArgs> { RestoreBDEstimationScreen(it.toRoute()) }
+        composable<RestoreHeight> { AndroidRestoreHeight(it.toRoute()) }
+        composable<RestoreDateArgs> { RestoreDateScreen(it.toRoute()) }
+        composable<RestoreEstimationArgs> { RestoreEstimationScreen(it.toRoute()) }
         dialogComposable<SeedInfo> { AndroidSeedInfo() }
         composable<ThirdPartyScan> { AndroidThirdPartyScan() }
         dialogComposable<ErrorDialog> { AndroidErrorDialog() }

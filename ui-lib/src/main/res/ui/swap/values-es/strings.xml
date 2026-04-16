@@ -9,10 +9,9 @@
     <string name="swap_slippage_subtitle">Esta configuración determina la diferencia máxima permitida entre el precio esperado de un swap y el precio real que pagas, lo cual está fuera del control de Zodl.</string>
     <string name="swap_slippage_max_threshold">Por favor, ingresa un slippage máximo de 30%%.</string>
     <string name="swap_slippage_info">Podrías recibir hasta %s menos de lo cotizado.</string>
-    <string name="swap_slippage_low_warning">%1$s El slippage %2$s aumenta la probabilidad de que tu swap no se complete y sea reembolsado. Considera usar %3$s, especialmente para montos mayores.</string>
-    <string name="swap_slippage_low_warning_1">Advertencia:</string>
-    <string name="swap_slippage_low_warning_2">menor al %s%%</string>
-    <string name="swap_slippage_low_warning_3">%s%% o más</string>
+    <string name="swap_slippage_low_warning">El slippage %1$s aumenta la probabilidad de que tu swap no se complete y sea reembolsado. Considera usar %2$s, especialmente para montos mayores.</string>
+    <string name="swap_slippage_low_warning_1">menor al %s%%</string>
+    <string name="swap_slippage_low_warning_2">%s%% o más</string>
     <string name="pay_slippage_info">Podrías pagar hasta %s más, además de las comisiones de transacción.</string>
     <string name="swap_title">Swap</string>
     <string name="swap_from">De</string>

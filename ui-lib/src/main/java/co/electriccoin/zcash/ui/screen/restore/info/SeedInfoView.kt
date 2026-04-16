@@ -100,7 +100,7 @@ private fun Content(
 
         ZashiButton(
             modifier = Modifier.fillMaxWidth(),
-            text = stringResource(R.string.restore_dialog_button),
+            text = stringResource(co.electriccoin.zcash.ui.design.R.string.general_got_it),
             onClick = state.onBack
         )
     }

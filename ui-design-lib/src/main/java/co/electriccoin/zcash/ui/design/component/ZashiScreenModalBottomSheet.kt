@@ -16,7 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
@@ -56,6 +59,15 @@ fun <T : ModalBottomSheetState> ZashiScreenModalBottomSheet(
                 )
                 LaunchedEffect(Unit) {
                     sheetState.show()
+                }
+
+                var wasShown by remember { mutableStateOf(false) }
+                LaunchedEffect(sheetState.currentValue) {
+                    when (sheetState.currentValue) {
+                        Expanded -> wasShown = true
+                        Hidden -> if (wasShown) it.onBack()
+                        else -> Unit
+                    }
                 }
 
                 HookupKeyboardController()

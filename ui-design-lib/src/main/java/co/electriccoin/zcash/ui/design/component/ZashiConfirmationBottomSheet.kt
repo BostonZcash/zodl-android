@@ -43,7 +43,9 @@ data class ZashiConfirmationState(
     val primaryAction: ButtonState,
     val secondaryAction: ButtonState,
     override val onBack: () -> Unit
-) : ModalBottomSheetState
+) : ModalBottomSheetState {
+    companion object
+}
 
 @Composable
 private fun ConfirmationContent(

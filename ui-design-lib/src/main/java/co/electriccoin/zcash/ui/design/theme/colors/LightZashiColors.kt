@@ -504,6 +504,7 @@ val LightZashiColorsInternal =
                         utilityOrange500 = WarningYellow.`500`,
                         utilityOrange200 = WarningYellow.`200`,
                         utilityOrange800 = WarningYellow.`800`,
+                        utilityOrange900 = WarningYellow.`900`,
                         utilityOrange50 = WarningYellow.`50`,
                         utilityOrange100 = WarningYellow.`100`,
                         utilityOrange400 = WarningYellow.`400`,

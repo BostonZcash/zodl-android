@@ -8,7 +8,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import androidx.navigation.toRoute
-import co.electriccoin.zcash.ui.dialogComposable
 import co.electriccoin.zcash.ui.screen.about.AboutArgs
 import co.electriccoin.zcash.ui.screen.about.AboutScreen
 import co.electriccoin.zcash.ui.screen.accountlist.AccountListArgs
@@ -29,8 +28,20 @@ import co.electriccoin.zcash.ui.screen.balances.spendable.SpendableBalanceArgs
 import co.electriccoin.zcash.ui.screen.balances.spendable.SpendableBalanceScreen
 import co.electriccoin.zcash.ui.screen.chooseserver.ChooseServerArgs
 import co.electriccoin.zcash.ui.screen.chooseserver.ChooseServerScreen
-import co.electriccoin.zcash.ui.screen.connectkeystone.ConnectKeystoneArgs
-import co.electriccoin.zcash.ui.screen.connectkeystone.ConnectKeystoneScreen
+import co.electriccoin.zcash.ui.screen.connectkeystone.connect.ConnectKeystoneArgs
+import co.electriccoin.zcash.ui.screen.connectkeystone.connect.ConnectKeystoneScreen
+import co.electriccoin.zcash.ui.screen.connectkeystone.connected.KeystoneConnectedArgs
+import co.electriccoin.zcash.ui.screen.connectkeystone.connected.KeystoneConnectedScreen
+import co.electriccoin.zcash.ui.screen.connectkeystone.date.KeystoneDateArgs
+import co.electriccoin.zcash.ui.screen.connectkeystone.date.KeystoneFirstTransactionScreen
+import co.electriccoin.zcash.ui.screen.connectkeystone.estimation.KeystoneEstimationArgs
+import co.electriccoin.zcash.ui.screen.connectkeystone.estimation.KeystoneFirstTransactionEstimationScreen
+import co.electriccoin.zcash.ui.screen.connectkeystone.explainer.KeystoneExplainerScreen
+import co.electriccoin.zcash.ui.screen.connectkeystone.explainer.KeystoneExplainerScreenArgs
+import co.electriccoin.zcash.ui.screen.connectkeystone.height.KeystoneHeightArgs
+import co.electriccoin.zcash.ui.screen.connectkeystone.height.KeystoneWBHScreen
+import co.electriccoin.zcash.ui.screen.connectkeystone.neworactive.KeystoneNewOrActiveArgs
+import co.electriccoin.zcash.ui.screen.connectkeystone.neworactive.KeystoneNewOrActiveScreen
 import co.electriccoin.zcash.ui.screen.contact.AddGenericABContactArgs
 import co.electriccoin.zcash.ui.screen.contact.AddGenericABContactScreen
 import co.electriccoin.zcash.ui.screen.contact.AddZashiABContactArgs
@@ -55,6 +66,8 @@ import co.electriccoin.zcash.ui.screen.exchangerate.settings.ExchangeRateSetting
 import co.electriccoin.zcash.ui.screen.exportdata.WrapExportPrivateData
 import co.electriccoin.zcash.ui.screen.feedback.FeedbackArgs
 import co.electriccoin.zcash.ui.screen.feedback.FeedbackScreen
+import co.electriccoin.zcash.ui.screen.heightinfo.HeightInfoArgs
+import co.electriccoin.zcash.ui.screen.heightinfo.HeightInfoScreen
 import co.electriccoin.zcash.ui.screen.home.AndroidHome
 import co.electriccoin.zcash.ui.screen.home.HomeArgs
 import co.electriccoin.zcash.ui.screen.home.backup.AndroidWalletBackupDetail
@@ -81,6 +94,8 @@ import co.electriccoin.zcash.ui.screen.insufficientfunds.InsufficientFundsArgs
 import co.electriccoin.zcash.ui.screen.insufficientfunds.InsufficientFundsScreen
 import co.electriccoin.zcash.ui.screen.integrations.IntegrationsArgs
 import co.electriccoin.zcash.ui.screen.integrations.IntegrationsScreen
+import co.electriccoin.zcash.ui.screen.keepopen.KeepOpenArgs
+import co.electriccoin.zcash.ui.screen.keepopen.KeepOpenScreen
 import co.electriccoin.zcash.ui.screen.more.MoreArgs
 import co.electriccoin.zcash.ui.screen.more.MoreScreen
 import co.electriccoin.zcash.ui.screen.pay.PayArgs
@@ -98,14 +113,14 @@ import co.electriccoin.zcash.ui.screen.receive.info.TransparentAddressInfoScreen
 import co.electriccoin.zcash.ui.screen.request.RequestScreen
 import co.electriccoin.zcash.ui.screen.restore.info.AndroidSeedInfo
 import co.electriccoin.zcash.ui.screen.restore.info.SeedInfo
-import co.electriccoin.zcash.ui.screen.restoresuccess.WrapRestoreSuccess
-import co.electriccoin.zcash.ui.screen.restoresuccess.WrapRestoreSuccessArgs
-import co.electriccoin.zcash.ui.screen.resync.confirm.ConfirmResyncArgs
-import co.electriccoin.zcash.ui.screen.resync.confirm.ConfirmResyncScreen
-import co.electriccoin.zcash.ui.screen.resync.date.ResyncBDDateArgs
-import co.electriccoin.zcash.ui.screen.resync.date.ResyncBDDateScreen
-import co.electriccoin.zcash.ui.screen.resync.estimation.ResyncBDEstimationArgs
-import co.electriccoin.zcash.ui.screen.resync.estimation.ResyncBDEstimationScreen
+import co.electriccoin.zcash.ui.screen.resync.confirm.ResyncConfirmArgs
+import co.electriccoin.zcash.ui.screen.resync.confirm.ResyncConfirmScreen
+import co.electriccoin.zcash.ui.screen.resync.date.ResyncDateArgs
+import co.electriccoin.zcash.ui.screen.resync.date.ResyncDateScreen
+import co.electriccoin.zcash.ui.screen.resync.estimation.ResyncEstimationArgs
+import co.electriccoin.zcash.ui.screen.resync.estimation.ResyncEstimationScreen
+import co.electriccoin.zcash.ui.screen.resync.height.ResyncHeightArgs
+import co.electriccoin.zcash.ui.screen.resync.height.ResyncHeightScreen
 import co.electriccoin.zcash.ui.screen.reviewtransaction.AndroidReviewTransaction
 import co.electriccoin.zcash.ui.screen.reviewtransaction.ReviewTransactionArgs
 import co.electriccoin.zcash.ui.screen.scan.ScanArgs
@@ -232,6 +247,14 @@ fun NavGraphBuilder.walletNavGraph(
             RequestScreen(addressType)
         }
         composable<ConnectKeystoneArgs> { ConnectKeystoneScreen() }
+        dialogComposable<KeystoneExplainerScreenArgs> { KeystoneExplainerScreen() }
+        composable<KeystoneNewOrActiveArgs> { KeystoneNewOrActiveScreen(it.toRoute()) }
+        composable<KeystoneDateArgs> { KeystoneFirstTransactionScreen(it.toRoute()) }
+        composable<KeystoneEstimationArgs> { KeystoneFirstTransactionEstimationScreen(it.toRoute()) }
+        composable<KeystoneHeightArgs> { KeystoneWBHScreen(it.toRoute()) }
+        composable<KeystoneConnectedArgs> { KeystoneConnectedScreen() }
+        composable<KeepOpenArgs> { KeepOpenScreen(it.toRoute()) }
+        dialogComposable<HeightInfoArgs> { HeightInfoScreen() }
         composable<SelectKeystoneAccount> { AndroidSelectKeystoneAccount(it.toRoute()) }
         composable<ReviewTransactionArgs> { AndroidReviewTransaction() }
         composable<TransactionProgressArgs> { TransactionProgressScreen(it.toRoute()) }
@@ -287,10 +310,10 @@ fun NavGraphBuilder.walletNavGraph(
         composable<DebugArgs> { DebugScreen() }
         composable<DebugDBArgs> { DebugDBScreen() }
         dialogComposable<DebugTextArgs> { DebugTextScreen(it.toRoute()) }
-        composable<ConfirmResyncArgs> { ConfirmResyncScreen() }
-        composable<ResyncBDDateArgs> { ResyncBDDateScreen(it.toRoute()) }
-        composable<ResyncBDEstimationArgs> { ResyncBDEstimationScreen(it.toRoute()) }
+        composable<ResyncConfirmArgs> { ResyncConfirmScreen() }
+        composable<ResyncDateArgs> { ResyncDateScreen(it.toRoute()) }
+        composable<ResyncEstimationArgs> { ResyncEstimationScreen(it.toRoute()) }
+        composable<ResyncHeightArgs> { ResyncHeightScreen() }
         composable<DisconnectArgs> { DisconnectScreen() }
-        composable<WrapRestoreSuccessArgs> { WrapRestoreSuccess() }
     }
 }

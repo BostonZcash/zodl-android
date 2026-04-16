@@ -559,6 +559,7 @@ data class UtilityWarningYellow(
     val utilityOrange500: Color,
     val utilityOrange200: Color,
     val utilityOrange800: Color,
+    val utilityOrange900: Color,
     val utilityOrange50: Color,
     val utilityOrange100: Color,
     val utilityOrange400: Color,

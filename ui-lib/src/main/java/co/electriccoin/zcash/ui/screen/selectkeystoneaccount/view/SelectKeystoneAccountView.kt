@@ -36,6 +36,7 @@ import co.electriccoin.zcash.ui.design.util.getValue
 import co.electriccoin.zcash.ui.design.util.imageRes
 import co.electriccoin.zcash.ui.design.util.scaffoldScrollPadding
 import co.electriccoin.zcash.ui.design.util.stringRes
+import co.electriccoin.zcash.ui.design.util.withStyle
 import co.electriccoin.zcash.ui.screen.selectkeystoneaccount.model.SelectKeystoneAccountState
 
 @Composable
@@ -102,11 +103,6 @@ private fun BottomSection(
     ) {
         ZashiButton(
             modifier = Modifier.fillMaxWidth(),
-            state = state.negativeButtonState,
-            defaultPrimaryColors = ZashiButtonDefaults.secondaryColors()
-        )
-        ZashiButton(
-            modifier = Modifier.fillMaxWidth(),
             state = state.positiveButtonState
         )
     }
@@ -158,7 +154,7 @@ private fun SinglePreview() =
                         listOf(
                             ZashiExpandedCheckboxListItemState(
                                 title = stringRes("title"),
-                                subtitle = stringRes("subtitle"),
+                                subtitle = stringRes("subtitle").withStyle(),
                                 icon = R.drawable.ic_item_zashi,
                                 isSelected = false,
                                 info =
@@ -170,7 +166,6 @@ private fun SinglePreview() =
                             )
                         ),
                     positiveButtonState = ButtonState(stringRes("Unlock")),
-                    negativeButtonState = ButtonState(stringRes("Forget this device"))
                 )
         )
     }
@@ -207,7 +202,6 @@ private fun MultiplePreview() =
                             )
                         ),
                     positiveButtonState = ButtonState(stringRes("Unlock")),
-                    negativeButtonState = ButtonState(stringRes("Forget this device"))
                 )
         )
     }

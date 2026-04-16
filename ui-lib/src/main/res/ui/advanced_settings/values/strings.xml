@@ -35,5 +35,5 @@
 
     <!-- Disconnect Hardware Wallet Error Dialog -->
     <string name="disconnect_hardware_wallet_error_title">Disconnect Failed</string>
-    <string name="disconnect_hardware_wallet_error_message">Disconnecting the hardware wallet couldn\'t be finalized.</string>
+    <string name="disconnect_hardware_wallet_error_message">Disconnecting the hardware wallet couldn\'t be finalized. Please try again or report an issue.</string>
 </resources>

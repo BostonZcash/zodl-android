@@ -5,10 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
@@ -20,11 +17,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import co.electriccoin.zcash.ui.R
+import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.Spacer
 import co.electriccoin.zcash.ui.design.component.ZashiBadge
 import co.electriccoin.zcash.ui.design.component.ZashiBadgeDefaults
-import co.electriccoin.zcash.ui.design.component.ZashiButton
-import co.electriccoin.zcash.ui.design.component.ZashiScreenModalBottomSheet
 import co.electriccoin.zcash.ui.design.component.rememberScreenModalBottomSheetState
 import co.electriccoin.zcash.ui.design.newcomponent.PreviewScreens
 import co.electriccoin.zcash.ui.design.theme.ZcashTheme
@@ -36,6 +32,7 @@ import co.electriccoin.zcash.ui.design.util.getValue
 import co.electriccoin.zcash.ui.design.util.stringRes
 import co.electriccoin.zcash.ui.design.util.styledStringResource
 import co.electriccoin.zcash.ui.design.util.withStyle
+import co.electriccoin.zcash.ui.screen.common.InfoBottomSheetView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,88 +40,60 @@ fun TEXUnsupportedView(
     state: TEXUnsupportedState?,
     sheetState: SheetState = rememberScreenModalBottomSheetState(),
 ) {
-    ZashiScreenModalBottomSheet(
-        state = state,
+    state ?: return
+    InfoBottomSheetView(
+        onBack = state.onBack,
+        primaryButton =
+            ButtonState(
+                text = stringRes(co.electriccoin.zcash.ui.design.R.string.general_got_it),
+                onClick = state.onBack,
+            ),
         sheetState = sheetState,
-        content = { state, contentPadding ->
-            Content(
-                modifier = Modifier.weight(1f, false),
-                state = state,
-                contentPadding = contentPadding
-            )
-        },
-    )
-}
-
-@Composable
-private fun Content(
-    state: TEXUnsupportedState,
-    contentPadding: PaddingValues,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier =
-            modifier
-                .verticalScroll(rememberScrollState())
-                .padding(
-                    start = 24.dp,
-                    end = 24.dp,
-                    bottom = contentPadding.calculateBottomPadding()
-                )
     ) {
-        Image(
-            painter = painterResource(R.drawable.ic_swap_quote_error),
-            contentDescription = null,
-        )
+        Image(painterResource(R.drawable.ic_swap_quote_error), contentDescription = null)
         Spacer(12.dp)
         Text(
             text = stringResource(R.string.tex_unsupported_title),
             color = ZashiColors.Text.textPrimary,
             style = ZashiTypography.header6,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
         )
         Spacer(8.dp)
         val description =
             (stringRes(R.string.tex_unsupported_description_part1) + stringRes(" ")).withStyle(
                 StyledStringStyle(
                     color = StringResourceColor.PRIMARY,
-                    fontWeight = FontWeight.SemiBold
-                )
+                    fontWeight = FontWeight.SemiBold,
+                ),
             ) +
                 styledStringResource(
                     R.string.tex_unsupported_description_part2,
-                    StringResourceColor.TERTIARY
+                    StringResourceColor.TERTIARY,
                 )
         Text(
             text = description.getValue(),
-            style = ZashiTypography.textSm
+            style = ZashiTypography.textSm,
         )
         Spacer(24.dp)
         Text(
             text = stringResource(R.string.tex_unsupported_workaround_title),
             color = ZashiColors.Text.textPrimary,
             style = ZashiTypography.textMd,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
         )
         Spacer(16.dp)
         StepItem(
             badge = stringResource(R.string.tex_unsupported_step_1_badge),
             title = stringResource(R.string.tex_unsupported_step_1_title),
             description = stringResource(R.string.tex_unsupported_step_1_description),
-            icon = R.drawable.ic_tex_unsupported_1
+            icon = R.drawable.ic_tex_unsupported_1,
         )
         Spacer(28.dp)
         StepItem(
             badge = stringResource(R.string.tex_unsupported_step_2_badge),
             title = stringResource(R.string.tex_unsupported_step_2_title),
             description = stringResource(R.string.tex_unsupported_step_2_description),
-            icon = R.drawable.ic_tex_unsupported_2
-        )
-        Spacer(28.dp)
-        ZashiButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = state.onBack,
-            text = stringResource(R.string.tex_unsupported_button)
+            icon = R.drawable.ic_tex_unsupported_2,
         )
     }
 }
@@ -134,15 +103,10 @@ private fun StepItem(
     badge: String,
     title: String,
     description: String,
-    icon: Int
+    icon: Int,
 ) {
-    Row(
-        verticalAlignment = Alignment.Top
-    ) {
-        Image(
-            painter = painterResource(icon),
-            contentDescription = null,
-        )
+    Row(verticalAlignment = Alignment.Top) {
+        Image(painterResource(icon), contentDescription = null)
         Spacer(16.dp)
         Column(modifier = Modifier.weight(1f)) {
             Spacer(4.dp)
@@ -150,21 +114,21 @@ private fun StepItem(
                 text = badge,
                 colors = ZashiBadgeDefaults.infoColors(),
                 contentPadding = PaddingValues(6.dp, 2.dp),
-                shape = RoundedCornerShape(6.dp)
+                shape = RoundedCornerShape(6.dp),
             )
             Spacer(8.dp)
             Text(
                 text = title,
                 color = ZashiColors.Text.textPrimary,
                 style = ZashiTypography.textSm,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
             )
             Spacer(4.dp)
             Text(
                 text = description,
                 color = ZashiColors.Text.textTertiary,
                 style = ZashiTypography.textSm,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
             )
         }
     }
@@ -175,10 +139,5 @@ private fun StepItem(
 @Composable
 private fun Preview() =
     ZcashTheme {
-        TEXUnsupportedView(
-            state =
-                TEXUnsupportedState(
-                    onBack = {}
-                )
-        )
+        TEXUnsupportedView(state = TEXUnsupportedState(onBack = {}))
     }

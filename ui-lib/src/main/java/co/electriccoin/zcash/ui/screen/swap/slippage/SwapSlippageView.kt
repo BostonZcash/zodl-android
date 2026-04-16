@@ -26,6 +26,8 @@ import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.Spacer
 import co.electriccoin.zcash.ui.design.component.ZashiButton
 import co.electriccoin.zcash.ui.design.component.ZashiCard
+import co.electriccoin.zcash.ui.design.component.ZashiDisclaimer
+import co.electriccoin.zcash.ui.design.component.ZashiDisclaimerState
 import co.electriccoin.zcash.ui.design.component.ZashiScreenModalBottomSheet
 import co.electriccoin.zcash.ui.design.component.ZashiSmallTopAppBar
 import co.electriccoin.zcash.ui.design.component.ZashiTopAppBarCloseNavigation
@@ -79,22 +81,8 @@ fun SwapSlippageView(state: SwapSlippageState?) {
                         SlippageInfoCard(innerState.info)
                     }
                     Spacer(1f)
-                    if (innerState.warning != null) {
-                        Spacer(20.dp)
-                        ZashiCard(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors =
-                                CardDefaults.cardColors(
-                                    containerColor = ZashiColors.Utility.WarningYellow.utilityOrange100
-                                ),
-                            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp)
-                        ) {
-                            Text(
-                                text = innerState.warning.getValue(),
-                                style = ZashiTypography.textXs,
-                                color = ZashiColors.Utility.WarningYellow.utilityOrange800
-                            )
-                        }
+                    innerState.warning?.let {
+                        ZashiDisclaimer(state = it)
                     }
                     Spacer(24.dp)
                     ZashiButton(
@@ -178,12 +166,13 @@ private fun Preview() =
                             mode = SwapSlippageInfoState.Mode.HIGH,
                         ),
                     warning =
-                        styledStringResource(
-                            R.string.swap_slippage_low_warning,
-                            null as androidx.compose.ui.text.font.FontWeight?,
-                            "Warning",
-                            "under 2%",
-                            "2% or higher"
+                        ZashiDisclaimerState.warning(
+                            styledStringResource(
+                                R.string.swap_slippage_low_warning,
+                                null as androidx.compose.ui.text.font.FontWeight?,
+                                "under 2%",
+                                "2% or higher"
+                            )
                         ),
                     primary =
                         ButtonState(

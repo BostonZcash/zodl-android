@@ -1,43 +1,40 @@
 package co.electriccoin.zcash.ui.screen.restore.tor
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import cash.z.ecc.android.sdk.model.BlockHeight
 import cash.z.ecc.android.sdk.model.SeedPhrase
-import cash.z.ecc.sdk.ANDROID_STATE_FLOW_TIMEOUT
 import co.electriccoin.zcash.ui.NavigationRouter
 import co.electriccoin.zcash.ui.R
+import co.electriccoin.zcash.ui.common.model.LceState
+import co.electriccoin.zcash.ui.common.model.mutableLce
+import co.electriccoin.zcash.ui.common.model.stateIn
+import co.electriccoin.zcash.ui.common.model.withLce
+import co.electriccoin.zcash.ui.common.usecase.ErrorMapperUseCase
 import co.electriccoin.zcash.ui.common.usecase.RestoreWalletUseCase
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.CheckboxState
 import co.electriccoin.zcash.ui.design.util.stringRes
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.WhileSubscribed
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class RestoreTorVM(
     private val args: RestoreTorArgs,
     private val navigationRouter: NavigationRouter,
-    private val restoreWallet: RestoreWalletUseCase
+    private val restoreWallet: RestoreWalletUseCase,
+    private val errorStateMapper: ErrorMapperUseCase,
 ) : ViewModel() {
     private val isChecked = MutableStateFlow(false)
+    private val restoreLce = mutableLce<Unit>()
 
-    val state: StateFlow<RestoreTorState> =
-        isChecked
-            .map {
-                createState(it)
-            }.stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(ANDROID_STATE_FLOW_TIMEOUT),
-                initialValue = createState(isChecked.value)
-            )
+    val state: StateFlow<LceState<RestoreTorState>> =
+        combine(isChecked, restoreLce.state) { checked, restore ->
+            createState(checked, restore.loading)
+        }.withLce(restoreLce, errorStateMapper::mapToState)
+            .stateIn(this, LceState(content = createState(isChecked.value, false)))
 
-    private fun createState(isChecked: Boolean): RestoreTorState =
+    private fun createState(isChecked: Boolean, isLoading: Boolean): RestoreTorState =
         RestoreTorState(
             checkbox =
                 CheckboxState(
@@ -49,6 +46,7 @@ class RestoreTorVM(
             primary =
                 ButtonState(
                     text = stringRes(R.string.restore_bd_restore_btn),
+                    isLoading = isLoading,
                     onClick = { onRestoreWalletClick(isChecked) },
                 ),
             secondary =
@@ -62,7 +60,7 @@ class RestoreTorVM(
     private fun onBack() = navigationRouter.back()
 
     private fun onRestoreWalletClick(isChecked: Boolean) =
-        viewModelScope.launch {
+        restoreLce.execute {
             restoreWallet(
                 seedPhrase = SeedPhrase.new(args.seed.trim()),
                 enableTor = isChecked,
