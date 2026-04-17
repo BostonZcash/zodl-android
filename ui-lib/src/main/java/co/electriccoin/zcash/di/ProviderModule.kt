@@ -92,5 +92,5 @@ val providerModule =
         factoryOf(::IsKeepScreenOnDuringRestoreProviderImpl) bind IsKeepScreenOnDuringRestoreProvider::class
         singleOf(::EphemeralAddressStorageProviderImpl) bind EphemeralAddressStorageProvider::class
         singleOf(::CMCApiProviderImpl) bind CMCApiProvider::class
-        singleOf(::KeystoneSDKProviderImpl) bind KeystoneSDKProvider::class
+        factoryOf(::KeystoneSDKProviderImpl) bind KeystoneSDKProvider::class
     }
