@@ -12,10 +12,8 @@ import cash.z.ecc.android.sdk.ext.currencyFormatter
 import cash.z.ecc.android.sdk.ext.zatoshiFormatter
 import cash.z.ecc.android.sdk.model.FiatCurrency
 import cash.z.ecc.android.sdk.model.Zatoshi
-import cash.z.wallet.sdk.internal.rpc.address
 import co.electriccoin.zcash.ui.design.R
 import co.electriccoin.zcash.ui.design.theme.balances.LocalBalancesAvailable
-import co.electriccoin.zcash.ui.design.util.ADDRESS_MAX_LENGTH_ABBREVIATED
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode

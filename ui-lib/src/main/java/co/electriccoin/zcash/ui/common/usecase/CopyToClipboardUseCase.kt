@@ -24,13 +24,13 @@ class CopyToClipboardUseCase(
                 "android.content.extra.IS_SENSITIVE"
             }
 
-    // The system clipboard confirmation chip (API 33+) is only shown to the admin/primary user.
+    // The system clipboard confirmation chip (API 33+) is only shown to the admin/primary user (API 34+).
     // Non-admin profiles never receive it — this is an upstream AOSP limitation across all OEMs.
     private val needsManualClipboardToast: Boolean
-        get() {
-            if (!AndroidApiVersion.isAtLeastTiramisu) return true
-            return !context.getSystemService<UserManager>().isAdminUser
-        }
+        get() =
+            !AndroidApiVersion.isAtLeastTiramisu ||
+                !AndroidApiVersion.isAtLeastUpsideDownCake ||
+                !context.getSystemService<UserManager>().isAdminUser
 
     operator fun invoke(value: String) {
         val clipboardManager = context.getSystemService<ClipboardManager>()

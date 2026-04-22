@@ -13,12 +13,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class TorSettingsVM(
-    isTorEnabled: IsTorEnabledUseCase,
+    isTorEnabledUseCase: IsTorEnabledUseCase,
     private val navigationRouter: NavigationRouter,
     private val optInExchangeRateAndTor: OptInExchangeRateAndTorUseCase
 ) : ViewModel() {
     val state =
-        isTorEnabled
+        isTorEnabledUseCase
             .observe()
             .map { isEnabled ->
                 TorSettingsState(

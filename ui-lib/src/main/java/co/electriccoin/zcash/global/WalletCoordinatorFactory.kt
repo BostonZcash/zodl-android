@@ -7,7 +7,7 @@ import co.electriccoin.zcash.ui.common.provider.IsExchangeRateEnabledStorageProv
 import co.electriccoin.zcash.ui.common.provider.IsTorEnabledStorageProvider
 import co.electriccoin.zcash.ui.common.provider.PersistableWalletProvider
 
-fun WalletCoordinator.Companion.newInstance(
+internal operator fun WalletCoordinator.Companion.invoke(
     context: Context,
     persistableWalletProvider: PersistableWalletProvider,
     isTorEnabledStorageProvider: IsTorEnabledStorageProvider,
