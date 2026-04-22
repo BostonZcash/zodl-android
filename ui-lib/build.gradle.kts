@@ -186,6 +186,7 @@ dependencies {
     implementation(libs.kotlinx.immutable)
     implementation(libs.kotlinx.serializable.json)
     "storeImplementation"(libs.mlkit.scanning)
+    "internalImplementation"(libs.mlkit.scanning)
     api(libs.zcash.sdk)
     implementation(libs.zcash.sdk.incubator)
     implementation(libs.zcash.bip39)

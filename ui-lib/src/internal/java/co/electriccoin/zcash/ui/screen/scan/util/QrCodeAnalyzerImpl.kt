@@ -1,107 +1,124 @@
 package co.electriccoin.zcash.ui.screen.scan.util
 
-import android.graphics.ImageFormat
+import android.graphics.Bitmap
+import android.graphics.Matrix
+import androidx.camera.core.ExperimentalGetImage
 import androidx.camera.core.ImageProxy
 import co.electriccoin.zcash.spackle.Twig
 import co.electriccoin.zcash.ui.screen.scan.QrCodeAnalyzer
 import co.electriccoin.zcash.ui.screen.scankeystone.view.FramePosition
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.BinaryBitmap
-import com.google.zxing.DecodeHintType
-import com.google.zxing.MultiFormatReader
-import com.google.zxing.PlanarYUVLuminanceSource
-import com.google.zxing.common.HybridBinarizer
-import java.nio.ByteBuffer
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.BarcodeScanning
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.common.InputImage
 
 class QrCodeAnalyzerImpl(
     private val framePosition: FramePosition,
     private val onQrCodeScanned: (String) -> Unit,
 ) : QrCodeAnalyzer {
-    private val supportedImageFormats =
-        listOf(
-            ImageFormat.YUV_420_888,
-            ImageFormat.YUV_422_888,
-            ImageFormat.YUV_444_888
-        )
+    private val supportedImageFormat = Barcode.FORMAT_QR_CODE
 
-    override fun analyze(image: ImageProxy) {
-        image.use {
-            if (image.format in supportedImageFormats) {
-                val bytes =
-                    image.planes
-                        .first()
-                        .buffer
-                        .toByteArray()
+    @androidx.annotation.OptIn(ExperimentalGetImage::class)
+    override fun analyze(imageProxy: ImageProxy) {
+        Twig.verbose { "Mlkit image proxy: ${imageProxy.imageInfo}" }
 
-                Twig.verbose {
-                    "Scan result: " +
-                        "Frame: $framePosition, " +
-                        "Info: ${image.imageInfo}, " +
-                        "Image width: ${image.width}, " +
-                        "Image height: ${image.height}"
-                }
+        val mediaImage = imageProxy.image
+        if (mediaImage != null) {
+            val bitmap = imageProxy.toBitmap()
 
-                // TODO [#1380]: Leverage FramePosition in QrCodeAnalyzer
-                // TODO [#1380]: https://github.com/Electric-Coin-Company/zashi-android/issues/1380
-                val source =
-                    if (image.height > image.width) {
-                        PlanarYUVLuminanceSource(
-                            bytes,
-                            image.width,
-                            image.height,
-                            (image.width * LEFT_OFFSET).toInt(),
-                            (image.height * TOP_OFFSET).toInt(),
-                            (image.width * WIDTH_OFFSET).toInt(),
-                            (image.height * HEIGHT_OFFSET).toInt(),
-                            false
-                        )
-                    } else {
-                        PlanarYUVLuminanceSource(
-                            bytes,
-                            image.width,
-                            image.height,
-                            (image.width * TOP_OFFSET).toInt(),
-                            (image.height * LEFT_OFFSET).toInt(),
-                            (image.width * HEIGHT_OFFSET).toInt(),
-                            (image.height * WIDTH_OFFSET).toInt(),
-                            false
-                        )
-                    }
+            val rotatedBitmap = bitmap.rotate(imageProxy.imageInfo.rotationDegrees)
+            val croppedBitmap = rotatedBitmap.crop(framePosition)
 
-                val binaryBmp = BinaryBitmap(HybridBinarizer(source))
+            // No rotation for cropped Bitmap
+            val image = InputImage.fromBitmap(croppedBitmap, 0)
 
-                Twig.verbose {
-                    "Scan result cropped: " +
-                        "Image width: ${binaryBmp.width}, " +
-                        "Image height: ${binaryBmp.height}"
-                }
-
-                runCatching {
-                    val result =
-                        MultiFormatReader()
-                            .apply {
-                                setHints(
-                                    mapOf(
-                                        DecodeHintType.POSSIBLE_FORMATS to arrayListOf(BarcodeFormat.QR_CODE),
-                                        DecodeHintType.ALSO_INVERTED to true
-                                    )
-                                )
-                            }.decodeWithState(binaryBmp)
-
-                    onQrCodeScanned(result.text)
-                }.onFailure {
-                    // failed to found QR code in current frame
-                }
+            Twig.verbose {
+                "Scan result: " +
+                    "Frame: $framePosition, "
+                "Format: ${mediaImage.format}, " +
+                    "Image width: ${mediaImage.width}, " +
+                    "Image height: ${mediaImage.height}"
+                "Rotation: ${imageProxy.imageInfo.rotationDegrees}"
             }
-        }
-    }
 
-    private fun ByteBuffer.toByteArray(): ByteArray {
-        rewind()
-        return ByteArray(remaining()).also {
-            get(it)
+            // Configure Barcode Scanner Options
+            val options =
+                BarcodeScannerOptions
+                    .Builder()
+                    .setBarcodeFormats(supportedImageFormat)
+                    // We could optionally use this to enhance scan success ratio. If it's specified, then the library
+                    // will suggest zooming the camera if the barcode is too far away or too small to be detected.
+                    // .setZoomSuggestionOptions()
+                    .build()
+
+            // Initialize Barcode Scanner
+            val scanner = BarcodeScanning.getClient(options)
+
+            scanner
+                .process(image)
+                .addOnSuccessListener { barcodes ->
+                    for (barcode in barcodes) {
+                        barcode.rawValue?.let { value ->
+                            Twig.debug { "Mlkit barcode value: $value" }
+                            onQrCodeScanned(value)
+                            // Note that we only take the first code from the list of discovered codes
+                            return@addOnSuccessListener
+                        }
+                    }
+                }.addOnFailureListener { e ->
+                    Twig.error(e) { "Barcode detection failed" }
+                }.addOnCompleteListener {
+                    // Close the image proxy
+                    imageProxy.close()
+                }
+        } else {
+            imageProxy.close()
         }
     }
+}
+
+private fun Bitmap.rotate(rotationDegrees: Int): Bitmap {
+    // Rotate the matrix by the specified degrees
+    val matrix =
+        Matrix().also {
+            it.postRotate(rotationDegrees.toFloat())
+        }
+    return Bitmap.createBitmap(
+        // source
+        this,
+        // x
+        0,
+        // y
+        0,
+        // width
+        width,
+        // height
+        height,
+        // matrix
+        matrix,
+        // filter (Filter for better quality)
+        true
+    )
+}
+
+/*
+ * Crop Bitmap to the specified dimensions given by [FramePosition]
+ */
+@Suppress("UNUSED_PARAMETER")
+private fun Bitmap.crop(framePosition: FramePosition): Bitmap {
+    // TODO [#1380]: Leverage FramePosition in QrCodeAnalyzer
+    // TODO [#1380]: https://github.com/Electric-Coin-Company/zashi-android/issues/1380
+    return Bitmap.createBitmap(
+        this,
+        // left
+        (width * LEFT_OFFSET).toInt(),
+        // top
+        (height * TOP_OFFSET).toInt(),
+        // width
+        (width * WIDTH_OFFSET).toInt(),
+        // height
+        (height * HEIGHT_OFFSET).toInt(),
+    )
 }
 
 private const val LEFT_OFFSET = .15
