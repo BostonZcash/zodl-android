@@ -3,6 +3,9 @@ package co.electriccoin.zcash.ui.screen.advancedsettings.debug
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.electriccoin.zcash.ui.NavigationRouter
+import co.electriccoin.zcash.ui.common.datasource.AccountDataSource
+import co.electriccoin.zcash.ui.common.model.KeystoneAccount
+import co.electriccoin.zcash.ui.common.model.ZashiAccount
 import co.electriccoin.zcash.ui.common.repository.EphemeralAddressRepository
 import co.electriccoin.zcash.ui.common.usecase.CopyToClipboardUseCase
 import co.electriccoin.zcash.ui.design.component.listitem.ListItemState
@@ -18,6 +21,7 @@ import kotlinx.coroutines.launch
 class DebugVM(
     private val copyToClipboardUseCase: CopyToClipboardUseCase,
     private val ephemeralAddressRepository: EphemeralAddressRepository,
+    private val accountDataSource: AccountDataSource,
     private val navigationRouter: NavigationRouter,
 ) : ViewModel() {
     val state: StateFlow<DebugState> =
@@ -49,6 +53,10 @@ class DebugVM(
                             // smallIcon = imageRes(co.electriccoin.zcash.ui.design.R.drawable.ic_zec_unshielded),
                             title = stringRes("Query Database"),
                             onClick = ::onQueryDatabaseClick
+                        ),
+                        ListItemState(
+                            title = stringRes("Current Shield Addresses"),
+                            onClick = ::onCurrentShieldAddressesClick
                         )
                     )
             )
@@ -76,6 +84,27 @@ class DebugVM(
                 DebugTextArgs(
                     title = "New Ephemeral Address",
                     text = address.toString()
+                )
+            )
+        }
+
+    private fun onCurrentShieldAddressesClick() =
+        viewModelScope.launch {
+            val accounts = accountDataSource.getAllAccounts()
+            val text =
+                accounts.joinToString("\n\n") { account ->
+                    val label =
+                        when (account) {
+                            is ZashiAccount -> "Zashi"
+                            is KeystoneAccount -> "Keystone"
+                        }
+                    "$label\n${account.unified.address.address}"
+                }
+            copyToClipboardUseCase(text)
+            navigationRouter.forward(
+                DebugTextArgs(
+                    title = "Current Shield Addresses",
+                    text = text
                 )
             )
         }
