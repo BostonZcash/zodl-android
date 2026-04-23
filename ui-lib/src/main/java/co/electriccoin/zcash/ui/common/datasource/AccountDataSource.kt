@@ -24,26 +24,29 @@ import co.electriccoin.zcash.ui.common.model.ZashiAccount
 import co.electriccoin.zcash.ui.common.provider.SelectedAccountUUIDProvider
 import co.electriccoin.zcash.ui.common.provider.SynchronizerProvider
 import co.electriccoin.zcash.ui.design.util.combineToFlow
+import co.electriccoin.zcash.ui.util.loggableNot
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ClosedSendChannelException
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.retryWhen
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -85,9 +88,10 @@ class AccountDataSourceImpl(
     private val selectedAccountUUIDProvider: SelectedAccountUUIDProvider,
     private val context: Context,
 ) : AccountDataSource {
+    private val log = loggableNot("AccountDataSource")
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private val requestNextShieldedAddressChannel = Channel<AddressRequest>(Channel.RENDEZVOUS)
+    private val requestNextShieldedAddressChannel = MutableSharedFlow<AddressRequest>()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val allAccounts: StateFlow<List<WalletAccount>?> =
@@ -193,15 +197,19 @@ class AccountDataSourceImpl(
         scope
             .launch {
                 val accountUuid = getSelectedAccount().sdkAccount.accountUuid
-                val responseChannel = Channel<WalletAddress.Unified>()
-                requestNextShieldedAddressChannel.send(AddressRequest(accountUuid, responseChannel))
+                log("requestNextShieldedAddress for $accountUuid")
+                val responseChannel = Channel<WalletAddress.Unified>(1)
+                requestNextShieldedAddressChannel.emit(AddressRequest(accountUuid, responseChannel))
                 try {
                     result = responseChannel.receive()
-                } catch (_: Exception) {
-                    // do nothing
+                    log("received address ${result.address} for $accountUuid")
+                } catch (e: Exception) {
+                    log("failed to receive address for $accountUuid", e)
                 }
             }.join()
-        return result ?: getSelectedAccount().unified.address
+        return (result ?: getSelectedAccount().unified.address).also {
+            log("returning address ${it.address}")
+        }
     }
 
     @Suppress("TooGenericExceptionCaught")
@@ -234,37 +242,63 @@ class AccountDataSourceImpl(
             }
 
     private fun observeUnified(synchronizer: Synchronizer, sdkAccount: Account): Flow<UnifiedInfo> {
-        val addressFlow =
-            requestNextShieldedAddressChannel
-                .receiveAsFlow()
-                .onStart { emit(AddressRequest(sdkAccount.accountUuid, Channel())) }
-                .map { request ->
-                    val addressRequest =
-                        if (sdkAccount.keySource?.lowercase() == KEYSTONE_KEYSOURCE) {
-                            UnifiedAddressRequest.Orchard
-                        } else {
-                            UnifiedAddressRequest.shielded
-                        }
+        suspend fun rotateAddress(): WalletAddress.Unified {
+            log("deriving unified address for ${sdkAccount.accountUuid}")
 
-                    val address =
-                        WalletAddress
-                            .Unified
-                            .new(synchronizer.getCustomUnifiedAddress(sdkAccount, addressRequest))
-                    try {
-                        request.responseChannel.trySend(address)
-                        request.responseChannel.close()
-                    } catch (_: ClosedSendChannelException) {
-                        // ignore
-                    }
-                    address
-                }.retryWhen { _, attempt ->
-                    delay(attempt.coerceAtMost(RETRY_DELAY).seconds)
-                    true
+            val addressRequest =
+                if (sdkAccount.keySource?.lowercase() == KEYSTONE_KEYSOURCE) {
+                    UnifiedAddressRequest.Orchard
+                } else {
+                    UnifiedAddressRequest.shielded
                 }
 
-        return combine(addressFlow, synchronizer.walletBalances) { address, balances ->
-            val balance = balances?.get(sdkAccount.accountUuid)
-            UnifiedInfo(address = address, balance = balance?.orchard ?: createEmptyWalletBalance())
+            val address =
+                WalletAddress
+                    .Unified
+                    .new(synchronizer.getCustomUnifiedAddress(sdkAccount, addressRequest))
+
+            log("derived address ${address.address} for ${sdkAccount.accountUuid}")
+
+            return address
+        }
+
+        val addressFlow =
+            channelFlow {
+                send(rotateAddress())
+
+                launch {
+                    requestNextShieldedAddressChannel
+                        .filter { it.accountUuid == sdkAccount.accountUuid }
+                        .collect {
+                            val address = rotateAddress()
+                            send(address)
+                            try {
+                                it.responseChannel.send(address)
+                                it.responseChannel.close()
+                            } catch (_: ClosedSendChannelException) {
+                                // ignore
+                            }
+                        }
+                }
+
+                awaitClose()
+            }.retryWhen { cause, attempt ->
+                log(
+                    "retrying address derivation for ${sdkAccount.accountUuid}, attempt $attempt",
+                    cause as? Exception
+                )
+                delay(attempt.coerceAtMost(RETRY_DELAY).seconds)
+                true
+            }
+
+        val balanceFlow =
+            synchronizer.walletBalances
+                .map {
+                    it?.get(sdkAccount.accountUuid)?.orchard ?: createEmptyWalletBalance()
+                }
+
+        return combine(addressFlow, balanceFlow) { address, balance ->
+            UnifiedInfo(address = address, balance = balance)
         }
     }
 
