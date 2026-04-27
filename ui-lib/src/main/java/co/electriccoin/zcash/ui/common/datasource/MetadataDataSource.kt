@@ -4,6 +4,7 @@ import cash.z.ecc.android.sdk.model.Zatoshi
 import co.electriccoin.zcash.spackle.Twig
 import co.electriccoin.zcash.ui.common.model.SimpleSwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapMode
+import co.electriccoin.zcash.ui.common.model.SwapMode.EXACT_INPUT
 import co.electriccoin.zcash.ui.common.model.SwapStatus
 import co.electriccoin.zcash.ui.common.model.metadata.AccountMetadataV3
 import co.electriccoin.zcash.ui.common.model.metadata.AnnotationMetadataV3
@@ -186,7 +187,12 @@ class MetadataDataSourceImpl(
                                                     token = destination.tokenTicker,
                                                     chain = destination.chainTicker
                                                 ),
-                                            exactInput = mode == SwapMode.EXACT_INPUT,
+                                            exactInput =
+                                                if (origin.chainTicker.equals("zec", true)) {
+                                                    mode == EXACT_INPUT
+                                                } else {
+                                                    false
+                                                },
                                             status = status,
                                             amountOutFormatted = amountOutFormatted,
                                         )
@@ -219,7 +225,7 @@ class MetadataDataSourceImpl(
                                             it.copy(
                                                 status = status,
                                                 amountOutFormatted = amountOutFormatted,
-                                                exactInput = mode == SwapMode.EXACT_INPUT,
+                                                exactInput = mode == EXACT_INPUT,
                                                 fromAsset =
                                                     MetadataSimpleSwapAssetV3(
                                                         token = origin.tokenTicker,

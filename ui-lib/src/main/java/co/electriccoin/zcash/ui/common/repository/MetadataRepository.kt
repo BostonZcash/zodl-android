@@ -230,10 +230,14 @@ class MetadataRepositoryImpl(
                     simpleSwapAssetProvider.get(tokenTicker = it.token, chainTicker = it.chain)
                 },
             mode =
-                when (exactInput) {
-                    true -> SwapMode.EXACT_INPUT
-                    false -> SwapMode.EXACT_OUTPUT
-                    null -> SwapMode.EXACT_INPUT
+                if (fromAsset.chain.equals("zec", true)) {
+                    when (exactInput) {
+                        true -> SwapMode.EXACT_INPUT
+                        false -> SwapMode.EXACT_OUTPUT
+                        null -> SwapMode.EXACT_INPUT
+                    }
+                } else {
+                    SwapMode.FLEX_INPUT
                 },
             status = status ?: SwapStatus.SUCCESS,
             amountOutFormatted = amountOutFormatted ?: BigDecimal(0),
