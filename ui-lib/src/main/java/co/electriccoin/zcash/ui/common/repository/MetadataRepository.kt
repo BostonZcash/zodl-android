@@ -6,6 +6,7 @@ import co.electriccoin.zcash.ui.common.datasource.AccountDataSource
 import co.electriccoin.zcash.ui.common.datasource.MetadataDataSource
 import co.electriccoin.zcash.ui.common.model.KeystoneAccount
 import co.electriccoin.zcash.ui.common.model.SimpleSwapAsset
+import co.electriccoin.zcash.ui.common.model.ZecSimpleSwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapMode
 import co.electriccoin.zcash.ui.common.model.SwapStatus
@@ -217,20 +218,18 @@ class MetadataRepositoryImpl(
             }.distinctUntilChanged()
     }
 
-    private fun SwapMetadataV3.toBusinessObject(): TransactionSwapMetadata =
-        TransactionSwapMetadata(
+    private fun SwapMetadataV3.toBusinessObject(): TransactionSwapMetadata {
+        val origin = simpleSwapAssetProvider.get(tokenTicker = fromAsset.token, chainTicker = fromAsset.chain)
+        return TransactionSwapMetadata(
             depositAddress = depositAddress,
             lastUpdated = lastUpdated,
-            origin =
-                fromAsset.let {
-                    simpleSwapAssetProvider.get(tokenTicker = it.token, chainTicker = it.chain)
-                },
+            origin = origin,
             destination =
                 toAsset.let {
                     simpleSwapAssetProvider.get(tokenTicker = it.token, chainTicker = it.chain)
                 },
             mode =
-                if (fromAsset.chain.equals("zec", true)) {
+                if (origin is ZecSimpleSwapAsset) {
                     when (exactInput) {
                         true -> SwapMode.EXACT_INPUT
                         false -> SwapMode.EXACT_OUTPUT
@@ -245,6 +244,7 @@ class MetadataRepositoryImpl(
             totalFees = totalFees,
             totalFeesUsd = totalFeesUsd,
         )
+    }
 
     override fun observeSwapMetadata(): Flow<List<TransactionSwapMetadata>?> =
         metadata

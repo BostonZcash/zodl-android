@@ -187,12 +187,7 @@ class MetadataDataSourceImpl(
                                                     token = destination.tokenTicker,
                                                     chain = destination.chainTicker
                                                 ),
-                                            exactInput =
-                                                if (origin.chainTicker.equals("zec", true)) {
-                                                    mode == EXACT_INPUT
-                                                } else {
-                                                    false
-                                                },
+                                            exactInput = mode == EXACT_INPUT,
                                             status = status,
                                             amountOutFormatted = amountOutFormatted,
                                         )
