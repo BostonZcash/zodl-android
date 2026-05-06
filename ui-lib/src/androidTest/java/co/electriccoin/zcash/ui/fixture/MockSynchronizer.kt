@@ -208,7 +208,7 @@ internal class MockSynchronizer : CloseableSynchronizer {
         error("Intentionally not implemented in ${MockSynchronizer::class.simpleName} implementation.")
     }
 
-    override suspend fun rescanFromHeight(height: BlockHeight) {
+    override suspend fun rewindToHeight(height: BlockHeight) {
         error("Intentionally not implemented in ${MockSynchronizer::class.simpleName} implementation.")
     }
 
