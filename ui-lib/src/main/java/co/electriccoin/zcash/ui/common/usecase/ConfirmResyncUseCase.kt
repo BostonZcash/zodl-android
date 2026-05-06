@@ -17,8 +17,8 @@ class ConfirmResyncUseCase(
 ) {
     suspend operator fun invoke(blockHeight: BlockHeight) {
         val synchronizer = synchronizerProvider.getSynchronizer()
-        synchronizer.rescanFromHeight(blockHeight)
-        walletRestoringStateProvider.store(WalletRestoringState.RESTORING)
+        synchronizer.rewindToHeight(blockHeight)
+        walletRestoringStateProvider.store(WalletRestoringState.RESYNCING)
         synchronizerProvider.resetSynchronizer()
         isKeepScreenOnDuringRestoreProvider.clear()
         navigationRouter.replaceAll(KeepOpenArgs(KeepOpenFlow.RESYNC))
