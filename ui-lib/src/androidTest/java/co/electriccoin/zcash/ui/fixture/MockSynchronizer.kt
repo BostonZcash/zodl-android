@@ -318,6 +318,10 @@ internal class MockSynchronizer(
         error("Intentionally not implemented in ${MockSynchronizer::class.simpleName} implementation.")
     }
 
+    override suspend fun getTreeState(height: BlockHeight): ByteArray {
+        error("Intentionally not implemented in ${MockSynchronizer::class.simpleName} implementation.")
+    }
+
     override suspend fun deleteAccount(accountUuid: AccountUuid): Boolean {
         error("Intentionally not implemented in ${MockSynchronizer::class.simpleName} implementation.")
     }
