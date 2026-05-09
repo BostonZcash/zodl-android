@@ -13,6 +13,7 @@ import cash.z.ecc.sdk.type.fromResources
 import co.electriccoin.lightwallet.client.model.LightWalletEndpoint
 import co.electriccoin.zcash.preference.StandardPreferenceProvider
 import co.electriccoin.zcash.ui.common.datasource.RestoreTimestampDataSource
+import co.electriccoin.zcash.ui.common.model.ConnectionMode
 import co.electriccoin.zcash.ui.common.model.FastestServersState
 import co.electriccoin.zcash.ui.common.model.OnboardingState
 import co.electriccoin.zcash.ui.common.model.ServerSelection
@@ -34,9 +35,11 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -84,12 +87,6 @@ class WalletRepositoryImpl(
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private val refreshFastestServersRequest = MutableSharedFlow<Unit>(replay = 1)
-
-    init {
-        scope.launch {
-            migrateServerSelectionIfNeeded()
-        }
-    }
 
     private val onboardingState =
         flow {
@@ -158,6 +155,13 @@ class WalletRepositoryImpl(
             initialValue = FastestServersState(servers = emptyList(), isLoading = true)
         )
 
+    init {
+        scope.launch {
+            migrateServerSelectionIfNeeded()
+            keepAutomaticEndpointUpdated()
+        }
+    }
+
     override val walletRestoringState: StateFlow<WalletRestoringState> =
         walletRestoringStateProvider
             .observe()
@@ -169,11 +173,15 @@ class WalletRepositoryImpl(
 
     override fun updateWalletEndpoint(endpoint: LightWalletEndpoint) {
         scope.launch {
-            val selectedWallet = persistableWalletProvider.getPersistableWallet() ?: return@launch
-            val selectedEndpoint = selectedWallet.endpoint
-            if (selectedEndpoint == endpoint) return@launch
-            persistWalletInternal(selectedWallet.copy(endpoint = endpoint))
+            updateWalletEndpointInternal(endpoint)
         }
+    }
+
+    private suspend fun updateWalletEndpointInternal(endpoint: LightWalletEndpoint) {
+        val selectedWallet = persistableWalletProvider.getPersistableWallet() ?: return
+        val selectedEndpoint = selectedWallet.endpoint
+        if (selectedEndpoint == endpoint) return
+        persistWalletInternal(selectedWallet.copy(endpoint = endpoint))
     }
 
     private suspend fun persistWalletInternal(persistableWallet: PersistableWallet) {
@@ -252,5 +260,18 @@ class WalletRepositoryImpl(
                 } ?: ServerSelection.automatic()
 
         serverSelectionProvider.store(selection)
+    }
+
+    private suspend fun keepAutomaticEndpointUpdated() {
+        serverSelectionProvider
+            .serverSelection
+            .filterNotNull()
+            .combine(fastestEndpoints) { selection, fastestServers ->
+                selection to fastestServers.servers?.firstOrNull()
+            }.collect { (selection, fastestEndpoint) ->
+                if (selection.mode == ConnectionMode.AUTOMATIC && fastestEndpoint != null) {
+                    updateWalletEndpointInternal(fastestEndpoint)
+                }
+            }
     }
 }
