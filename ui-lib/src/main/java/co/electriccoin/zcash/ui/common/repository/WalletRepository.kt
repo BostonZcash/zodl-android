@@ -12,6 +12,7 @@ import cash.z.ecc.sdk.ANDROID_STATE_FLOW_TIMEOUT
 import cash.z.ecc.sdk.type.fromResources
 import co.electriccoin.lightwallet.client.model.LightWalletEndpoint
 import co.electriccoin.zcash.preference.StandardPreferenceProvider
+import co.electriccoin.zcash.spackle.Twig
 import co.electriccoin.zcash.ui.common.datasource.RestoreTimestampDataSource
 import co.electriccoin.zcash.ui.common.model.ConnectionMode
 import co.electriccoin.zcash.ui.common.model.FastestServersState
@@ -37,6 +38,7 @@ import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -267,10 +269,19 @@ class WalletRepositoryImpl(
             .serverSelection
             .filterNotNull()
             .combine(fastestEndpoints) { selection, fastestServers ->
-                selection to fastestServers.servers?.firstOrNull()
-            }.collect { (selection, fastestEndpoint) ->
-                if (selection.mode == ConnectionMode.AUTOMATIC && fastestEndpoint != null) {
+                if (selection.mode == ConnectionMode.AUTOMATIC && !fastestServers.isLoading) {
+                    fastestServers.servers?.firstOrNull()
+                } else {
+                    null
+                }
+            }.distinctUntilChanged()
+            .collect { fastestEndpoint ->
+                fastestEndpoint ?: return@collect
+
+                runCatching {
                     updateWalletEndpointInternal(fastestEndpoint)
+                }.onFailure {
+                    Twig.error(it) { "Unable to update automatic server endpoint" }
                 }
             }
     }
