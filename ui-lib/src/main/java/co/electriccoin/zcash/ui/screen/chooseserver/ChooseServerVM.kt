@@ -469,12 +469,14 @@ class ChooseServerVM(
 
             ConnectionMode.MANUAL -> {
                 val endpoint =
-                    getUserEndpointSelectionOrShowError()
-                        ?: getSelectedEndpoint()
-                        ?: run {
-                            showValidationErrorDialog(null)
-                            return null
-                        }
+                    when (userEndpointSelection.value) {
+                        Selection.Custom -> getUserEndpointSelectionOrShowError() ?: return null
+                        is Selection.Endpoint -> getUserEndpointSelectionOrShowError()
+                        null -> getSelectedEndpoint()
+                    } ?: run {
+                        showValidationErrorDialog(null)
+                        return null
+                    }
 
                 ServerSelection.manual(endpoint)
             }
