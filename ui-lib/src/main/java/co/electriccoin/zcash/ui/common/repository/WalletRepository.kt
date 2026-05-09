@@ -46,6 +46,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -160,7 +161,7 @@ class WalletRepositoryImpl(
     init {
         scope.launch {
             migrateServerSelectionIfNeeded()
-            keepAutomaticEndpointUpdated()
+            keepSelectedEndpointUpdated()
         }
     }
 
@@ -264,24 +265,36 @@ class WalletRepositoryImpl(
         serverSelectionProvider.store(selection)
     }
 
-    private suspend fun keepAutomaticEndpointUpdated() {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private suspend fun keepSelectedEndpointUpdated() {
         serverSelectionProvider
             .serverSelection
             .filterNotNull()
-            .combine(fastestEndpoints) { selection, fastestServers ->
-                if (selection.mode == ConnectionMode.AUTOMATIC && !fastestServers.isLoading) {
-                    fastestServers.servers?.firstOrNull()
-                } else {
-                    null
+            .distinctUntilChanged()
+            .flatMapLatest { selection ->
+                when (selection.mode) {
+                    ConnectionMode.AUTOMATIC -> {
+                        fastestEndpoints.map { fastestServers ->
+                            if (fastestServers.isLoading) {
+                                null
+                            } else {
+                                fastestServers.servers?.firstOrNull()
+                            }
+                        }
+                    }
+
+                    ConnectionMode.MANUAL -> {
+                        flowOf(selection.endpoint)
+                    }
                 }
             }.distinctUntilChanged()
-            .collect { fastestEndpoint ->
-                fastestEndpoint ?: return@collect
+            .collect { endpoint ->
+                endpoint ?: return@collect
 
                 runCatching {
-                    updateWalletEndpointInternal(fastestEndpoint)
+                    updateWalletEndpointInternal(endpoint)
                 }.onFailure {
-                    Twig.error(it) { "Unable to update automatic server endpoint" }
+                    Twig.error(it) { "Unable to update selected server endpoint" }
                 }
             }
     }
