@@ -50,11 +50,20 @@ class PersistServerSelectionUseCase(
         }
     }
 
-    private suspend fun getAutomaticEndpoint() =
-        walletRepository.fastestEndpoints.value.servers
-            ?.firstOrNull()
+    private suspend fun getAutomaticEndpoint(): LightWalletEndpoint {
+        val fastestEndpoint =
+            walletRepository.fastestEndpoints.value.let { fastestServers ->
+                if (fastestServers.isLoading) {
+                    null
+                } else {
+                    fastestServers.servers?.firstOrNull()
+                }
+            }
+
+        return fastestEndpoint
             ?: getSelectedEndpoint()?.takeIf { lightWalletEndpointProvider.getEndpoints().contains(it) }
             ?: lightWalletEndpointProvider.getDefaultEndpoint()
+    }
 
     private suspend fun validateServerEndpoint(endpoint: LightWalletEndpoint) =
         synchronizerProvider

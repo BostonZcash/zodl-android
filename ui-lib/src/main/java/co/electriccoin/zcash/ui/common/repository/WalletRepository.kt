@@ -27,6 +27,7 @@ import co.electriccoin.zcash.ui.common.provider.WalletBackupFlagStorageProvider
 import co.electriccoin.zcash.ui.common.provider.WalletRestoringStateProvider
 import co.electriccoin.zcash.ui.common.viewmodel.SecretState
 import co.electriccoin.zcash.ui.preference.StandardPreferenceKeys
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -262,7 +263,9 @@ class WalletRepositoryImpl(
                     }
                 } ?: ServerSelection.automatic()
 
-        serverSelectionProvider.store(selection)
+        if (serverSelectionProvider.getServerSelection() == null) {
+            serverSelectionProvider.store(selection)
+        }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -291,10 +294,12 @@ class WalletRepositoryImpl(
             .collect { endpoint ->
                 endpoint ?: return@collect
 
-                runCatching {
+                try {
                     updateWalletEndpointInternal(endpoint)
-                }.onFailure {
-                    Twig.error(it) { "Unable to update selected server endpoint" }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (t: Throwable) {
+                    Twig.error(t) { "Unable to update selected server endpoint" }
                 }
             }
     }
