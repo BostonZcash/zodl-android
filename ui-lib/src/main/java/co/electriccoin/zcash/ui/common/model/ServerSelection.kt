@@ -37,6 +37,17 @@ data class ServerSelection(
                 endpoint = endpoint
             )
 
+        fun fromPersistedEndpoint(
+            endpoint: LightWalletEndpoint?,
+            knownEndpoints: List<LightWalletEndpoint>
+        ) = endpoint?.let {
+            if (knownEndpoints.contains(it)) {
+                automatic()
+            } else {
+                manual(it)
+            }
+        } ?: automatic()
+
         fun from(jsonObject: JSONObject): ServerSelection {
             val mode =
                 ConnectionMode.fromPersistedValue(

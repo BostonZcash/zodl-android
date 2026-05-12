@@ -253,15 +253,10 @@ class WalletRepositoryImpl(
 
         val existingWallet = persistableWalletProvider.getPersistableWallet()
         val selection =
-            existingWallet
-                ?.endpoint
-                ?.let { endpoint ->
-                    if (lightWalletEndpointProvider.getEndpoints().contains(endpoint)) {
-                        ServerSelection.automatic()
-                    } else {
-                        ServerSelection.manual(endpoint)
-                    }
-                } ?: ServerSelection.automatic()
+            ServerSelection.fromPersistedEndpoint(
+                endpoint = existingWallet?.endpoint,
+                knownEndpoints = lightWalletEndpointProvider.getEndpoints()
+            )
 
         if (serverSelectionProvider.getServerSelection() == null) {
             serverSelectionProvider.store(selection)
