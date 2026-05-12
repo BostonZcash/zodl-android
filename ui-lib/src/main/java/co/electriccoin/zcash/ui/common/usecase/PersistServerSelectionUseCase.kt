@@ -61,10 +61,15 @@ class PersistServerSelectionUseCase(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            previousSelection?.let {
-                runCatching { serverSelectionProvider.store(it) }
-            }
-            throw PersistEndpointException(e.message)
+            val rollbackFailure =
+                previousSelection?.let {
+                    runCatching { serverSelectionProvider.store(it) }
+                        .exceptionOrNull()
+                }
+            throw PersistEndpointException(e.message, e)
+                .also { persistFailure ->
+                    rollbackFailure?.let { persistFailure.addSuppressed(it) }
+                }
         }
     }
 
