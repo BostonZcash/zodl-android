@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger
 internal class MultiEndpointTransactionSubmitter(
     private val scope: CoroutineScope,
     private val globalTimeoutMillis: Long = MULTI_SUBMIT_GLOBAL_TIMEOUT_MILLIS,
+    private val timeoutDrainMillis: Long = MULTI_SUBMIT_TIMEOUT_DRAIN_MILLIS,
     private val gracePeriodMillis: Long = MULTI_SUBMIT_GRACE_PERIOD_MILLIS,
     private val logger: MultiEndpointTransactionSubmitterLogger = TwigMultiEndpointTransactionSubmitterLogger,
     private val submit: suspend (CreatedTransaction, LightWalletEndpoint) -> TransactionSubmitResult
@@ -144,14 +145,13 @@ internal class MultiEndpointTransactionSubmitter(
         val timeoutJob =
             scope.launch {
                 delay(globalTimeoutMillis)
+                // Let endpoint calls that completed at the deadline publish their result before reporting timeout.
+                delay(timeoutDrainMillis)
+                if (completion.isCompleted) {
+                    return@launch
+                }
                 val completedSubmissions =
-                    jobs.mapNotNull { job ->
-                        if (job.isCompleted && !job.isCancelled) {
-                            runCatching { job.await() }.getOrNull()
-                        } else {
-                            null
-                        }
-                    }
+                    jobs.completedSubmissions()
                 val timeoutResult =
                     selectTimeoutCompletion(
                         transaction = transaction,
@@ -295,8 +295,16 @@ internal class MultiEndpointTransactionSubmitter(
             code = MULTI_SUBMIT_GRPC_FAILURE_CODE,
             description = description
         )
-
 }
+
+private suspend fun List<Deferred<EndpointSubmission>>.completedSubmissions() =
+    mapNotNull { job ->
+        if (job.isCompleted && !job.isCancelled) {
+            runCatching { job.await() }.getOrNull()
+        } else {
+            null
+        }
+    }
 
 private fun LightWalletEndpoint.serverString() = "$host:$port"
 
@@ -333,6 +341,7 @@ private object TwigMultiEndpointTransactionSubmitterLogger : MultiEndpointTransa
 
 private const val MULTI_SUBMIT_GRACE_PERIOD_MILLIS = 5_000L
 private const val MULTI_SUBMIT_GLOBAL_TIMEOUT_MILLIS = 30_000L
+private const val MULTI_SUBMIT_TIMEOUT_DRAIN_MILLIS = 2_000L
 private const val MULTI_SUBMIT_GRPC_FAILURE_CODE = -1
 
 private data class BroadcastSubmissionState(

@@ -53,6 +53,7 @@ class MultiEndpointTransactionSubmitterTest {
                 MultiEndpointTransactionSubmitter(
                     scope = backgroundScope,
                     globalTimeoutMillis = 100,
+                    timeoutDrainMillis = 100,
                     logger = noOpLogger,
                     submit = { _, _ -> awaitCancellation() }
                 )
@@ -67,6 +68,44 @@ class MultiEndpointTransactionSubmitterTest {
             val result = assertIs<TransactionSubmitResult.Failure>(results.single())
             assertEquals(true, result.grpcError)
             assertEquals("Timed out submitting to endpoints", result.description)
+        }
+
+    @Test
+    fun timeoutDrainPreservesLateEndpointSuccess() =
+        runTest {
+            val transaction = transaction(9)
+            val submitter =
+                MultiEndpointTransactionSubmitter(
+                    scope = backgroundScope,
+                    globalTimeoutMillis = 100,
+                    timeoutDrainMillis = 100,
+                    logger = noOpLogger,
+                    submit = { _, submittedEndpoint ->
+                        when (submittedEndpoint.host) {
+                            "late.example.com" -> {
+                                delay(150)
+                                TransactionSubmitResult.Success(transaction.txId)
+                            }
+
+                            "hung.example.com" -> {
+                                awaitCancellation()
+                            }
+
+                            else -> {
+                                error("Unexpected endpoint $submittedEndpoint")
+                            }
+                        }
+                    }
+                )
+
+            val results =
+                submitter.submitTransactions(
+                    transactions = listOf(transaction),
+                    endpoints = listOf(endpoint("late.example.com"), endpoint("hung.example.com")),
+                    logTag = LOG_TAG
+                )
+
+            assertEquals(listOf(TransactionSubmitResult.Success(transaction.txId)), results)
         }
 
     @Test
@@ -157,6 +196,7 @@ class MultiEndpointTransactionSubmitterTest {
                 MultiEndpointTransactionSubmitter(
                     scope = backgroundScope,
                     globalTimeoutMillis = 100,
+                    timeoutDrainMillis = 100,
                     logger = noOpLogger,
                     submit = { _, submittedEndpoint ->
                         when (submittedEndpoint.host) {
@@ -244,7 +284,7 @@ class MultiEndpointTransactionSubmitterTest {
                     logTag = LOG_TAG
                 )
 
-            assertEquals(firstFailure, results[0])
+            assertEquals(firstFailure.copy(description = "manual.example.com:443: failure 18"), results[0])
             assertEquals(TransactionSubmitResult.NotAttempted(secondTransaction.txId), results[1])
             assertEquals(1, submissions.get())
         }
