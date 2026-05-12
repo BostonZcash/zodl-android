@@ -9,6 +9,7 @@ import co.electriccoin.zcash.ui.common.provider.LightWalletEndpointProvider
 import co.electriccoin.zcash.ui.common.provider.ServerSelectionProvider
 import co.electriccoin.zcash.ui.common.provider.SynchronizerProvider
 import co.electriccoin.zcash.ui.common.repository.WalletRepository
+import kotlinx.coroutines.CancellationException
 
 class PersistServerSelectionUseCase(
     private val application: Application,
@@ -28,16 +29,14 @@ class PersistServerSelectionUseCase(
 
     private suspend fun persistAutomatic() {
         val endpoint = getAutomaticEndpoint()
-        serverSelectionProvider.store(ServerSelection.automatic())
-        walletRepository.updateWalletEndpoint(endpoint)
+        persistSelectionAndEndpoint(ServerSelection.automatic(), endpoint)
     }
 
     @Throws(PersistEndpointException::class)
     private suspend fun persistManual(endpoint: LightWalletEndpoint) {
         when (val result = validateServerEndpoint(endpoint)) {
             ServerValidation.Valid -> {
-                serverSelectionProvider.store(ServerSelection.manual(endpoint))
-                walletRepository.updateWalletEndpoint(endpoint)
+                persistSelectionAndEndpoint(ServerSelection.manual(endpoint), endpoint)
             }
 
             is ServerValidation.InValid -> {
@@ -47,6 +46,25 @@ class PersistServerSelectionUseCase(
             ServerValidation.Running -> {
                 throw PersistEndpointException(null)
             }
+        }
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun persistSelectionAndEndpoint(
+        selection: ServerSelection,
+        endpoint: LightWalletEndpoint
+    ) {
+        val previousSelection = serverSelectionProvider.getServerSelection()
+        try {
+            serverSelectionProvider.store(selection)
+            walletRepository.updateWalletEndpoint(endpoint)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            previousSelection?.let {
+                runCatching { serverSelectionProvider.store(it) }
+            }
+            throw PersistEndpointException(e.message)
         }
     }
 

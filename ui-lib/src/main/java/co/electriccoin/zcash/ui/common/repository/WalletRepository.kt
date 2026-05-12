@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
@@ -47,7 +48,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -71,7 +71,7 @@ interface WalletRepository {
         birthday: BlockHeight
     )
 
-    fun updateWalletEndpoint(endpoint: LightWalletEndpoint)
+    suspend fun updateWalletEndpoint(endpoint: LightWalletEndpoint)
 
     fun refreshFastestServers()
 }
@@ -175,11 +175,7 @@ class WalletRepositoryImpl(
                 initialValue = WalletRestoringState.NONE
             )
 
-    override fun updateWalletEndpoint(endpoint: LightWalletEndpoint) {
-        scope.launch {
-            updateWalletEndpointInternal(endpoint)
-        }
-    }
+    override suspend fun updateWalletEndpoint(endpoint: LightWalletEndpoint) = updateWalletEndpointInternal(endpoint)
 
     private suspend fun updateWalletEndpointInternal(endpoint: LightWalletEndpoint) {
         val selectedWallet = persistableWalletProvider.getPersistableWallet() ?: return
@@ -263,40 +259,43 @@ class WalletRepositoryImpl(
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Suppress("TooGenericExceptionCaught")
     private suspend fun keepSelectedEndpointUpdated() {
         serverSelectionProvider
             .serverSelection
             .filterNotNull()
             .distinctUntilChanged()
-            .flatMapLatest { selection ->
-                when (selection.mode) {
-                    ConnectionMode.AUTOMATIC -> {
-                        fastestEndpoints.map { fastestServers ->
-                            if (fastestServers.isLoading) {
-                                null
-                            } else {
-                                fastestServers.servers?.firstOrNull()
-                            }
+            .collectLatest { selection ->
+                try {
+                    when (selection.mode) {
+                        ConnectionMode.AUTOMATIC -> {
+                            updateAutomaticEndpointOnce()
+                        }
+
+                        ConnectionMode.MANUAL -> {
+                            selection.endpoint?.let { updateWalletEndpointInternal(it) }
                         }
                     }
-
-                    ConnectionMode.MANUAL -> {
-                        flowOf(selection.endpoint)
-                    }
-                }
-            }.distinctUntilChanged()
-            .collect { endpoint ->
-                endpoint ?: return@collect
-
-                try {
-                    updateWalletEndpointInternal(endpoint)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
                     Twig.error(e) { "Unable to update selected server endpoint" }
                 }
             }
+    }
+
+    private suspend fun updateAutomaticEndpointOnce() {
+        val endpoint =
+            fastestEndpoints
+                .first { !it.isLoading }
+                .servers
+                ?.firstOrNull()
+                ?: return
+
+        if (serverSelectionProvider.getServerSelection()?.mode != ConnectionMode.AUTOMATIC) {
+            return
+        }
+
+        updateWalletEndpointInternal(endpoint)
     }
 }

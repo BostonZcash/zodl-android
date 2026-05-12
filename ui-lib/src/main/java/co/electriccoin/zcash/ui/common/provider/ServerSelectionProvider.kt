@@ -4,9 +4,9 @@ import co.electriccoin.zcash.preference.EncryptedPreferenceProvider
 import co.electriccoin.zcash.preference.api.PreferenceProvider
 import co.electriccoin.zcash.preference.model.entry.PreferenceDefault
 import co.electriccoin.zcash.preference.model.entry.PreferenceKey
+import co.electriccoin.zcash.spackle.Twig
 import co.electriccoin.zcash.ui.common.model.ServerSelection
 import kotlinx.coroutines.flow.Flow
-import org.json.JSONObject
 
 interface ServerSelectionProvider {
     val serverSelection: Flow<ServerSelection?>
@@ -43,7 +43,17 @@ private class ServerSelectionPreferenceDefault(
     override val key: PreferenceKey
 ) : PreferenceDefault<ServerSelection?> {
     override suspend fun getValue(preferenceProvider: PreferenceProvider) =
-        preferenceProvider.getString(key)?.let { ServerSelection.from(JSONObject(it)) }
+        preferenceProvider.getString(key)?.let { persistedSelection ->
+            ServerSelection
+                .fromPersistedJson(persistedSelection)
+                .also {
+                    if (it == null) {
+                        Twig.error {
+                            "Corrupted server_selection JSON; defaulting to automatic mode"
+                        }
+                    }
+                }
+        }
 
     override suspend fun putValue(
         preferenceProvider: PreferenceProvider,

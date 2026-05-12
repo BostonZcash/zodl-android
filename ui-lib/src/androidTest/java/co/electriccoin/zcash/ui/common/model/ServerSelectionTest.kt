@@ -48,6 +48,14 @@ class ServerSelectionTest {
         assertNull(selection.endpoint)
     }
 
+    @Test
+    @SmallTest
+    fun corruptedPersistedJsonReturnsNull() {
+        val selection = ServerSelection.fromPersistedJson("{")
+
+        assertNull(selection)
+    }
+
     companion object {
         private val knownEndpoints =
             listOf(

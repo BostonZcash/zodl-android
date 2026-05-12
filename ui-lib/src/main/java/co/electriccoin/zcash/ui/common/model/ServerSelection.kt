@@ -60,6 +60,10 @@ data class ServerSelection(
             }
         }
 
+        fun fromPersistedJson(json: String): ServerSelection? =
+            runCatching { from(JSONObject(json)) }
+                .getOrNull()
+
         private fun JSONObject.getEndpoint() =
             LightWalletEndpoint(
                 host = getString(KEY_ENDPOINT_HOST),
