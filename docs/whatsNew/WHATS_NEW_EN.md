@@ -12,6 +12,20 @@ directly impact users rather than highlighting other key architectural updates.*
 
 ## [Unreleased]
 
+## [3.4.0 (1691)] - 2026-05-12
+
+### Added:
+- We added Wallet Birthday Height when connecting a Keystone.
+
+### Changed:
+- We refreshed the Restore flow copy.
+
+### Fixed:
+- Locale bugs that could truncate ZEC, block Send, or cause an oversend with a comma decimal separator.
+- A bug where a shielded address could be reused as a swap refund address.
+- A missing copy-confirmation toast on Receive.
+- Tor sync turning off after a low-disk-space interrupt, plus other UX/UI fixes.
+
 ## [3.3.1 (1643)] - 2026-04-10
 
 ### Added:
