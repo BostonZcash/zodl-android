@@ -264,6 +264,7 @@ class WalletRepositoryImpl(
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
+    @Suppress("TooGenericExceptionCaught")
     private suspend fun keepSelectedEndpointUpdated() {
         serverSelectionProvider
             .serverSelection
@@ -293,8 +294,8 @@ class WalletRepositoryImpl(
                     updateWalletEndpointInternal(endpoint)
                 } catch (e: CancellationException) {
                     throw e
-                } catch (t: Throwable) {
-                    Twig.error(t) { "Unable to update selected server endpoint" }
+                } catch (e: Exception) {
+                    Twig.error(e) { "Unable to update selected server endpoint" }
                 }
             }
     }
