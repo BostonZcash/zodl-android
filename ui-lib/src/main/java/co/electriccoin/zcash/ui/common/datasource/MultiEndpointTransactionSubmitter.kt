@@ -63,25 +63,21 @@ internal class MultiEndpointTransactionSubmitter(
             return createGrpcFailure(transaction, "No endpoints available")
         }
 
-        return if (endpoints.size == 1) {
+        if (endpoints.size == 1) {
             logger.info {
                 "$logTag Submitting transaction ${index + 1}/$transactionCount to ${endpoints.first().serverString()}."
             }
-            submitToEndpoint(
-                transaction = transaction,
-                endpoint = endpoints.first(),
-                logTag = logTag
-            )
         } else {
             logger.info {
                 "$logTag Broadcasting transaction ${index + 1}/$transactionCount to ${endpoints.size} endpoints."
             }
-            broadcastToEndpoints(
-                transaction = transaction,
-                endpoints = endpoints,
-                logTag = logTag
-            )
         }
+
+        return broadcastToEndpoints(
+            transaction = transaction,
+            endpoints = endpoints,
+            logTag = logTag
+        )
     }
 
     private suspend fun broadcastToEndpoints(
@@ -91,7 +87,7 @@ internal class MultiEndpointTransactionSubmitter(
     ): TransactionSubmitResult {
         val completion = CompletableDeferred<BroadcastCompletion>()
         val failureCount = AtomicInteger(0)
-        val failures = ConcurrentLinkedQueue<TransactionSubmitResult>()
+        val failures = ConcurrentLinkedQueue<EndpointSubmission>()
         val jobs =
             endpoints.map { endpoint ->
                 scope
@@ -131,7 +127,7 @@ internal class MultiEndpointTransactionSubmitter(
 
                                     is TransactionSubmitResult.Failure,
                                     is TransactionSubmitResult.NotAttempted -> {
-                                        failures += result
+                                        failures += submission
                                         if (failureCount.incrementAndGet() >= endpoints.size) {
                                             completion.complete(
                                                 BroadcastCompletion.Rejected(
@@ -255,15 +251,18 @@ internal class MultiEndpointTransactionSubmitter(
 
     private fun selectRejectedResult(
         transaction: CreatedTransaction,
-        results: List<TransactionSubmitResult>
-    ): TransactionSubmitResult =
-        results
-            .filterIsInstance<TransactionSubmitResult.Failure>()
+        submissions: List<EndpointSubmission>
+    ): TransactionSubmitResult {
+        val failures =
+            submissions.mapNotNull { submission ->
+                (submission.result as? TransactionSubmitResult.Failure)?.withEndpoint(submission.endpoint)
+            }
+
+        return failures
             .lastOrNull { !it.grpcError }
-            ?: results
-                .filterIsInstance<TransactionSubmitResult.Failure>()
-                .lastOrNull()
+            ?: failures.lastOrNull()
             ?: createGrpcFailure(transaction, "All endpoints rejected transaction")
+    }
 
     private fun selectTimeoutCompletion(
         transaction: CreatedTransaction,
@@ -279,7 +278,6 @@ internal class MultiEndpointTransactionSubmitter(
                 }
             }
             ?: submissions
-                .map { it.result }
                 .takeIf { it.isNotEmpty() }
                 ?.let {
                     BroadcastCompletion.Rejected(
@@ -296,6 +294,11 @@ internal class MultiEndpointTransactionSubmitter(
             grpcError = true,
             code = MULTI_SUBMIT_GRPC_FAILURE_CODE,
             description = description
+        )
+
+    private fun TransactionSubmitResult.Failure.withEndpoint(endpoint: LightWalletEndpoint) =
+        copy(
+            description = description?.let { "${endpoint.serverString()}: $it" } ?: endpoint.serverString()
         )
 }
 

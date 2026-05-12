@@ -46,6 +46,30 @@ class MultiEndpointTransactionSubmitterTest {
         }
 
     @Test
+    fun manualModeTimesOutHungSubmission() =
+        runTest {
+            val transaction = transaction(8)
+            val submitter =
+                MultiEndpointTransactionSubmitter(
+                    scope = backgroundScope,
+                    globalTimeoutMillis = 100,
+                    logger = noOpLogger,
+                    submit = { _, _ -> awaitCancellation() }
+                )
+
+            val results =
+                submitter.submitTransactions(
+                    transactions = listOf(transaction),
+                    endpoints = listOf(endpoint("manual.example.com")),
+                    logTag = LOG_TAG
+                )
+
+            val result = assertIs<TransactionSubmitResult.Failure>(results.single())
+            assertEquals(true, result.grpcError)
+            assertEquals("Timed out submitting to endpoints", result.description)
+        }
+
+    @Test
     fun automaticModeReturnsFirstSuccessfulEndpoint() =
         runTest {
             val first = endpoint("first.example.com")
@@ -122,6 +146,7 @@ class MultiEndpointTransactionSubmitterTest {
             val result = assertIs<TransactionSubmitResult.Failure>(results.single())
             assertEquals(false, result.grpcError)
             assertEquals(18, result.code)
+            assertEquals("second.example.com:443: failure 18", result.description)
         }
 
     @Test
@@ -152,6 +177,7 @@ class MultiEndpointTransactionSubmitterTest {
             val result = assertIs<TransactionSubmitResult.Failure>(results.single())
             assertEquals(false, result.grpcError)
             assertEquals(18, result.code)
+            assertEquals("failed.example.com:443: failure 18", result.description)
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)
