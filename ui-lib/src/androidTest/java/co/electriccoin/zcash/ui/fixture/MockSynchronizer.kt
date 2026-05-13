@@ -230,11 +230,10 @@ internal class MockSynchronizer(
     override suspend fun validateServerEndpoint(
         context: Context,
         endpoint: LightWalletEndpoint
-    ): ServerValidation {
-        return serverValidation ?: error(
+    ): ServerValidation =
+        serverValidation ?: error(
             "Intentionally not implemented in ${MockSynchronizer::class.simpleName} implementation."
         )
-    }
 
     override suspend fun getExistingDataDbFilePath(
         context: Context,
