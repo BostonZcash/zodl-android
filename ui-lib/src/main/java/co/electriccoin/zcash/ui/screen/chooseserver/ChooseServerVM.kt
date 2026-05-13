@@ -475,7 +475,7 @@ class ChooseServerVM(
         }
     }
 
-    private fun getManualServerSelectionOrShowError(persistedSelection: ServerSelection): ServerSelection? {
+    private suspend fun getManualServerSelectionOrShowError(persistedSelection: ServerSelection): ServerSelection? {
         val selectedEndpoint = userEndpointSelection.value
         val endpoint =
             when (selectedEndpoint) {
