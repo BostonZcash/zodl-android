@@ -41,6 +41,22 @@ class ServerSelectionTest {
 
     @Test
     @SmallTest
+    fun nonDefaultKnownPersistedEndpointMigratesToManualMode() {
+        val endpoint = knownEndpoints[1]
+
+        val selection =
+            ServerSelection.fromPersistedEndpoint(
+                endpoint = endpoint,
+                knownEndpoints = knownEndpoints
+            )
+
+        assertEquals(ConnectionMode.MANUAL, selection.mode)
+        assertEquals(endpoint, selection.endpoint)
+        assertFalse(selection.isCustom)
+    }
+
+    @Test
+    @SmallTest
     fun missingPersistedEndpointMigratesToAutomaticMode() {
         val selection =
             ServerSelection.fromPersistedEndpoint(
@@ -76,7 +92,8 @@ class ServerSelectionTest {
     companion object {
         private val knownEndpoints =
             listOf(
-                LightWalletEndpoint(host = "zec.rocks", port = 443, isSecure = true)
+                LightWalletEndpoint(host = "zec.rocks", port = 443, isSecure = true),
+                LightWalletEndpoint(host = "eu.zec.rocks", port = 443, isSecure = true)
             )
     }
 }

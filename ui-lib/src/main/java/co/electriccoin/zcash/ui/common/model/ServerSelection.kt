@@ -45,10 +45,10 @@ data class ServerSelection(
             endpoint: LightWalletEndpoint?,
             knownEndpoints: List<LightWalletEndpoint>
         ) = endpoint?.let {
-            if (knownEndpoints.contains(it)) {
-                automatic()
-            } else {
-                manual(endpoint = it, isCustom = true)
+            when {
+                it == knownEndpoints.firstOrNull() -> automatic()
+                knownEndpoints.contains(it) -> manual(endpoint = it, isCustom = false)
+                else -> manual(endpoint = it, isCustom = true)
             }
         } ?: automatic()
 
