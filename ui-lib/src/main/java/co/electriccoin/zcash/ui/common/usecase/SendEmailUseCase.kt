@@ -119,6 +119,17 @@ class SendEmailUseCase(
      * Sends a support email for gRPC failure.
      */
     operator fun invoke(submitResult: SubmitResult.GrpcFailure) {
+        val reportDescription =
+            when (submitResult.reason) {
+                SubmitResult.GrpcFailure.Reason.TIMEOUT -> {
+                    context.getString(R.string.send_confirmation_pending_timeout_subtitle)
+                }
+
+                null -> {
+                    submitResult.description
+                }
+            }
+
         sendSupportEmail(
             subject = context.getString(R.string.app_name),
             messageBody =
@@ -126,8 +137,7 @@ class SendEmailUseCase(
                     body =
                         buildString {
                             appendLine("Grpc failure")
-                            submitResult
-                                .reportDescription()
+                            reportDescription
                                 ?.takeIf { it.isNotBlank() }
                                 ?.let {
                                     appendLine()
@@ -138,17 +148,6 @@ class SendEmailUseCase(
                 )
         )
     }
-
-    private fun SubmitResult.GrpcFailure.reportDescription() =
-        when (reason) {
-            SubmitResult.GrpcFailure.Reason.TIMEOUT -> {
-                context.getString(R.string.send_confirmation_pending_timeout_subtitle)
-            }
-
-            null -> {
-                description
-            }
-        }
 
     /**
      * Sends a support email for transaction submission error.

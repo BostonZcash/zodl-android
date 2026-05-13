@@ -384,36 +384,9 @@ internal fun List<TransactionSubmitResult>.toSubmitResult(): SubmitResult {
 
     val successCount = count { it is TransactionSubmitResult.Success }
     val txIds = map { it.txIdString() }
-    val statuses =
-        map {
-            when (it) {
-                is TransactionSubmitResult.Success -> {
-                    "success"
-                }
-
-                is TransactionSubmitResult.Failure -> {
-                    if (it.grpcError) {
-                        it.description.orEmpty()
-                    } else {
-                        "code: ${it.code} desc: ${it.description}"
-                    }
-                }
-
-                is TransactionSubmitResult.NotAttempted -> {
-                    "notAttempted"
-                }
-            }
-        }
-    val resubmittableFailures =
-        mapNotNull {
-            when (it) {
-                is TransactionSubmitResult.Failure -> it.grpcError
-                is TransactionSubmitResult.NotAttempted -> null
-                is TransactionSubmitResult.Success -> null
-            }
-        }
+    val failures = filterIsInstance<TransactionSubmitResult.Failure>()
     val grpcFailureDescription =
-        filterIsInstance<TransactionSubmitResult.Failure>()
+        failures
             .lastOrNull { it.grpcError }
             ?.description
     val grpcFailureReason =
@@ -424,13 +397,13 @@ internal fun List<TransactionSubmitResult>.toSubmitResult(): SubmitResult {
         }
 
     val (errCode, errDesc) =
-        filterIsInstance<TransactionSubmitResult.Failure>()
+        failures
             .lastOrNull { !it.grpcError }
             ?.let { it.code to it.description } ?: (0 to "")
 
     return when (successCount) {
         0 -> {
-            if (resubmittableFailures.all { it }) {
+            if (failures.all { it.grpcError }) {
                 SubmitResult.GrpcFailure(
                     txIds = txIds,
                     description = grpcFailureDescription,
@@ -446,10 +419,29 @@ internal fun List<TransactionSubmitResult>.toSubmitResult(): SubmitResult {
         }
 
         else -> {
-            SubmitResult.Partial(txIds = txIds, statuses = statuses)
+            SubmitResult.Partial(txIds = txIds, statuses = map { it.statusDescription() })
         }
     }
 }
+
+private fun TransactionSubmitResult.statusDescription() =
+    when (this) {
+        is TransactionSubmitResult.Success -> {
+            "success"
+        }
+
+        is TransactionSubmitResult.Failure -> {
+            if (grpcError) {
+                description.orEmpty()
+            } else {
+                "code: $code desc: $description"
+            }
+        }
+
+        is TransactionSubmitResult.NotAttempted -> {
+            "notAttempted"
+        }
+    }
 
 sealed interface TransactionProposal {
     val proposal: Proposal
