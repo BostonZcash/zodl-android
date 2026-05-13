@@ -19,6 +19,7 @@ import co.electriccoin.zcash.ui.common.model.FastestServersState
 import co.electriccoin.zcash.ui.common.model.OnboardingState
 import co.electriccoin.zcash.ui.common.model.ServerSelection
 import co.electriccoin.zcash.ui.common.model.WalletRestoringState
+import co.electriccoin.zcash.ui.common.provider.ApplicationStateProvider
 import co.electriccoin.zcash.ui.common.provider.LightWalletEndpointProvider
 import co.electriccoin.zcash.ui.common.provider.PersistableWalletProvider
 import co.electriccoin.zcash.ui.common.provider.ServerSelectionProvider
@@ -32,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -80,6 +82,7 @@ interface WalletRepository {
 class WalletRepositoryImpl(
     configurationRepository: ConfigurationRepository,
     private val application: Application,
+    private val applicationStateProvider: ApplicationStateProvider,
     private val lightWalletEndpointProvider: LightWalletEndpointProvider,
     private val persistableWalletProvider: PersistableWalletProvider,
     private val serverSelectionProvider: ServerSelectionProvider,
@@ -226,9 +229,7 @@ class WalletRepositoryImpl(
 
     override fun refreshFastestServers() {
         scope.launch {
-            if (!fastestEndpoints.first().isLoading) {
-                refreshFastestServersRequest.emit(Unit)
-            }
+            refreshFastestServersIfIdle()
         }
     }
 
@@ -282,7 +283,7 @@ class WalletRepositoryImpl(
                 try {
                     when (selection.mode) {
                         ConnectionMode.AUTOMATIC -> {
-                            updateAutomaticEndpointOnce()
+                            keepAutomaticEndpointUpdated()
                         }
 
                         ConnectionMode.MANUAL -> {
@@ -297,16 +298,42 @@ class WalletRepositoryImpl(
             }
     }
 
-    private suspend fun updateAutomaticEndpointOnce() {
-        val endpoint =
-            fastestEndpoints
-                .first { !it.isLoading }
-                .servers
-                ?.firstOrNull()
-                ?: return
+    private suspend fun keepAutomaticEndpointUpdated() =
+        coroutineScope {
+            launch {
+                refreshFastestServersOnForeground()
+            }
 
-        updateWalletEndpointInternal(endpoint) {
-            serverSelectionProvider.getServerSelection()?.mode == ConnectionMode.AUTOMATIC
+            fastestEndpoints
+                .collectLatest { fastestServers ->
+                    if (fastestServers.isLoading) return@collectLatest
+                    val endpoint = fastestServers.servers?.firstOrNull() ?: return@collectLatest
+
+                    try {
+                        updateWalletEndpointInternal(endpoint) {
+                            serverSelectionProvider.getServerSelection()?.mode == ConnectionMode.AUTOMATIC
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Twig.error(e) { "Unable to update selected server endpoint" }
+                    }
+                }
+        }
+
+    private suspend fun refreshFastestServersOnForeground() {
+        applicationStateProvider
+            .observeOnForeground()
+            .collect {
+                if (serverSelectionProvider.getServerSelection()?.mode == ConnectionMode.AUTOMATIC) {
+                    refreshFastestServersIfIdle()
+                }
+            }
+    }
+
+    private suspend fun refreshFastestServersIfIdle() {
+        if (!fastestEndpoints.first().isLoading) {
+            refreshFastestServersRequest.emit(Unit)
         }
     }
 }
