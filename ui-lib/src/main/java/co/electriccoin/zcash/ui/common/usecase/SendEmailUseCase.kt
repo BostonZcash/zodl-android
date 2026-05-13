@@ -126,7 +126,7 @@ class SendEmailUseCase(
                     body =
                         buildString {
                             appendLine("Grpc failure")
-                            submitResult.description
+                            submitResult.reportDescription()
                                 ?.takeIf { it.isNotBlank() }
                                 ?.let {
                                     appendLine()
@@ -137,6 +137,17 @@ class SendEmailUseCase(
                 )
         )
     }
+
+    private fun SubmitResult.GrpcFailure.reportDescription() =
+        when (reason) {
+            SubmitResult.GrpcFailure.Reason.TIMEOUT -> {
+                context.getString(R.string.send_confirmation_pending_timeout_subtitle)
+            }
+
+            null -> {
+                description
+            }
+        }
 
     /**
      * Sends a support email for transaction submission error.

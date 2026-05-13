@@ -15,8 +15,13 @@ sealed interface SubmitResult {
 
     data class GrpcFailure(
         override val txIds: List<String>,
-        val description: String? = null
-    ) : SubmitResult
+        val description: String? = null,
+        val reason: Reason? = null
+    ) : SubmitResult {
+        enum class Reason {
+            TIMEOUT
+        }
+    }
 
     data class Partial(
         override val txIds: List<String>,

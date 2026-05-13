@@ -266,9 +266,7 @@ class TransactionProgressVM(
                     }
                 },
             subtitle =
-                result.description
-                    ?.takeIf { it.isNotBlank() }
-                    ?.let { stringRes(it).withStyle() }
+                result.pendingDescription()
                     ?: when (proposal) {
                         is Zip321TransactionProposal,
                         is RegularTransactionProposal -> {
@@ -343,6 +341,19 @@ class TransactionProgressVM(
             image = imageRes(listOf(R.drawable.ic_fist_punch, R.drawable.ic_face_star).random())
         )
     }
+
+    private fun SubmitResult.GrpcFailure.pendingDescription(): StyledStringResource? =
+        when (reason) {
+            SubmitResult.GrpcFailure.Reason.TIMEOUT -> {
+                stringRes(R.string.send_confirmation_pending_timeout_subtitle).withStyle()
+            }
+
+            null -> {
+                description
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { stringRes(it).withStyle() }
+            }
+        }
 
     private fun createNonResubmittableErrorState(
         proposal: TransactionProposal,

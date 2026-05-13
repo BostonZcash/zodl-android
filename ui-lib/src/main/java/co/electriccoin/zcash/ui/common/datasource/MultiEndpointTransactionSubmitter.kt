@@ -343,7 +343,7 @@ private const val MULTI_SUBMIT_GRACE_PERIOD_MILLIS = 5_000L
 private const val MULTI_SUBMIT_GLOBAL_TIMEOUT_MILLIS = 30_000L
 private const val MULTI_SUBMIT_TIMEOUT_DRAIN_MILLIS = 2_000L
 private const val MULTI_SUBMIT_GRPC_FAILURE_CODE = -1
-private const val MULTI_SUBMIT_TIMEOUT_DESCRIPTION =
+internal const val MULTI_SUBMIT_TIMEOUT_DESCRIPTION =
     "Timed out waiting for endpoint response; transaction may still have been broadcast"
 
 private data class BroadcastSubmissionState(
