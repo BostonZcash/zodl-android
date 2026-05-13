@@ -398,7 +398,7 @@ internal fun List<TransactionSubmitResult>.toSubmitResult(): SubmitResult {
 
     val (errCode, errDesc) =
         failures
-            .lastOrNull { !it.grpcError }
+            .firstOrNull { !it.grpcError }
             ?.let { it.code to it.description } ?: (0 to "")
 
     return when (successCount) {

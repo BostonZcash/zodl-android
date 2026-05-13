@@ -259,8 +259,8 @@ internal class MultiEndpointTransactionSubmitter(
             }
 
         return failures
-            .lastOrNull { !it.grpcError }
-            ?: failures.lastOrNull()
+            .firstOrNull { !it.grpcError }
+            ?: failures.firstOrNull()
             ?: createGrpcFailure(transaction, "All endpoints rejected transaction")
     }
 

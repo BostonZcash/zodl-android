@@ -157,7 +157,7 @@ class MultiEndpointTransactionSubmitterTest {
         }
 
     @Test
-    fun automaticModeReturnsBestFailureWhenAllEndpointsFailFast() =
+    fun automaticModeReturnsFirstNonGrpcFailureWhenAllEndpointsFailFast() =
         runTest {
             val transaction = transaction(3)
             val submitter =
@@ -168,7 +168,7 @@ class MultiEndpointTransactionSubmitterTest {
                         when (submittedEndpoint.host) {
                             "first.example.com" -> failure(transaction, code = 1, grpcError = true)
                             "second.example.com" -> failure(transaction, code = 18, grpcError = false)
-                            "third.example.com" -> failure(transaction, code = 19, grpcError = true)
+                            "third.example.com" -> failure(transaction, code = 19, grpcError = false)
                             else -> error("Unexpected endpoint $submittedEndpoint")
                         }
                     }
@@ -315,6 +315,27 @@ class MultiEndpointTransactionSubmitterTest {
                         thirdTransaction.txIdString()
                     ),
                 statuses = listOf("success", "failure -1", "notAttempted")
+            ),
+            result
+        )
+    }
+
+    @Test
+    fun nonGrpcFailuresMapToFirstFailureDetail() {
+        val firstTransaction = transaction(13)
+        val secondTransaction = transaction(14)
+
+        val result =
+            listOf(
+                failure(firstTransaction, code = 18, grpcError = false),
+                failure(secondTransaction, code = 19, grpcError = false)
+            ).toSubmitResult()
+
+        assertEquals(
+            SubmitResult.Failure(
+                txIds = listOf(firstTransaction.txIdString(), secondTransaction.txIdString()),
+                code = 18,
+                description = "failure 18"
             ),
             result
         )
