@@ -492,25 +492,23 @@ class ChooseServerVM(
                 }
             }
 
-        return endpoint?.let {
-            ServerSelection.manual(
-                endpoint = it,
-                isCustom =
-                    when (selectedEndpoint) {
-                        Selection.Custom,
-                        is Selection.Endpoint -> {
-                            !availableServers.contains(it)
-                        }
+        return endpoint?.let { endpoint ->
+            when (selectedEndpoint) {
+                Selection.Custom,
+                is Selection.Endpoint -> {
+                    ServerSelection.manual(
+                        endpoint = endpoint,
+                        isCustom = !availableServers.contains(endpoint)
+                    )
+                }
 
-                        null -> {
-                            if (persistedSelection.endpoint == it) {
-                                persistedSelection.isCustom || !availableServers.contains(it)
-                            } else {
-                                !availableServers.contains(it)
-                            }
-                        }
-                    }
-            )
+                null -> {
+                    endpoint.toCurrentManualServerSelection(
+                        persistedSelection = persistedSelection,
+                        availableServers = availableServers
+                    )
+                }
+            }
         }
     }
 
@@ -588,4 +586,17 @@ private data class SaveButtonInput(
     val modeSelection: ConnectionMode?,
     val isSaveInProgress: Boolean,
     val customEndpointText: String?,
+)
+
+internal fun LightWalletEndpoint.toCurrentManualServerSelection(
+    persistedSelection: ServerSelection,
+    availableServers: List<LightWalletEndpoint>
+) = ServerSelection.manual(
+    endpoint = this,
+    isCustom =
+        if (persistedSelection.endpoint == this) {
+            persistedSelection.isCustom || !availableServers.contains(this)
+        } else {
+            !availableServers.contains(this)
+        }
 )
