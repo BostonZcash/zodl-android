@@ -266,21 +266,24 @@ class TransactionProgressVM(
                     }
                 },
             subtitle =
-                when (proposal) {
-                    is Zip321TransactionProposal,
-                    is RegularTransactionProposal -> {
-                        stringRes(R.string.send_confirmation_pending_transaction_subtitle)
-                    }
+                result.description
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { stringRes(it).withStyle() }
+                    ?: when (proposal) {
+                        is Zip321TransactionProposal,
+                        is RegularTransactionProposal -> {
+                            stringRes(R.string.send_confirmation_pending_transaction_subtitle)
+                        }
 
-                    is ExactInputSwapTransactionProposal,
-                    is ExactOutputSwapTransactionProposal -> {
-                        stringRes(R.string.send_confirmation_pending_swap_subtitle)
-                    }
+                        is ExactInputSwapTransactionProposal,
+                        is ExactOutputSwapTransactionProposal -> {
+                            stringRes(R.string.send_confirmation_pending_swap_subtitle)
+                        }
 
-                    is ShieldTransactionProposal -> {
-                        stringRes(R.string.send_confirmation_pending_shielding_subtitle)
-                    }
-                }.withStyle(),
+                        is ShieldTransactionProposal -> {
+                            stringRes(R.string.send_confirmation_pending_shielding_subtitle)
+                        }
+                    }.withStyle(),
             middleButton =
                 when (proposal) {
                     is ExactInputSwapTransactionProposal,

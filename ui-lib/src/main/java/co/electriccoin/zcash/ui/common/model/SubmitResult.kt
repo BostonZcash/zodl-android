@@ -14,7 +14,8 @@ sealed interface SubmitResult {
     ) : NonResubmittableError
 
     data class GrpcFailure(
-        override val txIds: List<String>
+        override val txIds: List<String>,
+        val description: String? = null
     ) : SubmitResult
 
     data class Partial(

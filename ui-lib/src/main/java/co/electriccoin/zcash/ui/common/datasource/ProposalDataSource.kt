@@ -336,6 +336,11 @@ class ProposalDataSourceImpl(
                             is TransactionSubmitResult.Success -> null
                         }
                     }
+            val grpcFailureDescription =
+                submitResults
+                    .filterIsInstance<TransactionSubmitResult.Failure>()
+                    .lastOrNull { it.grpcError }
+                    ?.description
 
             val (errCode, errDesc) =
                 submitResults
@@ -347,7 +352,7 @@ class ProposalDataSourceImpl(
                 when (successCount) {
                     0 -> {
                         if (resubmittableFailures.all { it }) {
-                            SubmitResult.GrpcFailure(txIds = txIds)
+                            SubmitResult.GrpcFailure(txIds = txIds, description = grpcFailureDescription)
                         } else {
                             SubmitResult.Failure(txIds = txIds, code = errCode, description = errDesc)
                         }
@@ -359,7 +364,7 @@ class ProposalDataSourceImpl(
 
                     else -> {
                         if (resubmittableFailures.all { it }) {
-                            SubmitResult.GrpcFailure(txIds = txIds)
+                            SubmitResult.GrpcFailure(txIds = txIds, description = grpcFailureDescription)
                         } else {
                             SubmitResult.Partial(txIds = txIds, statuses = statuses)
                         }

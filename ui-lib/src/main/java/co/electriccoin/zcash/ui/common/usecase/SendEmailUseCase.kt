@@ -123,7 +123,16 @@ class SendEmailUseCase(
             subject = context.getString(R.string.app_name),
             messageBody =
                 EmailUtil.formatMessage(
-                    body = "Grpc failure",
+                    body =
+                        buildString {
+                            appendLine("Grpc failure")
+                            submitResult.description
+                                ?.takeIf { it.isNotBlank() }
+                                ?.let {
+                                    appendLine()
+                                    appendLine(it)
+                                }
+                        },
                     supportInfo = ""
                 )
         )
