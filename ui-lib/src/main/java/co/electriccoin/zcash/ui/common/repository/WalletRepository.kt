@@ -206,7 +206,9 @@ class WalletRepositoryImpl(
                     endpoint = lightWalletEndpointProvider.getDefaultEndpoint(),
                     walletInitMode = WalletInitMode.NewWallet,
                 )
-            persistWalletInternal(newWallet)
+            endpointUpdateMutex.withLock {
+                persistWalletInternal(newWallet)
+            }
             walletRestoringStateProvider.store(WalletRestoringState.INITIATING)
         }
     }
@@ -241,7 +243,9 @@ class WalletRepositoryImpl(
                     seedPhrase = seedPhrase,
                     walletInitMode = WalletInitMode.RestoreWallet,
                 )
-            persistWalletInternal(restoredWallet)
+            endpointUpdateMutex.withLock {
+                persistWalletInternal(restoredWallet)
+            }
             walletRestoringStateProvider.store(WalletRestoringState.RESTORING)
             walletBackupFlagStorageProvider.store(true)
             restoreTimestampDataSource.getOrCreate()
