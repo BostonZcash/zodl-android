@@ -193,7 +193,7 @@ class MultiEndpointTransactionSubmitterTest {
         }
 
     @Test
-    fun timeoutPreservesCompletedEndpointFailure() =
+    fun timeoutWithIncompleteEndpointReportsGrpcFailure() =
         runTest {
             val transaction = transaction(4)
             val submitter =
@@ -219,9 +219,17 @@ class MultiEndpointTransactionSubmitterTest {
                 )
 
             val result = assertIs<TransactionSubmitResult.Failure>(results.single())
-            assertEquals(false, result.grpcError)
-            assertEquals(18, result.code)
-            assertEquals("failed.example.com:443: failure 18", result.description)
+            assertEquals(true, result.grpcError)
+            assertEquals(-1, result.code)
+            assertEquals(MULTI_SUBMIT_TIMEOUT_DESCRIPTION, result.description)
+            assertEquals(
+                SubmitResult.GrpcFailure(
+                    txIds = listOf(transaction.txIdString()),
+                    description = MULTI_SUBMIT_TIMEOUT_DESCRIPTION,
+                    reason = SubmitResult.GrpcFailure.Reason.TIMEOUT
+                ),
+                results.toSubmitResult()
+            )
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)

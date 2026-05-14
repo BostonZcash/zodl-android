@@ -159,7 +159,8 @@ internal class MultiEndpointTransactionSubmitter(
                 val timeoutResult =
                     selectTimeoutCompletion(
                         transaction = transaction,
-                        submissions = completedSubmissions
+                        submissions = completedSubmissions,
+                        endpointCount = endpoints.size
                     )
                 if (completion.complete(timeoutResult)) {
                     logger.error { "$logTag Timed out waiting for any endpoint to accept $transactionLabel." }
@@ -271,7 +272,8 @@ internal class MultiEndpointTransactionSubmitter(
 
     private fun selectTimeoutCompletion(
         transaction: CreatedTransaction,
-        submissions: List<EndpointSubmission>
+        submissions: List<EndpointSubmission>,
+        endpointCount: Int
     ): BroadcastCompletion =
         submissions
             .firstNotNullOfOrNull { submission ->
@@ -283,7 +285,7 @@ internal class MultiEndpointTransactionSubmitter(
                 }
             }
             ?: submissions
-                .takeIf { it.isNotEmpty() }
+                .takeIf { it.size >= endpointCount }
                 ?.let {
                     BroadcastCompletion.Rejected(
                         result = selectRejectedResult(transaction, it)
