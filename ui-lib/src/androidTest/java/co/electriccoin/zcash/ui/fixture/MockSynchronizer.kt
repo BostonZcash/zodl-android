@@ -75,6 +75,9 @@ internal class MockSynchronizer : CloseableSynchronizer {
     override val networkHeight: StateFlow<BlockHeight?>
         get() = error("Intentionally not implemented in ${MockSynchronizer::class.simpleName} implementation.")
 
+    override val fullyScannedHeight: StateFlow<BlockHeight?>
+        get() = error("Intentionally not implemented in ${MockSynchronizer::class.simpleName} implementation.")
+
     override val walletBalances: StateFlow<Map<AccountUuid, AccountBalance>?>
         get() = error("Intentionally not implemented in ${MockSynchronizer::class.simpleName} implementation.")
 
@@ -201,6 +204,14 @@ internal class MockSynchronizer : CloseableSynchronizer {
         account: Account,
         since: BlockHeight
     ): Int? {
+        error("Intentionally not implemented in ${MockSynchronizer::class.simpleName} implementation.")
+    }
+
+    override suspend fun getWalletDbPath(): String {
+        error("Intentionally not implemented in ${MockSynchronizer::class.simpleName} implementation.")
+    }
+
+    override suspend fun getTreeState(height: BlockHeight): ByteArray {
         error("Intentionally not implemented in ${MockSynchronizer::class.simpleName} implementation.")
     }
 
