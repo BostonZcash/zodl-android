@@ -189,7 +189,7 @@ class MultiEndpointTransactionSubmitterTest {
             val result = assertIs<TransactionSubmitResult.Failure>(results.single())
             assertEquals(false, result.grpcError)
             assertEquals(18, result.code)
-            assertEquals("second.example.com:443: failure 18", result.description)
+            assertEquals("failure 18", result.description)
         }
 
     @Test
@@ -296,9 +296,62 @@ class MultiEndpointTransactionSubmitterTest {
                     logTag = LOG_TAG
                 )
 
-            assertEquals(firstFailure.copy(description = "manual.example.com:443: failure 18"), results[0])
+            assertEquals(firstFailure, results[0])
             assertEquals(TransactionSubmitResult.NotAttempted(secondTransaction.txId), results[1])
             assertEquals(1, submissions.get())
+        }
+
+    @Test
+    fun endpointHostAndPortAreNotLoggedOrAddedToFailureDescription() =
+        runTest {
+            val logger = RecordingLogger()
+            val transaction = transaction(19)
+            val submitter =
+                MultiEndpointTransactionSubmitter(
+                    scope = backgroundScope,
+                    logger = logger,
+                    submit = { _, _ ->
+                        failure(transaction, code = 18, grpcError = false)
+                    }
+                )
+
+            val results =
+                submitter.submitTransactions(
+                    transactions = listOf(transaction),
+                    endpoints = listOf(endpoint("private.example.com")),
+                    logTag = LOG_TAG
+                )
+
+            val result = assertIs<TransactionSubmitResult.Failure>(results.single())
+            assertEquals("failure 18", result.description)
+            assertEquals(false, logger.messages.any { it.contains("private.example.com") || it.contains(":443") })
+        }
+
+    @Test
+    fun endpointExceptionMessageIsNotLoggedOrReported() =
+        runTest {
+            val logger = RecordingLogger()
+            val transaction = transaction(20)
+            val submitter =
+                MultiEndpointTransactionSubmitter(
+                    scope = backgroundScope,
+                    logger = logger,
+                    submit = { _, _ ->
+                        error("private.example.com:443 failed")
+                    }
+                )
+
+            val results =
+                submitter.submitTransactions(
+                    transactions = listOf(transaction),
+                    endpoints = listOf(endpoint("private.example.com")),
+                    logTag = LOG_TAG
+                )
+
+            val result = assertIs<TransactionSubmitResult.Failure>(results.single())
+            assertEquals(true, result.grpcError)
+            assertEquals("Endpoint submission failed", result.description)
+            assertEquals(false, logger.messages.any { it.contains("private.example.com") || it.contains(":443") })
         }
 
     @Test
@@ -436,12 +489,23 @@ class MultiEndpointTransactionSubmitterTest {
 
                 override fun warn(message: () -> String) = Unit
 
-                override fun warn(
-                    throwable: Throwable,
-                    message: () -> String
-                ) = Unit
-
                 override fun error(message: () -> String) = Unit
             }
+    }
+}
+
+private class RecordingLogger : MultiEndpointTransactionSubmitterLogger {
+    val messages: MutableList<String> = Collections.synchronizedList(mutableListOf())
+
+    override fun info(message: () -> String) {
+        messages += message()
+    }
+
+    override fun warn(message: () -> String) {
+        messages += message()
+    }
+
+    override fun error(message: () -> String) {
+        messages += message()
     }
 }

@@ -67,7 +67,7 @@ internal class MultiEndpointTransactionSubmitter(
 
         if (endpoints.size == 1) {
             logger.info {
-                "$logTag Submitting transaction ${index + 1}/$transactionCount to ${endpoints.first().serverString()}."
+                "$logTag Submitting $transactionLabel to endpoint 1/1."
             }
         } else {
             logger.info {
@@ -93,15 +93,18 @@ internal class MultiEndpointTransactionSubmitter(
         val failureCount = AtomicInteger(0)
         val failures = ConcurrentLinkedQueue<EndpointSubmission>()
         val jobs =
-            endpoints.map { endpoint ->
+            endpoints.mapIndexed { endpointIndex, endpoint ->
+                val endpointLabel = endpointLabel(endpointIndex, endpoints.size)
+
                 scope
                     .async {
                         EndpointSubmission(
-                            endpoint = endpoint,
+                            endpointLabel = endpointLabel,
                             result =
                                 submitToEndpoint(
                                     transaction = transaction,
                                     endpoint = endpoint,
+                                    endpointLabel = endpointLabel,
                                     transactionLabel = transactionLabel,
                                     logTag = logTag
                                 )
@@ -115,8 +118,8 @@ internal class MultiEndpointTransactionSubmitter(
                                     runCatching { job.await() }
                                         .getOrElse {
                                             EndpointSubmission(
-                                                endpoint = endpoint,
-                                                result = createGrpcFailure(transaction, it.message)
+                                                endpointLabel = endpointLabel,
+                                                result = createGrpcFailure(transaction, SUBMIT_EXCEPTION_DESCRIPTION)
                                             )
                                         }
 
@@ -124,7 +127,7 @@ internal class MultiEndpointTransactionSubmitter(
                                     is TransactionSubmitResult.Success -> {
                                         completion.complete(
                                             BroadcastCompletion.Accepted(
-                                                endpoint = submission.endpoint,
+                                                endpointLabel = submission.endpointLabel,
                                                 result = result
                                             )
                                         )
@@ -191,7 +194,7 @@ internal class MultiEndpointTransactionSubmitter(
             when (val result = state.completion.await()) {
                 is BroadcastCompletion.Accepted -> {
                     logger.info {
-                        "$logTag $transactionLabel accepted by ${result.endpoint.serverString()}."
+                        "$logTag $transactionLabel accepted by ${result.endpointLabel}."
                     }
                     state.cancelAfterGracePeriod()
                     result.result
@@ -226,6 +229,7 @@ internal class MultiEndpointTransactionSubmitter(
     private suspend fun submitToEndpoint(
         transaction: CreatedTransaction,
         endpoint: LightWalletEndpoint,
+        endpointLabel: String,
         transactionLabel: String,
         logTag: String
     ): TransactionSubmitResult =
@@ -233,26 +237,25 @@ internal class MultiEndpointTransactionSubmitter(
             val result = submit(transaction, endpoint)
             when (result) {
                 is TransactionSubmitResult.Success -> {
-                    logger.info { "$logTag ${endpoint.serverString()} SUCCESS $transactionLabel." }
+                    logger.info { "$logTag $endpointLabel SUCCESS $transactionLabel." }
                 }
 
                 is TransactionSubmitResult.Failure -> {
                     logger.warn {
-                        "$logTag ${endpoint.serverString()} FAILED $transactionLabel: " +
-                            "${result.code} ${result.description}"
+                        "$logTag $endpointLabel FAILED $transactionLabel: code=${result.code} grpc=${result.grpcError}"
                     }
                 }
 
                 is TransactionSubmitResult.NotAttempted -> {
-                    logger.warn { "$logTag ${endpoint.serverString()} NOT_ATTEMPTED $transactionLabel." }
+                    logger.warn { "$logTag $endpointLabel NOT_ATTEMPTED $transactionLabel." }
                 }
             }
             result
         } catch (e: CancellationException) {
             throw e
-        } catch (e: Exception) {
-            logger.warn(e) { "$logTag ${endpoint.serverString()} FAILED $transactionLabel." }
-            createGrpcFailure(transaction, e.message)
+        } catch (_: Exception) {
+            logger.warn { "$logTag $endpointLabel FAILED $transactionLabel with exception." }
+            createGrpcFailure(transaction, SUBMIT_EXCEPTION_DESCRIPTION)
         }
 
     private fun selectRejectedResult(
@@ -261,7 +264,7 @@ internal class MultiEndpointTransactionSubmitter(
     ): TransactionSubmitResult {
         val failures =
             submissions.mapNotNull { submission ->
-                (submission.result as? TransactionSubmitResult.Failure)?.withEndpoint(submission.endpoint)
+                submission.result as? TransactionSubmitResult.Failure
             }
 
         return failures
@@ -279,7 +282,7 @@ internal class MultiEndpointTransactionSubmitter(
             .firstNotNullOfOrNull { submission ->
                 (submission.result as? TransactionSubmitResult.Success)?.let {
                     BroadcastCompletion.Accepted(
-                        endpoint = submission.endpoint,
+                        endpointLabel = submission.endpointLabel,
                         result = it
                     )
                 }
@@ -313,22 +316,12 @@ private suspend fun List<Deferred<EndpointSubmission>>.completedSubmissions() =
         }
     }
 
-private fun LightWalletEndpoint.serverString() = "$host:$port"
-
-private fun TransactionSubmitResult.Failure.withEndpoint(endpoint: LightWalletEndpoint) =
-    copy(
-        description = description?.let { "${endpoint.serverString()}: $it" } ?: endpoint.serverString()
-    )
+private fun endpointLabel(index: Int, count: Int) = "endpoint ${index + 1}/$count"
 
 internal interface MultiEndpointTransactionSubmitterLogger {
     fun info(message: () -> String)
 
     fun warn(message: () -> String)
-
-    fun warn(
-        throwable: Throwable,
-        message: () -> String
-    )
 
     fun error(message: () -> String)
 }
@@ -338,11 +331,6 @@ private object TwigMultiEndpointTransactionSubmitterLogger : MultiEndpointTransa
 
     override fun warn(message: () -> String) = Twig.warn(message)
 
-    override fun warn(
-        throwable: Throwable,
-        message: () -> String
-    ) = Twig.warn(throwable, message)
-
     override fun error(message: () -> String) = Twig.error(message)
 }
 
@@ -350,6 +338,7 @@ private const val MULTI_SUBMIT_GRACE_PERIOD_MILLIS = 5_000L
 private const val MULTI_SUBMIT_GLOBAL_TIMEOUT_MILLIS = 30_000L
 private const val MULTI_SUBMIT_TIMEOUT_DRAIN_MILLIS = 2_000L
 private const val MULTI_SUBMIT_GRPC_FAILURE_CODE = -1
+private const val SUBMIT_EXCEPTION_DESCRIPTION = "Endpoint submission failed"
 internal const val MULTI_SUBMIT_TIMEOUT_DESCRIPTION =
     "Timed out waiting for endpoint response; transaction may still have been broadcast"
 
@@ -360,13 +349,13 @@ private data class BroadcastSubmissionState(
 )
 
 private data class EndpointSubmission(
-    val endpoint: LightWalletEndpoint,
+    val endpointLabel: String,
     val result: TransactionSubmitResult
 )
 
 private sealed interface BroadcastCompletion {
     data class Accepted(
-        val endpoint: LightWalletEndpoint,
+        val endpointLabel: String,
         val result: TransactionSubmitResult.Success
     ) : BroadcastCompletion
 
