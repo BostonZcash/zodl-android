@@ -229,7 +229,7 @@ class WalletRepositoryImpl(
 
     override fun refreshFastestServers() {
         scope.launch {
-            refreshFastestServersIfIdle()
+            refreshFastestServersIfIdle(fastestEndpoints, refreshFastestServersRequest)
         }
     }
 
@@ -301,7 +301,13 @@ class WalletRepositoryImpl(
     private suspend fun keepAutomaticEndpointUpdated() =
         coroutineScope {
             launch {
-                refreshFastestServersOnForeground()
+                applicationStateProvider
+                    .observeOnForeground()
+                    .collect {
+                        if (serverSelectionProvider.getServerSelection()?.mode == ConnectionMode.AUTOMATIC) {
+                            refreshFastestServersIfIdle(fastestEndpoints, refreshFastestServersRequest)
+                        }
+                    }
             }
 
             fastestEndpoints
@@ -309,31 +315,28 @@ class WalletRepositoryImpl(
                     if (fastestServers.isLoading) return@collectLatest
                     val endpoint = fastestServers.servers?.firstOrNull() ?: return@collectLatest
 
-                    try {
-                        updateWalletEndpointInternal(endpoint) {
-                            serverSelectionProvider.getServerSelection()?.mode == ConnectionMode.AUTOMATIC
-                        }
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: Exception) {
-                        Twig.error(e) { "Unable to update selected server endpoint" }
+                    val failure =
+                        runCatching {
+                            updateWalletEndpointInternal(endpoint) {
+                                serverSelectionProvider.getServerSelection()?.mode == ConnectionMode.AUTOMATIC
+                            }
+                        }.exceptionOrNull()
+
+                    when (failure) {
+                        null -> Unit
+                        is CancellationException -> throw failure
+                        is Exception -> Twig.error(failure) { "Unable to update selected server endpoint" }
+                        else -> throw failure
                     }
                 }
         }
+}
 
-    private suspend fun refreshFastestServersOnForeground() {
-        applicationStateProvider
-            .observeOnForeground()
-            .collect {
-                if (serverSelectionProvider.getServerSelection()?.mode == ConnectionMode.AUTOMATIC) {
-                    refreshFastestServersIfIdle()
-                }
-            }
-    }
-
-    private suspend fun refreshFastestServersIfIdle() {
-        if (!fastestEndpoints.first().isLoading) {
-            refreshFastestServersRequest.emit(Unit)
-        }
+private suspend fun refreshFastestServersIfIdle(
+    fastestEndpoints: StateFlow<FastestServersState>,
+    refreshFastestServersRequest: MutableSharedFlow<Unit>
+) {
+    if (!fastestEndpoints.first().isLoading) {
+        refreshFastestServersRequest.emit(Unit)
     }
 }
