@@ -439,7 +439,11 @@ private fun TransactionSubmitResult.statusDescription() =
 
         is TransactionSubmitResult.Failure -> {
             if (grpcError) {
-                description.orEmpty()
+                if (description == MULTI_SUBMIT_TIMEOUT_DESCRIPTION) {
+                    MULTI_SUBMIT_TIMEOUT_DESCRIPTION
+                } else {
+                    MULTI_SUBMIT_GRPC_FAILURE_STATUS
+                }
             } else {
                 "code: $code desc: $description"
             }
@@ -509,3 +513,4 @@ private const val MULTI_SUBMIT_TAG = "[MultiSubmit]"
 private const val MULTI_SUBMIT_PCZT_TAG = "[MultiSubmit/PCZT]"
 private const val MULTI_SUBMIT_EMPTY_TRANSACTION_CODE = -1
 private const val MULTI_SUBMIT_EMPTY_TRANSACTION_DESCRIPTION = "No transactions created"
+private const val MULTI_SUBMIT_GRPC_FAILURE_STATUS = "grpcFailure"

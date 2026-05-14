@@ -375,7 +375,7 @@ class MultiEndpointTransactionSubmitterTest {
                         secondTransaction.txIdString(),
                         thirdTransaction.txIdString()
                     ),
-                statuses = listOf("success", "failure -1", "notAttempted")
+                statuses = listOf("success", "grpcFailure", "notAttempted")
             ),
             result
         )
@@ -435,7 +435,32 @@ class MultiEndpointTransactionSubmitterTest {
         assertEquals(
             SubmitResult.Partial(
                 txIds = listOf(firstTransaction.txIdString(), secondTransaction.txIdString()),
-                statuses = listOf("failure -1", "notAttempted")
+                statuses = listOf("grpcFailure", "notAttempted")
+            ),
+            result
+        )
+    }
+
+    @Test
+    fun grpcFailurePartialStatusDoesNotExposeDescription() {
+        val firstTransaction = transaction(21)
+        val secondTransaction = transaction(22)
+
+        val result =
+            listOf(
+                TransactionSubmitResult.Failure(
+                    txId = firstTransaction.txId,
+                    grpcError = true,
+                    code = -1,
+                    description = "private.example.com:443 failed"
+                ),
+                TransactionSubmitResult.NotAttempted(secondTransaction.txId)
+            ).toSubmitResult()
+
+        assertEquals(
+            SubmitResult.Partial(
+                txIds = listOf(firstTransaction.txIdString(), secondTransaction.txIdString()),
+                statuses = listOf("grpcFailure", "notAttempted")
             ),
             result
         )
