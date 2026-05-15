@@ -141,9 +141,8 @@ internal class MultiEndpointTransactionSubmitter(
             }
         val timeoutJob =
             scope.launch {
-                delay(globalTimeoutMillis)
                 // Let endpoint calls that completed at the deadline publish their result before reporting timeout.
-                delay(timeoutDrainMillis)
+                delay(globalTimeoutMillis + timeoutDrainMillis)
                 if (completion.isCompleted) {
                     return@launch
                 }
