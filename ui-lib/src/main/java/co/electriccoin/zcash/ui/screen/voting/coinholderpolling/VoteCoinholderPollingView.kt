@@ -79,9 +79,7 @@ fun VoteCoinholderPollingView(state: VoteCoinholderPollingState) {
                             .scaffoldPadding(padding),
                     contentPadding =
                         PaddingValues(
-                            start = ZashiDimensions.Spacing.spacing3xl,
                             top = 8.dp,
-                            end = ZashiDimensions.Spacing.spacing3xl,
                             bottom = 40.dp
                         ),
                     verticalArrangement = Arrangement.spacedBy(ZashiDimensions.Spacing.spacing4xl)
@@ -266,7 +264,11 @@ private fun PollActionButton(state: VotePollCardState) {
         state =
             ButtonState(
                 text = actionText,
-                style = ButtonStyle.PRIMARY,
+                style =
+                    when (state.status) {
+                        VotePollCardStatus.ACTIVE -> ButtonStyle.PRIMARY
+                        else -> ButtonStyle.TERTIARY
+                    },
                 isEnabled = state.isActionEnabled,
                 onClick = state.onAction
             ),
@@ -421,7 +423,7 @@ private fun CoinholderPollingPreviewWithRounds() =
                                 roundNumber = 1,
                                 title = stringRes("ZF Grant Funding — Q1 2026"),
                                 description = stringRes(""),
-                                status = VotePollCardStatus.CLOSED,
+                                status = VotePollCardStatus.VOTED,
                                 sessionStatus = SessionStatus.COMPLETED,
                                 isActionEnabled = true,
                                 dateLabel = stringRes("Closed Jan 20"),

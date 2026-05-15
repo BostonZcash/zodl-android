@@ -51,13 +51,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -109,11 +107,7 @@ class VoteCoinholderPollingVM(
         observeSelectedWalletAccount
             .require()
             .map { account -> account.sdkAccount.accountUuid.toVotingAccountScopeId() }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.Eagerly,
-                initialValue = null
-            )
+            .stateIn(this)
 
     init {
         viewModelScope.launch {
@@ -159,8 +153,8 @@ class VoteCoinholderPollingVM(
             val rounds =
                 when {
                     !apiSnapshotWithConfig.isSelectedConfigLoaded -> null
-                    roundsLceState.loading -> null
                     apiSnapshot.rounds.isNotEmpty() -> apiSnapshot.rounds
+                    roundsLceState.loading -> null
                     roundsLceState.content is LceContent.Success -> emptyList()
                     else -> null
                 }
@@ -243,10 +237,7 @@ class VoteCoinholderPollingVM(
                 configErrorSheet,
                 unverifiedPollWarningSheet
             ) { content, refreshPending, configPending, configSheet, unverifiedSheet ->
-                // The poll-list VM is retained behind deeper voting screens. Suppress old
-                // content until ON_RESUME starts the refresh, otherwise Compose can draw a
-                // stale poll card for one frame before the loading state arrives.
-                content.takeUnless { refreshPending || configPending }?.copy(
+                content?.copy(
                     configErrorSheet = configSheet,
                     unverifiedPollWarningSheet = unverifiedSheet
                 )
@@ -313,7 +304,9 @@ class VoteCoinholderPollingVM(
     }
 
     fun onScreenEntered() {
-        refreshVotingData()
+        roundsLce.execute {
+            refreshVotingDataInternal(resetVisibleConfigError = true, softRefresh = true)
+        }
         screenRefreshPending.value = false
     }
 
@@ -482,11 +475,22 @@ class VoteCoinholderPollingVM(
         }
     }
 
-    private suspend fun refreshVotingDataInternal(resetVisibleConfigError: Boolean): List<VotingRound> {
+    private suspend fun refreshVotingDataInternal(
+        resetVisibleConfigError: Boolean,
+        softRefresh: Boolean = false,
+    ): List<VotingRound> {
         if (resetVisibleConfigError) {
             configIssue = null
             configErrorSheet.value = null
-            clearLoadedVotingStateForServiceConfigRefresh()
+            if (!softRefresh) {
+                clearLoadedVotingStateForServiceConfigRefresh()
+            } else {
+                // Soft re-entry: keep rounds/votes visible during refresh to avoid card flicker.
+                // Still clear config so downstream callers resolve a fresh service config.
+                unverifiedPollWarningSheet.value = null
+                pendingUnverifiedRoundSelection = null
+                votingConfigRepository.clear()
+            }
             // Mirror iOS `prepareForServiceConfigRefresh` (VotingStore+Session.swift:644-647):
             // every flow entry / user-driven refresh drops the cached resolved config so
             // downstream callers (authenticateVotingSession, configuredVoteServerUrls,
