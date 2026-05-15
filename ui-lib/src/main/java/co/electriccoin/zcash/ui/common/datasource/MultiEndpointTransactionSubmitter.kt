@@ -31,25 +31,39 @@ internal class MultiEndpointTransactionSubmitter(
         logTag: String
     ): List<TransactionSubmitResult> {
         var anySubmissionFailed = false
+        var hasSuccessfulBroadcast = false
+        var completedNormally = false
 
-        return transactions.mapIndexed { index, transaction ->
-            if (anySubmissionFailed) {
-                TransactionSubmitResult.NotAttempted(transaction.txId)
-            } else {
-                val result =
-                    submitTransaction(
-                        transaction = transaction,
-                        endpoints = endpoints,
-                        index = index,
-                        transactionCount = transactions.size,
-                        logTag = logTag
-                    )
+        try {
+            val results = transactions.mapIndexed { index, transaction ->
+                if (anySubmissionFailed) {
+                    TransactionSubmitResult.NotAttempted(transaction.txId)
+                } else {
+                    val result =
+                        submitTransaction(
+                            transaction = transaction,
+                            endpoints = endpoints,
+                            index = index,
+                            transactionCount = transactions.size,
+                            logTag = logTag
+                        )
 
-                if (result !is TransactionSubmitResult.Success) {
-                    anySubmissionFailed = true
+                    if (result is TransactionSubmitResult.Success) {
+                        hasSuccessfulBroadcast = true
+                    } else {
+                        anySubmissionFailed = true
+                    }
+
+                    result
                 }
-
-                result
+            }
+            completedNormally = true
+            return results
+        } finally {
+            if (completedNormally && hasSuccessfulBroadcast) {
+                closeAfterGracePeriod()
+            } else {
+                close()
             }
         }
     }
@@ -185,7 +199,7 @@ internal class MultiEndpointTransactionSubmitter(
                     logger.info {
                         "$logTag $transactionLabel accepted by ${result.endpointLabel}."
                     }
-                    state.cancelAfterGracePeriod()
+                    state.cancelJobsAfterGracePeriod()
                     result.result
                 }
 
@@ -202,7 +216,14 @@ internal class MultiEndpointTransactionSubmitter(
             throw e
         }
 
-    private fun BroadcastSubmissionState.cancelAfterGracePeriod() {
+    private fun closeAfterGracePeriod() {
+        scope.launch {
+            delay(gracePeriodMillis)
+            close()
+        }
+    }
+
+    private fun BroadcastSubmissionState.cancelJobsAfterGracePeriod() {
         scope.launch {
             delay(gracePeriodMillis)
             cancel()

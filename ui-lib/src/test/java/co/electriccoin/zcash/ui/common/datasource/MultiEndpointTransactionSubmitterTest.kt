@@ -11,6 +11,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import java.util.Collections
@@ -111,6 +112,52 @@ class MultiEndpointTransactionSubmitterTest {
                 )
 
             assertEquals(listOf(TransactionSubmitResult.Success(transaction.txId)), results)
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun successfulBroadcastKeepsOtherEndpointsRunningDuringGracePeriod() =
+        runTest {
+            val transaction = transaction(23)
+            val lateEndpointCompleted = CompletableDeferred<Unit>()
+            val submitter =
+                MultiEndpointTransactionSubmitter(
+                    closeableScopeHolder = CloseableScopeHolderImpl(backgroundScope),
+                    gracePeriodMillis = 100,
+                    logger = noOpLogger,
+                    submit = { _, submittedEndpoint ->
+                        when (submittedEndpoint.host) {
+                            "fast.example.com" -> {
+                                TransactionSubmitResult.Success(transaction.txId)
+                            }
+
+                            "late.example.com" -> {
+                                delay(50)
+                                lateEndpointCompleted.complete(Unit)
+                                TransactionSubmitResult.Success(transaction.txId)
+                            }
+
+                            else -> {
+                                error("Unexpected endpoint $submittedEndpoint")
+                            }
+                        }
+                    }
+                )
+
+            val results =
+                submitter.submitTransactions(
+                    transactions = listOf(transaction),
+                    endpoints = listOf(endpoint("fast.example.com"), endpoint("late.example.com")),
+                    logTag = LOG_TAG
+                )
+
+            assertEquals(listOf(TransactionSubmitResult.Success(transaction.txId)), results)
+            assertEquals(false, lateEndpointCompleted.isCompleted)
+
+            advanceTimeBy(50)
+            runCurrent()
+
+            assertEquals(true, lateEndpointCompleted.isCompleted)
         }
 
     @Test

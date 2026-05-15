@@ -321,13 +321,11 @@ class ProposalDataSourceImpl(
             submit = { transaction, endpoint ->
                 synchronizer.broadcaster.submit(transaction, endpoint)
             }
-        ).use { submitter ->
-            submitter.submitTransactions(
-                transactions = transactions,
-                endpoints = endpoints,
-                logTag = logTag
-            )
-        }
+        ).submitTransactions(
+            transactions = transactions,
+            endpoints = endpoints,
+            logTag = logTag
+        )
 
     private suspend fun getSubmissionEndpoints(): List<LightWalletEndpoint> {
         val selection = serverSelectionProvider.getServerSelection() ?: ServerSelection.automatic()
