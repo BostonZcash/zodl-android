@@ -15,16 +15,16 @@ import kotlin.time.Clock
  * Complements [AmountStateTest] which covers basic happy-path cases.
  */
 class AmountStateMathTest {
-
     // region toZecString precision
 
     @Test
     @SmallTest
     fun toZecString_oneDollarAtPriceHundred_returnsPointZeroOne() {
-        val conversion = FiatCurrencyConversion(
-            timestamp = Clock.System.now(),
-            priceOfZec = 100.0
-        )
+        val conversion =
+            FiatCurrencyConversion(
+                timestamp = Clock.System.now(),
+                priceOfZec = 100.0
+            )
         val state = AmountState(amount = "1", currency = RequestCurrency.FIAT, isValid = true)
 
         val result = state.toZecString(conversion, getAppContext())
@@ -42,10 +42,11 @@ class AmountStateMathTest {
     @Test
     @SmallTest
     fun toZecString_largeFiatAmount_succeeds() {
-        val conversion = FiatCurrencyConversion(
-            timestamp = Clock.System.now(),
-            priceOfZec = 50.0
-        )
+        val conversion =
+            FiatCurrencyConversion(
+                timestamp = Clock.System.now(),
+                priceOfZec = 50.0
+            )
         val state = AmountState(amount = "10000", currency = RequestCurrency.FIAT, isValid = true)
 
         val result = state.toZecString(conversion, getAppContext())
@@ -57,10 +58,11 @@ class AmountStateMathTest {
     @Test
     @SmallTest
     fun toZecString_verySmallFiatAmount_succeeds() {
-        val conversion = FiatCurrencyConversion(
-            timestamp = Clock.System.now(),
-            priceOfZec = 30.0
-        )
+        val conversion =
+            FiatCurrencyConversion(
+                timestamp = Clock.System.now(),
+                priceOfZec = 30.0
+            )
         val state = AmountState(amount = "0.01", currency = RequestCurrency.FIAT, isValid = true)
 
         val result = state.toZecString(conversion, getAppContext())
@@ -72,10 +74,11 @@ class AmountStateMathTest {
     @Test
     @SmallTest
     fun toZecString_highZecPrice_producesSmallZecAmount() {
-        val conversion = FiatCurrencyConversion(
-            timestamp = Clock.System.now(),
-            priceOfZec = 10000.0
-        )
+        val conversion =
+            FiatCurrencyConversion(
+                timestamp = Clock.System.now(),
+                priceOfZec = 10000.0
+            )
         val state = AmountState(amount = "10", currency = RequestCurrency.FIAT, isValid = true)
 
         val result = state.toZecString(conversion, getAppContext())
@@ -89,10 +92,11 @@ class AmountStateMathTest {
     @Test
     @SmallTest
     fun toZecString_lowZecPrice_producesLargeZecAmount() {
-        val conversion = FiatCurrencyConversion(
-            timestamp = Clock.System.now(),
-            priceOfZec = 0.5
-        )
+        val conversion =
+            FiatCurrencyConversion(
+                timestamp = Clock.System.now(),
+                priceOfZec = 0.5
+            )
         val state = AmountState(amount = "10", currency = RequestCurrency.FIAT, isValid = true)
 
         val result = state.toZecString(conversion, getAppContext())
@@ -109,10 +113,11 @@ class AmountStateMathTest {
     @Test
     @SmallTest
     fun toZecStringFloored_floorsTruncatesDown() {
-        val conversion = FiatCurrencyConversion(
-            timestamp = Clock.System.now(),
-            priceOfZec = 33.33
-        )
+        val conversion =
+            FiatCurrencyConversion(
+                timestamp = Clock.System.now(),
+                priceOfZec = 33.33
+            )
         // $10 / $33.33 = 0.30003... ZEC
         val state = AmountState(amount = "10", currency = RequestCurrency.FIAT, isValid = true)
 
@@ -125,10 +130,11 @@ class AmountStateMathTest {
     @Test
     @SmallTest
     fun toZecStringFloored_verySmallAmount_doesNotReturnNegative() {
-        val conversion = FiatCurrencyConversion(
-            timestamp = Clock.System.now(),
-            priceOfZec = 100000.0
-        )
+        val conversion =
+            FiatCurrencyConversion(
+                timestamp = Clock.System.now(),
+                priceOfZec = 100000.0
+            )
         val state = AmountState(amount = "0.01", currency = RequestCurrency.FIAT, isValid = true)
 
         val result = state.toZecStringFloored(conversion, getAppContext())
@@ -144,10 +150,11 @@ class AmountStateMathTest {
     @Test
     @SmallTest
     fun toFiatString_oneZecAtPriceHundred_returnsHundred() {
-        val conversion = FiatCurrencyConversion(
-            timestamp = Clock.System.now(),
-            priceOfZec = 100.0
-        )
+        val conversion =
+            FiatCurrencyConversion(
+                timestamp = Clock.System.now(),
+                priceOfZec = 100.0
+            )
         val state = AmountState(amount = "1", currency = RequestCurrency.ZEC, isValid = true)
 
         val result = state.toFiatString(getAppContext(), conversion)
@@ -159,10 +166,11 @@ class AmountStateMathTest {
     @Test
     @SmallTest
     fun toFiatString_halfZec_returnsHalfPrice() {
-        val conversion = FiatCurrencyConversion(
-            timestamp = Clock.System.now(),
-            priceOfZec = 100.0
-        )
+        val conversion =
+            FiatCurrencyConversion(
+                timestamp = Clock.System.now(),
+                priceOfZec = 100.0
+            )
         val state = AmountState(amount = "0.5", currency = RequestCurrency.ZEC, isValid = true)
 
         val result = state.toFiatString(getAppContext(), conversion)
@@ -174,10 +182,11 @@ class AmountStateMathTest {
     @Test
     @SmallTest
     fun toFiatString_verySmallZecAmount_returnsNonEmpty() {
-        val conversion = FiatCurrencyConversion(
-            timestamp = Clock.System.now(),
-            priceOfZec = 30.0
-        )
+        val conversion =
+            FiatCurrencyConversion(
+                timestamp = Clock.System.now(),
+                priceOfZec = 30.0
+            )
         val state = AmountState(amount = "0.001", currency = RequestCurrency.ZEC, isValid = true)
 
         val result = state.toFiatString(getAppContext(), conversion)
@@ -189,10 +198,11 @@ class AmountStateMathTest {
     @Test
     @SmallTest
     fun toFiatString_largeZecAmount_succeeds() {
-        val conversion = FiatCurrencyConversion(
-            timestamp = Clock.System.now(),
-            priceOfZec = 30.0
-        )
+        val conversion =
+            FiatCurrencyConversion(
+                timestamp = Clock.System.now(),
+                priceOfZec = 30.0
+            )
         val state = AmountState(amount = "1000", currency = RequestCurrency.ZEC, isValid = true)
 
         val result = state.toFiatString(getAppContext(), conversion)
@@ -204,10 +214,11 @@ class AmountStateMathTest {
     @Test
     @SmallTest
     fun toFiatString_zeroZec_returnsZeroFormatted() {
-        val conversion = FiatCurrencyConversion(
-            timestamp = Clock.System.now(),
-            priceOfZec = 30.0
-        )
+        val conversion =
+            FiatCurrencyConversion(
+                timestamp = Clock.System.now(),
+                priceOfZec = 30.0
+            )
         val state = AmountState(amount = "0", currency = RequestCurrency.ZEC, isValid = true)
 
         val result = state.toFiatString(getAppContext(), conversion)
@@ -223,21 +234,23 @@ class AmountStateMathTest {
     @SmallTest
     fun roundTrip_fiatToZecAndBack_isConsistent() {
         val priceOfZec = 45.67
-        val conversion = FiatCurrencyConversion(
-            timestamp = Clock.System.now(),
-            priceOfZec = priceOfZec
-        )
+        val conversion =
+            FiatCurrencyConversion(
+                timestamp = Clock.System.now(),
+                priceOfZec = priceOfZec
+            )
 
         // Start with $10 fiat
         val fiatState = AmountState(amount = "10", currency = RequestCurrency.FIAT, isValid = true)
         val zecString = fiatState.toZecString(conversion, getAppContext())
 
         // Now convert that ZEC back to fiat
-        val zecState = AmountState(
-            amount = zecString.replace(",", ".").trim(),
-            currency = RequestCurrency.ZEC,
-            isValid = true
-        )
+        val zecState =
+            AmountState(
+                amount = zecString.replace(",", ".").trim(),
+                currency = RequestCurrency.ZEC,
+                isValid = true
+            )
         val fiatResult = zecState.toFiatString(getAppContext(), conversion)
 
         // The round-trip should produce something close to $10

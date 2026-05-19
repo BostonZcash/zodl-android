@@ -1,16 +1,15 @@
 package cash.z.ecc.sdk.extension
 
 import androidx.test.filters.SmallTest
+import org.junit.Test
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.Locale
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import org.junit.Test
 
 class CurrencyFormatterExtTest {
-
     // region zatoshiFormatter
 
     @Test
@@ -105,11 +104,12 @@ class CurrencyFormatterExtTest {
     @Test
     @SmallTest
     fun currencyFormatter_customMaxDecimals() {
-        val formatter = currencyFormatter(
-            locale = Locale.US,
-            maximumFractionDigits = 2,
-            minimumFractionDigits = 2
-        )
+        val formatter =
+            currencyFormatter(
+                locale = Locale.US,
+                maximumFractionDigits = 2,
+                minimumFractionDigits = 2
+            )
 
         assertEquals(2, formatter.maximumFractionDigits)
         assertEquals(2, formatter.minimumFractionDigits)
@@ -151,11 +151,12 @@ class CurrencyFormatterExtTest {
     @Test
     @SmallTest
     fun currencyFormatter_nullMaxDecimals_noLimit() {
-        val formatter = currencyFormatter(
-            locale = Locale.US,
-            maximumFractionDigits = null,
-            minimumFractionDigits = null
-        )
+        val formatter =
+            currencyFormatter(
+                locale = Locale.US,
+                maximumFractionDigits = null,
+                minimumFractionDigits = null
+            )
 
         // When null, the formatter inherits the locale's default
         assertNotNull(formatter)

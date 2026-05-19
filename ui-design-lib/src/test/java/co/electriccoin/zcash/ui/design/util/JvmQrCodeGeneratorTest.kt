@@ -10,7 +10,6 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class JvmQrCodeGeneratorTest {
-
     // region Basic Generation
 
     @Test
