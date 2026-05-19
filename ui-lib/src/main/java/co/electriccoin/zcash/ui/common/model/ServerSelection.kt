@@ -1,7 +1,11 @@
 package co.electriccoin.zcash.ui.common.model
 
 import co.electriccoin.lightwallet.client.model.LightWalletEndpoint
-import org.json.JSONObject
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 data class ServerSelection(
     val mode: ConnectionMode,
@@ -14,24 +18,9 @@ data class ServerSelection(
         }
     }
 
-    fun toJson() =
-        JSONObject().apply {
-            put(KEY_MODE, mode.persistedValue)
-            endpoint?.let {
-                put(KEY_ENDPOINT_HOST, it.host)
-                put(KEY_ENDPOINT_PORT, it.port)
-                put(KEY_ENDPOINT_IS_SECURE, it.isSecure)
-                put(KEY_ENDPOINT_IS_CUSTOM, isCustom)
-            }
-        }
+    fun toJson() = serverSelectionJson.encodeToString(toPersisted())
 
     companion object {
-        private const val KEY_MODE = "mode"
-        private const val KEY_ENDPOINT_HOST = "endpoint_host"
-        private const val KEY_ENDPOINT_PORT = "endpoint_port"
-        private const val KEY_ENDPOINT_IS_SECURE = "endpoint_is_secure"
-        private const val KEY_ENDPOINT_IS_CUSTOM = "endpoint_is_custom"
-
         fun automatic() = ServerSelection(ConnectionMode.AUTOMATIC)
 
         fun manual(endpoint: LightWalletEndpoint, isCustom: Boolean) =
@@ -52,38 +41,60 @@ data class ServerSelection(
             }
         } ?: automatic()
 
-        fun from(jsonObject: JSONObject): ServerSelection {
-            val mode =
-                ConnectionMode.fromPersistedValue(
-                    jsonObject.getString(KEY_MODE)
-                )
-
-            return when (mode) {
-                ConnectionMode.AUTOMATIC -> {
-                    automatic()
-                }
-
-                ConnectionMode.MANUAL -> {
-                    manual(
-                        endpoint = jsonObject.getEndpoint(),
-                        isCustom = jsonObject.optBoolean(KEY_ENDPOINT_IS_CUSTOM, false)
-                    )
-                }
-            }
-        }
+        fun from(json: String): ServerSelection =
+            serverSelectionJson.decodeFromString<PersistedServerSelection>(json).toDomain()
 
         fun fromPersistedJson(json: String): ServerSelection? =
-            runCatching { from(JSONObject(json)) }
+            runCatching { from(json) }
                 .getOrNull()
-
-        private fun JSONObject.getEndpoint() =
-            LightWalletEndpoint(
-                host = getString(KEY_ENDPOINT_HOST),
-                port = getInt(KEY_ENDPOINT_PORT),
-                isSecure = getBoolean(KEY_ENDPOINT_IS_SECURE)
-            )
     }
 }
+
+@Serializable
+private data class PersistedServerSelection(
+    val mode: String,
+    @SerialName("endpoint_host")
+    val endpointHost: String? = null,
+    @SerialName("endpoint_port")
+    val endpointPort: Int? = null,
+    @SerialName("endpoint_is_secure")
+    val endpointIsSecure: Boolean? = null,
+    @SerialName("endpoint_is_custom")
+    val endpointIsCustom: Boolean? = null
+) {
+    fun toDomain(): ServerSelection =
+        when (ConnectionMode.fromPersistedValue(mode)) {
+            ConnectionMode.AUTOMATIC -> {
+                ServerSelection.automatic()
+            }
+
+            ConnectionMode.MANUAL -> {
+                ServerSelection.manual(
+                    endpoint =
+                        LightWalletEndpoint(
+                            host = requireNotNull(endpointHost),
+                            port = requireNotNull(endpointPort),
+                            isSecure = requireNotNull(endpointIsSecure)
+                        ),
+                    isCustom = endpointIsCustom ?: false
+                )
+            }
+        }
+}
+
+private fun ServerSelection.toPersisted() =
+    PersistedServerSelection(
+        mode = mode.persistedValue,
+        endpointHost = endpoint?.host,
+        endpointPort = endpoint?.port,
+        endpointIsSecure = endpoint?.isSecure,
+        endpointIsCustom = endpoint?.let { isCustom }
+    )
+
+private val serverSelectionJson =
+    Json {
+        ignoreUnknownKeys = true
+    }
 
 enum class ConnectionMode(
     val persistedValue: String

@@ -58,5 +58,5 @@ private class ServerSelectionPreferenceDefault(
     override suspend fun putValue(
         preferenceProvider: PreferenceProvider,
         newValue: ServerSelection?
-    ) = preferenceProvider.putString(key, newValue?.toJson()?.toString())
+    ) = preferenceProvider.putString(key, newValue?.toJson())
 }
