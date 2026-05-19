@@ -12,7 +12,7 @@ directly impact users rather than highlighting other key architectural updates.*
 
 ## [Unreleased]
 
-## [3.4.1 (1696)] - 2026-05-18
+## [3.4.1 (1698)] - 2026-05-19
 
 ### Cambiado:
 - Actualizamos el texto del widget de estado de protección.
