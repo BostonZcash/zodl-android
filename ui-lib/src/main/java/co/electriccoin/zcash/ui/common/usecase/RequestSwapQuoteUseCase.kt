@@ -10,11 +10,14 @@ import co.electriccoin.zcash.ui.common.datasource.AccountDataSource
 import co.electriccoin.zcash.ui.common.datasource.InsufficientFundsException
 import co.electriccoin.zcash.ui.common.datasource.TexUnsupportedOnKSException
 import co.electriccoin.zcash.ui.common.model.KeystoneAccount
+import co.electriccoin.zcash.ui.common.model.SwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapMode.EXACT_INPUT
 import co.electriccoin.zcash.ui.common.model.SwapMode.EXACT_OUTPUT
 import co.electriccoin.zcash.ui.common.model.SwapMode.FLEX_INPUT
 import co.electriccoin.zcash.ui.common.model.SwapQuote
 import co.electriccoin.zcash.ui.common.model.ZashiAccount
+import co.electriccoin.zcash.ui.common.model.near.requireMatchingAsset
+import co.electriccoin.zcash.ui.common.provider.SimpleSwapAssetProvider
 import co.electriccoin.zcash.ui.common.provider.SynchronizerProvider
 import co.electriccoin.zcash.ui.common.repository.KeystoneProposalRepository
 import co.electriccoin.zcash.ui.common.repository.SwapQuoteData
@@ -30,6 +33,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 class RequestSwapQuoteUseCase(
     private val navigationRouter: NavigationRouter,
@@ -39,19 +43,49 @@ class RequestSwapQuoteUseCase(
     private val keystoneProposalRepository: KeystoneProposalRepository,
     private val accountDataSource: AccountDataSource,
     private val synchronizerProvider: SynchronizerProvider,
+    private val simpleSwapAssetProvider: SimpleSwapAssetProvider,
 ) {
     suspend fun requestExactInput(
         amount: BigDecimal,
         address: String,
         canNavigateToSwapQuote: () -> Boolean
     ) {
+        val expectedOrigin = swapRepository.assets.value.zecAsset
+        val expectedDestination = swapRepository.selectedAsset.value
+        val newAddress = accountDataSource.requestNextShieldedAddress()
         requestQuote(
             requestQuote = {
-                val newAddress = accountDataSource.requestNextShieldedAddress()
                 swapRepository.requestExactInputQuote(
                     amount = amount,
                     address = address,
                     refundAddress = newAddress.address
+                )
+            },
+            validateQuote = { quote ->
+                requireQuoteMatchesUserAmount(
+                    quoted = quote.amountInFormatted,
+                    requested = amount,
+                    decimals = quote.originAsset.decimals
+                )
+                requireExpectedAsset(
+                    name = "originAsset",
+                    expected = expectedOrigin,
+                    actual = quote.originAsset
+                )
+                requireExpectedAsset(
+                    name = "destinationAsset",
+                    expected = expectedDestination,
+                    actual = quote.destinationAsset
+                )
+                requireMatchingAddress(
+                    name = "destinationAddress",
+                    expected = address,
+                    actual = quote.destinationAddress.address
+                )
+                requireMatchingAddress(
+                    name = "refundAddress",
+                    expected = newAddress.address,
+                    actual = quote.refundAddress.address
                 )
             },
             createProposal = true,
@@ -64,13 +98,42 @@ class RequestSwapQuoteUseCase(
         address: String,
         canNavigateToSwapQuote: () -> Boolean
     ) {
+        val expectedOrigin = swapRepository.assets.value.zecAsset
+        val expectedDestination = swapRepository.selectedAsset.value
+        val newAddress = accountDataSource.requestNextShieldedAddress()
         requestQuote(
             requestQuote = {
-                val newAddress = accountDataSource.requestNextShieldedAddress()
                 swapRepository.requestExactOutputQuote(
                     amount = amount,
                     address = address,
                     refundAddress = newAddress.address
+                )
+            },
+            validateQuote = { quote ->
+                requireQuoteMatchesUserAmount(
+                    quoted = quote.amountOutFormatted,
+                    requested = amount,
+                    decimals = quote.destinationAsset.decimals
+                )
+                requireExpectedAsset(
+                    name = "originAsset",
+                    expected = expectedOrigin,
+                    actual = quote.originAsset
+                )
+                requireExpectedAsset(
+                    name = "destinationAsset",
+                    expected = expectedDestination,
+                    actual = quote.destinationAsset
+                )
+                requireMatchingAddress(
+                    name = "destinationAddress",
+                    expected = address,
+                    actual = quote.destinationAddress.address
+                )
+                requireMatchingAddress(
+                    name = "refundAddress",
+                    expected = newAddress.address,
+                    actual = quote.refundAddress.address
                 )
             },
             createProposal = true,
@@ -83,15 +146,44 @@ class RequestSwapQuoteUseCase(
         refundAddress: String,
         canNavigateToSwapQuote: () -> Boolean
     ) {
+        val expectedOrigin = swapRepository.selectedAsset.value
+        val expectedDestination = swapRepository.assets.value.zecAsset
+        val newAddress = accountDataSource.requestNextShieldedAddress()
         requestQuote(
             requestQuote = {
-                val newAddress = accountDataSource.requestNextShieldedAddress()
                 swapRepository
                     .requestFlexInputIntoZec(
                         amount = amount,
                         refundAddress = refundAddress,
                         destinationAddress = newAddress.address
                     )
+            },
+            validateQuote = { quote ->
+                requireQuoteMatchesUserAmount(
+                    quoted = quote.amountInFormatted,
+                    requested = amount,
+                    decimals = quote.originAsset.decimals
+                )
+                requireExpectedAsset(
+                    name = "originAsset",
+                    expected = expectedOrigin,
+                    actual = quote.originAsset
+                )
+                requireExpectedAsset(
+                    name = "destinationAsset",
+                    expected = expectedDestination,
+                    actual = quote.destinationAsset
+                )
+                requireMatchingAddress(
+                    name = "refundAddress",
+                    expected = refundAddress,
+                    actual = quote.refundAddress.address
+                )
+                requireMatchingAddress(
+                    name = "destinationAddress",
+                    expected = newAddress.address,
+                    actual = quote.destinationAddress.address
+                )
             },
             createProposal = false,
             canNavigateToSwapQuote = canNavigateToSwapQuote
@@ -101,6 +193,7 @@ class RequestSwapQuoteUseCase(
     @Suppress("TooGenericExceptionCaught")
     private suspend fun requestQuote(
         requestQuote: suspend () -> Unit,
+        validateQuote: (SwapQuote) -> Unit,
         createProposal: Boolean,
         canNavigateToSwapQuote: () -> Boolean
     ) = withContext(Dispatchers.Default) {
@@ -110,6 +203,7 @@ class RequestSwapQuoteUseCase(
 
         if (result is SwapQuoteData.Success) {
             try {
+                validateQuote(result.quote)
                 if (createProposal) {
                     createProposal(result.quote)
                 }
@@ -164,6 +258,29 @@ class RequestSwapQuoteUseCase(
                     FLEX_INPUT -> throw UnsupportedOperationException("Flex input swap not supported")
                 }
             }
+        }
+    }
+
+    private fun requireQuoteMatchesUserAmount(quoted: BigDecimal, requested: BigDecimal, decimals: Int) {
+        val truncated = requested.setScale(decimals, RoundingMode.DOWN)
+        require(quoted.compareTo(truncated) == 0) {
+            "Swap quote does not match user-requested amount: " +
+                "quote=$quoted, requested=$truncated (at $decimals decimals)"
+        }
+    }
+
+    private fun requireExpectedAsset(name: String, expected: SwapAsset?, actual: SwapAsset) {
+        if (expected == null) return
+        requireMatchingAsset(
+            name = name,
+            expected = simpleSwapAssetProvider.get(expected.tokenTicker, expected.chainTicker),
+            actual = actual
+        )
+    }
+
+    private fun requireMatchingAddress(name: String, expected: String, actual: String) {
+        require(expected == actual) {
+            "Swap quote address mismatch: expected $name=$expected but quote returned $actual"
         }
     }
 

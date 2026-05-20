@@ -2,8 +2,6 @@ package co.electriccoin.zcash.ui.common.datasource
 
 import cash.z.ecc.android.sdk.type.AddressType
 import co.electriccoin.zcash.ui.common.model.DynamicSwapAddress
-import co.electriccoin.zcash.ui.common.model.NearSwapQuote
-import co.electriccoin.zcash.ui.common.model.NearSwapQuoteStatus
 import co.electriccoin.zcash.ui.common.model.SwapAddress
 import co.electriccoin.zcash.ui.common.model.SwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapMode
@@ -14,6 +12,8 @@ import co.electriccoin.zcash.ui.common.model.ZcashSwapAddress
 import co.electriccoin.zcash.ui.common.model.ZcashTransparentSwapAddress
 import co.electriccoin.zcash.ui.common.model.ZecSwapAsset
 import co.electriccoin.zcash.ui.common.model.near.AppFee
+import co.electriccoin.zcash.ui.common.model.near.NearSwapQuote
+import co.electriccoin.zcash.ui.common.model.near.NearSwapQuoteStatus
 import co.electriccoin.zcash.ui.common.model.near.QuoteRequest
 import co.electriccoin.zcash.ui.common.model.near.QuoteResponseDto
 import co.electriccoin.zcash.ui.common.model.near.RecipientType
