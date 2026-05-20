@@ -64,8 +64,8 @@ class CurrencyFormatterExtTest {
         val formatter = zatoshiFormatter(Locale.US)
         val result = formatter.format(BigDecimal("0.123456789"))
 
-        // Should be rounded/truncated to 8 places
-        assertEquals(8, formatter.maximumFractionDigits)
+        // HALF_EVEN rounds 9th decimal: 0.123456789 -> 0.12345679
+        assertEquals("0.12345679", result)
     }
 
     @Test
@@ -123,8 +123,8 @@ class CurrencyFormatterExtTest {
 
         // US locale should use comma grouping: "1,234,567.89"
         assertTrue(
-            result.contains(",") || result.contains("."),
-            "Large number should use grouping: \"$result\""
+            result.contains("1,234,567"),
+            "Large number should have grouping separator: \"$result\""
         )
     }
 
@@ -144,8 +144,10 @@ class CurrencyFormatterExtTest {
         val result = formatter.format(BigDecimal("1234.56"))
 
         // German locale uses comma as decimal separator
-        assertNotNull(result)
-        assertTrue(result.isNotEmpty(), "German format should produce output: \"$result\"")
+        assertTrue(
+            result.contains(","),
+            "German locale should use comma as decimal separator: \"$result\""
+        )
     }
 
     @Test
@@ -158,8 +160,9 @@ class CurrencyFormatterExtTest {
                 minimumFractionDigits = null
             )
 
-        // When null, the formatter inherits the locale's default
-        assertNotNull(formatter)
+        // When null, the formatter inherits the locale's default fraction digits
+        val defaultFormatter = currencyFormatter(Locale.US)
+        assertEquals(defaultFormatter.maximumFractionDigits, formatter.maximumFractionDigits)
     }
 
     // endregion
@@ -187,8 +190,8 @@ class CurrencyFormatterExtTest {
     fun zcashDecimalFormatSymbols_usLocale_hasGroupingSeparator() {
         val symbols = ZcashDecimalFormatSymbols(Locale.US)
 
-        // US locale should have comma or similar grouping separator
-        assertNotNull(symbols.groupingSeparator)
+        // US locale uses comma as grouping separator
+        assertEquals(',', symbols.groupingSeparator, "US locale should have comma as grouping separator")
     }
 
     // endregion

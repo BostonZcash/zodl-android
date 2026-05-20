@@ -7,6 +7,7 @@ import com.google.zxing.qrcode.QRCodeReader
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class JvmQrCodeGeneratorTest {
@@ -59,15 +60,7 @@ class JvmQrCodeGeneratorTest {
         val result1 = JvmQrCodeGenerator.generate("address_one", size)
         val result2 = JvmQrCodeGenerator.generate("address_two", size)
 
-        var differenceFound = false
-        for (i in result1.indices) {
-            if (result1[i] != result2[i]) {
-                differenceFound = true
-                break
-            }
-        }
-
-        assertTrue(differenceFound, "Different inputs should produce different QR codes")
+        assertFalse(result1.contentEquals(result2), "Different inputs should produce different QR codes")
     }
 
     // endregion
