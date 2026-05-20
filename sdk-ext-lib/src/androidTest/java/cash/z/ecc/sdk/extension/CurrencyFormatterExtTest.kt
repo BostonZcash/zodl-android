@@ -160,9 +160,8 @@ class CurrencyFormatterExtTest {
                 minimumFractionDigits = null
             )
 
-        // When null, the formatter inherits the locale's default fraction digits
-        val defaultFormatter = currencyFormatter(Locale.US)
-        assertEquals(defaultFormatter.maximumFractionDigits, formatter.maximumFractionDigits)
+        // When null, the formatter inherits US locale's default (3 fraction digits)
+        assertEquals(3, formatter.maximumFractionDigits)
     }
 
     // endregion
