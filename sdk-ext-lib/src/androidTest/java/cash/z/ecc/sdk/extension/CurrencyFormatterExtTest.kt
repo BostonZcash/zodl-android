@@ -52,10 +52,7 @@ class CurrencyFormatterExtTest {
         val formatter = zatoshiFormatter(Locale.US)
         val result = formatter.format(BigDecimal("0.12345678"))
 
-        assertTrue(
-            result.contains("12345678"),
-            "Should preserve 8 decimal places: \"$result\""
-        )
+        assertEquals("0.12345678", result)
     }
 
     @Test
@@ -75,10 +72,7 @@ class CurrencyFormatterExtTest {
         val result = formatter.format(BigDecimal("1"))
 
         // Should show "1.000" (3 min decimals)
-        assertTrue(
-            result.contains("1.000") || result.contains("1,000"),
-            "Should pad to 3 decimals: \"$result\""
-        )
+        assertEquals("1.000", result)
     }
 
     // endregion
@@ -134,7 +128,7 @@ class CurrencyFormatterExtTest {
         val formatter = currencyFormatter(Locale.US)
         val result = formatter.format(BigDecimal.ZERO)
 
-        assertTrue(result.contains("0"), "Zero should format as 0: \"$result\"")
+        assertEquals("0", result)
     }
 
     @Test

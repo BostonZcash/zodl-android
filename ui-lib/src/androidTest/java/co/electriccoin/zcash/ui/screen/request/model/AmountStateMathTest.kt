@@ -255,6 +255,12 @@ class AmountStateMathTest {
 
         // The round-trip should produce something close to $10
         assertFalse(fiatResult.isEmpty(), "Round-trip should produce a value")
+        val parsedFiat = fiatResult.replace(",", "").replace(" ", "").toBigDecimalOrNull()
+        assertNotNull(parsedFiat, "Round-trip result should be parseable: \"$fiatResult\"")
+        assertTrue(
+            parsedFiat.toDouble() in 9.0..11.0,
+            "Round-trip of \$10 should be within tolerance, got: $parsedFiat"
+        )
     }
 
     // endregion
