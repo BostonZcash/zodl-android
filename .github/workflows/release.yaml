@@ -355,19 +355,27 @@ jobs:
           KEYSTORE_JSON=$(aws secretsmanager get-secret-value \
             --secret-id /infra/zodl-android/fdroid_index_keystore \
             --query SecretString --output text)
-          echo "$KEYSTORE_JSON" | jq -r '.keystore_b64'         | base64 -d > /tmp/fdroid-index.jks
-          echo "keystore_password=$(echo "$KEYSTORE_JSON" | jq -r '.keystore_password')" >> $GITHUB_OUTPUT
-          echo "key_alias=$(echo "$KEYSTORE_JSON" | jq -r '.key_alias')"                 >> $GITHUB_OUTPUT
-          echo "key_password=$(echo "$KEYSTORE_JSON" | jq -r '.key_password')"           >> $GITHUB_OUTPUT
-          echo "::add-mask::$(echo "$KEYSTORE_JSON" | jq -r '.keystore_password')"
-          echo "::add-mask::$(echo "$KEYSTORE_JSON" | jq -r '.key_password')"
+          echo "$KEYSTORE_JSON" | jq -r '.keystore_b64' | base64 -d > /tmp/fdroid-index.jks
+
+          # Read into shell vars first, register the mask, then write to
+          # GITHUB_OUTPUT. Reversing this order risks the runner flushing
+          # the output line to the log before the mask command takes effect.
+          KEYSTORE_PASS=$(echo "$KEYSTORE_JSON" | jq -r '.keystore_password')
+          KEY_ALIAS=$(echo "$KEYSTORE_JSON" | jq -r '.key_alias')
+          KEY_PASS=$(echo "$KEYSTORE_JSON" | jq -r '.key_password')
+          echo "::add-mask::${KEYSTORE_PASS}"
+          echo "::add-mask::${KEY_PASS}"
+
+          echo "keystore_password=${KEYSTORE_PASS}" >> "$GITHUB_OUTPUT"
+          echo "key_alias=${KEY_ALIAS}"             >> "$GITHUB_OUTPUT"
+          echo "key_password=${KEY_PASS}"           >> "$GITHUB_OUTPUT"
 
           mkdir -p ~/.ssh
           aws secretsmanager get-secret-value \
             --secret-id /infra/zodl-android/fdroid_deploy_ssh_key \
             --query SecretString --output text > ~/.ssh/id_fdroid
           chmod 600 ~/.ssh/id_fdroid
-          ssh-keyscan -t ed25519,rsa github.com >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -t ed25519,rsa github.com >> ~/.ssh/known_hosts
           cat > ~/.ssh/config <<'EOF'
           Host github.com-fdroid
             HostName github.com
@@ -433,8 +441,10 @@ jobs:
         working-directory: fdroid-repo/fdroid
         run: |
           fdroid update --create-metadata --pretty --verbose
-          # fdroid writes config.yml with secrets — delete before committing.
-          rm -f config.yml
+          # config.yml contains plaintext keystore + key passwords.
+          # Use shred to match how the other key material in this job is
+          # disposed of (JKS, SSH deploy key) and to reduce recoverability.
+          shred -u config.yml
 
       - name: Commit + push
         working-directory: fdroid-repo
