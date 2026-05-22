@@ -59,8 +59,7 @@ jobs:
           profile: pixel_6
           script: |
             adb install app/build/outputs/apk/zcashtestnetStore/debug/*.apk
-            maestro test zodl-qa/maestro/smoke/ \
-              --include-tags="android"
+            maestro test zodl-qa/maestro/smoke/ --include-tags="android"
 
       - name: Upload test results
         if: always()
