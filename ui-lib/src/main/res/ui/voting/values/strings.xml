@@ -55,7 +55,7 @@
     <string name="vote_poll_card_closes">Closes %1$s</string>
     <string name="vote_poll_card_closed">Closed %1$s</string>
     <string name="vote_poll_card_enter">Enter Poll</string>
-    <string name="vote_poll_card_view_votes">View My Votes</string>
+    <string name="vote_poll_card_view_votes">Review</string>
     <string name="vote_poll_card_view_results">View Results</string>
     <string name="vote_poll_voted_count">%1$d of %2$d voted</string>
 
@@ -77,7 +77,7 @@
     <string name="vote_error_insufficient_funds_message">You don\'t have enough ZEC to cover the transaction fee. Add funds to your wallet and try again.</string>
     <string name="vote_error_go_back">Go Back</string>
     <string name="vote_error_authorization_failed_title">Authorization Failed</string>
-    <string name="vote_error_authorization_failed_message">The authorization transaction failed. Check your connection and try again.</string>
+    <string name="vote_error_authorization_failed_message">We couldn\'t authorize your vote. Check your connection and try again.</string>
 
     <string name="vote_poll_ended_title">Poll Has Ended</string>
     <string name="vote_poll_ended_message">The voting period closed.\nYour responses cannot be submitted.</string>
@@ -101,7 +101,10 @@
     <string name="vote_confirm_cta_submitting_generic">Submitting...</string>
     <string name="vote_confirm_cta_submit_votes">Submit Votes</string>
     <string name="vote_confirm_cta_authorizing">Authorizing...</string>
-    <string name="vote_confirm_cta_submitting">Submitting vote %1$d of %2$d...</string>
+    <string name="vote_confirm_cta_submitting">Submitting vote %1$d of %2$d</string>
+    <string name="vote_confirm_status_authorizing">Authorizing vote...</string>
+    <string name="vote_confirm_status_submitting">Submitting vote %1$d of %2$d...</string>
+    <string name="vote_confirm_status_authorizing_percent">%1$d%%</string>
     <string name="vote_confirm_nav_confirmation">Confirmation</string>
     <string name="vote_confirm_nav_submission">Submission</string>
     <string name="vote_confirm_title_idle">Confirm &amp; Submit</string>
@@ -157,6 +160,7 @@
     <string name="vote_proposal_list_time_day_left">%1$d day left</string>
     <string name="vote_proposal_list_time_days_left">%1$d days left</string>
     <string name="vote_proposal_list_view_more">View more</string>
+    <string name="vote_proposal_list_view_less">View less</string>
     <string name="vote_proposal_detail_forum_discussions">View Forum Discussions</string>
     <string name="vote_poll_description_title">POLL DESCRIPTION</string>
 
@@ -172,8 +176,9 @@
     <string name="vote_proposal_detail_unanswered_message_singular">You have not responded to 1 question. Confirm to abstain from this question or go back to respond.</string>
     <string name="vote_proposal_detail_unanswered_message_plural">You have not responded to %1$d questions. Confirm to abstain from these questions or go back to respond.</string>
     <string name="vote_proposal_detail_unanswered_go_back">Go back</string>
-    <string name="vote_proposal_list_review_title">Review your answers</string>
+    <string name="vote_proposal_list_review_title">Review and submit vote</string>
     <string name="vote_proposal_list_review_subtitle">Tap on the question to edit any of your answers. After you review your answers, tap on Confirm &amp; Submit.</string>
+    <string name="vote_proposal_list_your_vote">Your vote:</string>
 
     <string name="vote_results_title">Results</string>
     <string name="vote_results_amount_zec">%1$.3f ZEC</string>
@@ -182,8 +187,7 @@
     <string name="vote_results_voted">Voted %1$s</string>
     <string name="vote_results_voting_power">Voting Power %1$.3f ZEC</string>
     <string name="vote_results_meta_line">%1$s  &#8226;  %2$s</string>
-    <string name="vote_results_winner">Winner: %1$s</string>
-    <string name="vote_results_tie">Tie</string>
+    <string name="vote_results_voted_option">Voted: %1$s</string>
 
     <string name="vote_tallying_top_bar_title">Governance</string>
     <string name="vote_tallying_title">Votes Closed</string>
@@ -220,6 +224,8 @@
     <string name="vote_error_mapper_version">Your app may need an update to participate in this voting round.</string>
     <string name="vote_error_mapper_unknown">An unexpected error occurred. Please try again.</string>
 
+    <string name="vote_wallet_syncing_sheet_title">Wallet Syncing</string>
+    <string name="vote_wallet_syncing_sheet_message">Your wallet needs to sync to the snapshot block height before you can participate in voting.</string>
     <string name="vote_wallet_syncing_top_bar_title">Wallet Sync</string>
     <string name="vote_wallet_syncing_title">Syncing your wallet</string>
     <string name="vote_wallet_syncing_message">Your wallet needs to scan up to block %1$d before you can vote. Currently at block %2$d.</string>

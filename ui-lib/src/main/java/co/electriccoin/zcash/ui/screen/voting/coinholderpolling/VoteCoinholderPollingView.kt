@@ -22,24 +22,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import co.electriccoin.zcash.ui.R
-import co.electriccoin.zcash.ui.common.appbar.ZashiTopAppBarTags
 import co.electriccoin.zcash.ui.common.model.voting.SessionStatus
 import co.electriccoin.zcash.ui.design.component.BlankBgScaffold
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.ButtonStyle
-import co.electriccoin.zcash.ui.design.component.IconButtonState
 import co.electriccoin.zcash.ui.design.component.ZashiButton
 import co.electriccoin.zcash.ui.design.component.ZashiConfirmationBottomSheet
-import co.electriccoin.zcash.ui.design.component.ZashiIconButton
 import co.electriccoin.zcash.ui.design.component.ZashiSmallTopAppBar
-import co.electriccoin.zcash.ui.design.component.ZashiTopAppBarBackNavigation
 import co.electriccoin.zcash.ui.design.newcomponent.PreviewScreens
 import co.electriccoin.zcash.ui.design.theme.ZcashTheme
 import co.electriccoin.zcash.ui.design.theme.colors.ZashiColors
@@ -51,8 +46,8 @@ import co.electriccoin.zcash.ui.design.util.scaffoldPadding
 import co.electriccoin.zcash.ui.design.util.stringRes
 import co.electriccoin.zcash.ui.screen.home.common.CommonShimmerLoadingScreen
 import co.electriccoin.zcash.ui.screen.voting.VoteTrustIndicator
+import co.electriccoin.zcash.ui.screen.voting.component.VoteAppBar
 import co.electriccoin.zcash.ui.screen.voting.component.VoteTrustIndicatorView
-import co.electriccoin.zcash.ui.design.R as DesignR
 
 @Composable
 fun VoteCoinholderPollingView(state: VoteCoinholderPollingState) {
@@ -60,7 +55,13 @@ fun VoteCoinholderPollingView(state: VoteCoinholderPollingState) {
     ZashiConfirmationBottomSheet(state = state.unverifiedPollWarningSheet)
 
     BlankBgScaffold(
-        topBar = { AppBar(state) },
+        topBar = {
+            VoteAppBar(
+                title = stringResource(R.string.vote_top_bar_title),
+                onBack = state.onBack,
+                onConfigSettings = state.onConfigSettings,
+            )
+        },
         content = { padding ->
             if (state.activeRounds.isEmpty() && state.pastRounds.isEmpty()) {
                 NoRoundsContent(
@@ -79,9 +80,7 @@ fun VoteCoinholderPollingView(state: VoteCoinholderPollingState) {
                             .scaffoldPadding(padding),
                     contentPadding =
                         PaddingValues(
-                            start = ZashiDimensions.Spacing.spacing3xl,
                             top = 8.dp,
-                            end = ZashiDimensions.Spacing.spacing3xl,
                             bottom = 40.dp
                         ),
                     verticalArrangement = Arrangement.spacedBy(ZashiDimensions.Spacing.spacing4xl)
@@ -266,7 +265,11 @@ private fun PollActionButton(state: VotePollCardState) {
         state =
             ButtonState(
                 text = actionText,
-                style = ButtonStyle.PRIMARY,
+                style =
+                    when (state.status) {
+                        VotePollCardStatus.ACTIVE -> ButtonStyle.PRIMARY
+                        else -> ButtonStyle.TERTIARY
+                    },
                 isEnabled = state.isActionEnabled,
                 onClick = state.onAction
             ),
@@ -342,35 +345,6 @@ private data class StatusBadgeParams(
     val borderColor: Color,
 )
 
-@Composable
-private fun AppBar(state: VoteCoinholderPollingState) {
-    ZashiSmallTopAppBar(
-        title = stringResource(R.string.vote_top_bar_title),
-        navigationAction = {
-            ZashiTopAppBarBackNavigation(
-                onBack = state.onBack,
-                modifier = Modifier.testTag(ZashiTopAppBarTags.BACK)
-            )
-        },
-        regularActions = {
-            ZashiIconButton(
-                state =
-                    IconButtonState(
-                        icon = DesignR.drawable.ic_app_bar_settings,
-                        contentDescription = stringRes(R.string.vote_chain_config_settings_content_description),
-                        onClick = state.onConfigSettings
-                    ),
-                modifier = Modifier.size(40.dp)
-            )
-        },
-        colors =
-            ZcashTheme.colors.topAppBarColors orDark
-                ZcashTheme.colors.topAppBarColors.copyColors(
-                    containerColor = Color.Transparent
-                )
-    )
-}
-
 @PreviewScreens
 @Composable
 private fun CoinholderPollingPreviewWithRounds() =
@@ -421,7 +395,7 @@ private fun CoinholderPollingPreviewWithRounds() =
                                 roundNumber = 1,
                                 title = stringRes("ZF Grant Funding — Q1 2026"),
                                 description = stringRes(""),
-                                status = VotePollCardStatus.CLOSED,
+                                status = VotePollCardStatus.VOTED,
                                 sessionStatus = SessionStatus.COMPLETED,
                                 isActionEnabled = true,
                                 dateLabel = stringRes("Closed Jan 20"),
