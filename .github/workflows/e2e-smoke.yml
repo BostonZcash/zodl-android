@@ -38,7 +38,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Build debug APK
-        run: ./gradlew assembleZcashtestnetStoreDebug
+        run: ./gradlew assembleZcashmainnetInternalDebug
 
       - name: Enable KVM
         run: |
@@ -58,7 +58,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           script: |
-            adb install app/build/outputs/apk/zcashtestnetStore/debug/*.apk
+            adb install app/build/outputs/apk/zcashmainnetInternal/debug/*.apk
             maestro test zodl-qa/maestro/smoke/ --include-tags="android"
 
       - name: Upload test results
