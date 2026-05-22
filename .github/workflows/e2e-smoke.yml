@@ -56,7 +56,7 @@ jobs:
         with:
           api-level: 34
           arch: x86_64
-          profile: Pixel 6
+          profile: pixel_6
           script: |
             adb install app/build/outputs/apk/zcashtestnetStore/debug/*.apk
             maestro test zodl-qa/maestro/smoke/ \
