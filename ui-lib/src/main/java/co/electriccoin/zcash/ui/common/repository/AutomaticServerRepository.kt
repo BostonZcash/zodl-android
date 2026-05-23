@@ -2,36 +2,57 @@ package co.electriccoin.zcash.ui.common.repository
 
 import co.electriccoin.zcash.ui.common.provider.ApplicationStateProvider
 import co.electriccoin.zcash.ui.common.provider.IsServerSelectionAutomaticProvider
+import co.electriccoin.zcash.ui.common.provider.LightWalletEndpointProvider
+import co.electriccoin.zcash.ui.common.provider.PersistableWalletProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 
-interface AutomaticServerSelectionRepository {
+interface AutomaticServerRepository {
+    val isServerAutomatic: Flow<Boolean>
+
     fun init()
 }
 
-class AutomaticServerSelectionRepositoryImpl(
+class AutomaticServerRepositoryImpl(
     private val applicationStateProvider: ApplicationStateProvider,
     private val isServerSelectionAutomaticProvider: IsServerSelectionAutomaticProvider,
     private val walletRepository: WalletRepository,
-) : AutomaticServerSelectionRepository {
+    private val lightWalletEndpointProvider: LightWalletEndpointProvider,
+    private val persistableWalletProvider: PersistableWalletProvider
+) : AutomaticServerRepository {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun init() {
+    override val isServerAutomatic: Flow<Boolean> =
         isServerSelectionAutomaticProvider
             .observe()
-            .map { isServerSelectionAutomaticProvider.get() != false }
             .distinctUntilChanged()
+            .flatMapLatest { isAutomatic ->
+                isAutomatic?.let { flowOf(it) }
+                    ?: persistableWalletProvider.persistableWallet
+                        .mapNotNull { it?.endpoint }
+                        .map {
+                            !lightWalletEndpointProvider.getEndpoints().contains(it)
+                        }.map { isCustomEndpoint ->
+                            !isCustomEndpoint
+                        }
+            }.distinctUntilChanged()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun init() {
+        isServerAutomatic
             .flatMapLatest { isAutomatic ->
                 if (isAutomatic) {
                     walletRepository.fastestEndpoints

@@ -11,10 +11,10 @@ import co.electriccoin.zcash.ui.R
 import co.electriccoin.zcash.ui.common.component.EndpointTextFieldInnerState
 import co.electriccoin.zcash.ui.common.component.EndpointTextFieldState
 import co.electriccoin.zcash.ui.common.model.FastestServersState
-import co.electriccoin.zcash.ui.common.provider.IsServerSelectionAutomaticProvider
 import co.electriccoin.zcash.ui.common.provider.LightWalletEndpointProvider
 import co.electriccoin.zcash.ui.common.usecase.GetAutomaticEndpointUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetSelectedEndpointUseCase
+import co.electriccoin.zcash.ui.common.usecase.IsServerAutomaticUseCase
 import co.electriccoin.zcash.ui.common.usecase.ObserveFastestServersUseCase
 import co.electriccoin.zcash.ui.common.usecase.PersistEndpointException
 import co.electriccoin.zcash.ui.common.usecase.PersistServerSelectionUseCase
@@ -27,11 +27,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -42,7 +40,7 @@ class ChooseServerVM(
     application: Application,
     observeFastestServers: ObserveFastestServersUseCase,
     getSelectedEndpoint: GetSelectedEndpointUseCase,
-    isServerSelectionAutomaticProvider: IsServerSelectionAutomaticProvider,
+    isServerAutomatic: IsServerAutomaticUseCase,
     private val lightWalletEndpointProvider: LightWalletEndpointProvider,
     private val refreshFastestServersUseCase: RefreshFastestServersUseCase,
     private val persistServerSelection: PersistServerSelectionUseCase,
@@ -196,7 +194,7 @@ class ChooseServerVM(
 
     init {
         combine(
-            isServerSelectionAutomaticProvider.observe().map { it != false }.distinctUntilChanged(),
+            isServerAutomatic.observe(),
             getSelectedEndpoint.observe().filterNotNull()
         ) { isAutomatic, endpoint -> isAutomatic to endpoint }
             .onEach { (isAutomatic, endpoint) ->
