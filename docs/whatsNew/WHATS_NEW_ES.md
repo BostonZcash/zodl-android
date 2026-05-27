@@ -12,6 +12,30 @@ directly impact users rather than highlighting other key architectural updates.*
 
 ## [Unreleased]
 
+## [3.4.1 (1698)] - 2026-05-19
+
+### Cambiado:
+- Actualizamos el texto del widget de estado de protección.
+
+### Corregido:
+- Corregimos un error que impedía proteger cuando había muchas entradas transparentes pequeñas.
+- Corregimos que «Enviar de nuevo» no rellenaba correctamente algunos campos.
+- Corregimos que el aviso de Conversión de Moneda no aparecía en los flujos de nueva billetera y restauración.
+
+## [3.4.0 (1691)] - 2026-05-12
+
+### Añadido:
+- Añadimos altura de cumpleaños al conectar una billetera Keystone.
+
+### Cambiado:
+- Actualizamos los textos del flujo de Restauración.
+
+### Corregido:
+- Errores de localización con separador decimal de coma.
+- Un error que permitía reutilizar una dirección protegida como reembolso de swap.
+- Falta de confirmación al copiar una dirección de recepción.
+- Tor desactivado tras una alerta de poco espacio, además de otros detalles de UX/UI.
+
 ## [3.3.1 (1643)] - 2026-04-10
 
 ### Añadido:
