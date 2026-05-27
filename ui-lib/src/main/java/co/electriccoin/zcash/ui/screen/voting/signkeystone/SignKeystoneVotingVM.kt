@@ -11,6 +11,8 @@ import co.electriccoin.zcash.ui.common.model.stateIn
 import co.electriccoin.zcash.ui.common.model.voting.toVotingRawZecLabel
 import co.electriccoin.zcash.ui.common.repository.VotingKeystoneResumeSubmissionException
 import co.electriccoin.zcash.ui.common.repository.VotingKeystoneRouteStage
+import co.electriccoin.zcash.ui.common.repository.VotingKeystoneScanNotice
+import co.electriccoin.zcash.ui.common.repository.VotingKeystoneScanNoticeType
 import co.electriccoin.zcash.ui.common.repository.VotingKeystoneSigningBundle
 import co.electriccoin.zcash.ui.common.repository.VotingRecoveryRepository
 import co.electriccoin.zcash.ui.common.repository.VotingRecoverySnapshot
@@ -74,6 +76,14 @@ class SignKeystoneVotingVM(
 
     val loading: StateFlow<Boolean> = isLoading
     val errorSheet: StateFlow<ZashiConfirmationState?> = errorSheetState
+    val scanNoticeSheet: StateFlow<ZashiConfirmationState?> =
+        recovery
+            .map { snapshot ->
+                snapshot
+                    ?.pendingKeystoneRequest
+                    ?.scanNotice
+                    ?.toScanNoticeSheet()
+            }.stateIn(this)
 
     val bottomSheetState =
         isBottomSheetVisible
@@ -322,6 +332,46 @@ class SignKeystoneVotingVM(
         (0 until bundleCount)
             .takeWhile { bundleIndex -> bundleIndex in keystoneBundleSignatures }
             .count()
+
+    private fun VotingKeystoneScanNotice.toScanNoticeSheet() =
+        ZashiConfirmationState.error(
+            title = stringRes(R.string.scan_keystone_voting_rejected_title),
+            message = toScanNoticeMessage(),
+            primaryText = stringRes(co.electriccoin.zcash.ui.design.R.string.general_ok),
+            secondaryText = null,
+            primaryStyle = ButtonStyle.PRIMARY,
+            onPrimary = ::onDismissScanNotice,
+            onBack = ::onDismissScanNotice
+        )
+
+    private fun onDismissScanNotice() {
+        viewModelScope.launch {
+            val accountUuid = selectedAccountUuid.filterNotNull().first()
+            votingRecoveryRepository.clearPendingKeystoneScanNotice(
+                accountUuid = accountUuid,
+                roundId = args.roundIdHex
+            )
+        }
+    }
+
+    private fun VotingKeystoneScanNotice.toScanNoticeMessage() =
+        when (type) {
+            VotingKeystoneScanNoticeType.DUPLICATE_SIGNATURE -> {
+                stringRes(
+                    R.string.scan_keystone_voting_duplicate_signature,
+                    bundleNumber,
+                    bundleCount
+                )
+            }
+
+            VotingKeystoneScanNoticeType.WRONG_SIGNATURE -> {
+                stringRes(
+                    R.string.scan_keystone_voting_wrong_signature,
+                    bundleNumber,
+                    bundleCount
+                )
+            }
+        }
 
     private fun Long.toVotingWeightLabel(): String {
         // Keystone bundle weights are quantized in 0.125 ZEC increments, so three decimals are exact here.
