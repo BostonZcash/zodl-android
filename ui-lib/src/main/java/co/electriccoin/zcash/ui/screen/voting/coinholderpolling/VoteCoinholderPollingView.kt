@@ -28,12 +28,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import co.electriccoin.zcash.ui.R
+import co.electriccoin.zcash.ui.common.component.error
 import co.electriccoin.zcash.ui.common.model.voting.SessionStatus
 import co.electriccoin.zcash.ui.design.component.BlankBgScaffold
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.ButtonStyle
 import co.electriccoin.zcash.ui.design.component.ZashiButton
-import co.electriccoin.zcash.ui.common.component.error
 import co.electriccoin.zcash.ui.design.component.ZashiConfirmationBottomSheet
 import co.electriccoin.zcash.ui.design.component.ZashiConfirmationState
 import co.electriccoin.zcash.ui.design.newcomponent.PreviewScreens
@@ -77,9 +77,10 @@ fun VoteCoinholderPollingView(state: VoteCoinholderPollingState) {
                 )
             } else {
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = padding.calculateTopPadding()),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(top = padding.calculateTopPadding()),
                     contentPadding =
                         PaddingValues(
                             start = ZashiDimensions.Spacing.spacing3xl,

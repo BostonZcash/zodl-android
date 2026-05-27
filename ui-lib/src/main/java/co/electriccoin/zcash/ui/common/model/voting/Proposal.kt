@@ -14,4 +14,3 @@ data class Proposal(
     @SerialName("forum_url")
     val forumUrl: String? = null
 )
-
