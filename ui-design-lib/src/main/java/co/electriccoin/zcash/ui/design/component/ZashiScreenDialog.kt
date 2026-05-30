@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
@@ -51,10 +52,17 @@ private fun Dialog(
     AlertDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {
-            ZashiButton(state = positive)
+            ZashiButton(
+                state = positive,
+                modifier = Modifier.testTag(ZashiScreenDialogTag.CONFIRM)
+            )
         },
         dismissButton = {
-            ZashiButton(state = negative, defaultPrimaryColors = ZashiButtonDefaults.secondaryColors())
+            ZashiButton(
+                state = negative,
+                modifier = Modifier.testTag(ZashiScreenDialogTag.DISMISS),
+                defaultPrimaryColors = ZashiButtonDefaults.secondaryColors()
+            )
         },
         title = {
             Text(
@@ -86,3 +94,8 @@ data class DialogState(
     val title: StringResource,
     val message: StringResource,
 )
+
+object ZashiScreenDialogTag {
+    const val CONFIRM = "DIALOG_CONFIRM"
+    const val DISMISS = "DIALOG_DISMISS"
+}

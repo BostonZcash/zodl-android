@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -95,7 +96,11 @@ fun ZashiTopAppBarNavigation(
         modifier = modifier,
     ) {
         Spacer(modifier = Modifier.width(16.dp))
-        IconButton(onClick = onBack, enabled = enabled) {
+        IconButton(
+            onClick = onBack,
+            enabled = enabled,
+            modifier = Modifier.testTag(NAVIGATION_BACK_TAG)
+        ) {
             Icon(
                 painter = painterResource(drawableRes),
                 contentDescription = backContentDescriptionText,
@@ -104,3 +109,5 @@ fun ZashiTopAppBarNavigation(
         }
     }
 }
+
+const val NAVIGATION_BACK_TAG = "NAVIGATION_BACK"

@@ -29,6 +29,7 @@ import co.electriccoin.zcash.ui.design.component.PickerState
 import co.electriccoin.zcash.ui.design.component.Spacer
 import co.electriccoin.zcash.ui.design.component.TextFieldState
 import co.electriccoin.zcash.ui.design.component.ZashiAddressTextField
+import co.electriccoin.zcash.ui.design.component.ZashiTextFieldDefaults
 import co.electriccoin.zcash.ui.design.component.ZashiButton
 import co.electriccoin.zcash.ui.design.component.ZashiButtonDefaults
 import co.electriccoin.zcash.ui.design.component.ZashiIconButton
@@ -96,6 +97,10 @@ private fun ContactViewInternal(
                 Modifier
                     .fillMaxWidth()
                     .focusRequester(addressFocusRequester),
+            innerModifier =
+                ZashiTextFieldDefaults
+                    .innerModifier
+                    .testTag(ABContactTag.WALLET_ADDRESS_FIELD),
             state = state.walletAddress,
             placeholder = {
                 Text(
@@ -122,6 +127,10 @@ private fun ContactViewInternal(
                 Modifier
                     .fillMaxWidth()
                     .focusRequester(nameFocusRequester),
+            innerModifier =
+                ZashiTextFieldDefaults
+                    .innerModifier
+                    .testTag(ABContactTag.CONTACT_NAME_FIELD),
             state = state.contactName,
             keyboardOptions =
                 KeyboardOptions(

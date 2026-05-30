@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -61,13 +62,17 @@ private fun Tooltip(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextButton(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(AddressBookTag.MANUAL_ENTRY),
                 state = state.manualButton,
                 res = R.drawable.ic_add_contact_manual,
                 onDismissRequest = onDismissRequest
             )
             TextButton(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(AddressBookTag.SCAN_ENTRY),
                 state = state.scanButton,
                 res = R.drawable.ic_add_contact_qr,
                 onDismissRequest = onDismissRequest
