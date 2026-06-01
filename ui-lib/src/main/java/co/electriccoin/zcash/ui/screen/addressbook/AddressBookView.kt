@@ -292,9 +292,10 @@ private fun AddContactButton(
         state = state,
     ) {
         ZashiButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag(AddressBookTag.ADD_CONTACT),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .testTag(AddressBookTag.ADD_CONTACT),
             state =
                 ButtonState(
                     onClick = {

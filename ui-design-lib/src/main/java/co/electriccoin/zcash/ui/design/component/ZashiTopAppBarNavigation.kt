@@ -99,7 +99,7 @@ fun ZashiTopAppBarNavigation(
         IconButton(
             onClick = onBack,
             enabled = enabled,
-            modifier = Modifier.testTag(NAVIGATION_BACK_TAG)
+            modifier = Modifier.testTag(ZashiTopAppBarNavigationTag.BACK)
         ) {
             Icon(
                 painter = painterResource(drawableRes),
@@ -110,4 +110,6 @@ fun ZashiTopAppBarNavigation(
     }
 }
 
-const val NAVIGATION_BACK_TAG = "NAVIGATION_BACK"
+object ZashiTopAppBarNavigationTag {
+    const val BACK = "NAVIGATION_BACK"
+}

@@ -62,19 +62,21 @@ private fun Dialog(
             // Maestro / uiautomator as a resource-id.
             ZashiButton(
                 state = positive,
-                modifier = Modifier.semantics {
-                    testTagsAsResourceId = true
-                    testTag = ZashiScreenDialogTag.CONFIRM
-                }
+                modifier =
+                    Modifier.semantics {
+                        testTagsAsResourceId = true
+                        testTag = ZashiScreenDialogTag.CONFIRM
+                    }
             )
         },
         dismissButton = {
             ZashiButton(
                 state = negative,
-                modifier = Modifier.semantics {
-                    testTagsAsResourceId = true
-                    testTag = ZashiScreenDialogTag.DISMISS
-                },
+                modifier =
+                    Modifier.semantics {
+                        testTagsAsResourceId = true
+                        testTag = ZashiScreenDialogTag.DISMISS
+                    },
                 defaultPrimaryColors = ZashiButtonDefaults.secondaryColors()
             )
         },

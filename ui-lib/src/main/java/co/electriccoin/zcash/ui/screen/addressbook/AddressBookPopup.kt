@@ -69,23 +69,25 @@ private fun Tooltip(
             // window — re-enable testTagsAsResourceId inline so testTags
             // surface as resource-ids inside the popup.
             TextButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .semantics {
-                        testTagsAsResourceId = true
-                        testTag = AddressBookTag.MANUAL_ENTRY
-                    },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .semantics {
+                            testTagsAsResourceId = true
+                            testTag = AddressBookTag.MANUAL_ENTRY
+                        },
                 state = state.manualButton,
                 res = R.drawable.ic_add_contact_manual,
                 onDismissRequest = onDismissRequest
             )
             TextButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .semantics {
-                        testTagsAsResourceId = true
-                        testTag = AddressBookTag.SCAN_ENTRY
-                    },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .semantics {
+                            testTagsAsResourceId = true
+                            testTag = AddressBookTag.SCAN_ENTRY
+                        },
                 state = state.scanButton,
                 res = R.drawable.ic_add_contact_qr,
                 onDismissRequest = onDismissRequest

@@ -55,7 +55,7 @@ fun ZashiTopAppBarWithAccountSelection(
                 }
                 ZashiIconButton(
                     state.moreButton,
-                    modifier = Modifier.size(40.dp).testTag("HOME_MORE")
+                    modifier = Modifier.size(40.dp).testTag(ZashiTopAppBarWithAccountSelectionTag.MORE)
                 )
                 Spacer(Modifier.width(20.dp))
             },
@@ -133,6 +133,10 @@ data class AccountSwitchState(
     val onAccountTypeClick: (() -> Unit)?,
     val accountType: AccountType,
 )
+
+object ZashiTopAppBarWithAccountSelectionTag {
+    const val MORE = "HOME_MORE"
+}
 
 @PreviewScreens
 @Composable
