@@ -1,7 +1,6 @@
 package co.electriccoin.zcash.ui.screen.voting.chainconfig
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,8 +25,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,15 +32,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -71,7 +64,6 @@ import co.electriccoin.zcash.ui.design.theme.colors.ZashiColors
 import co.electriccoin.zcash.ui.design.theme.dimensions.ZashiDimensions
 import co.electriccoin.zcash.ui.design.theme.typography.ZashiTypography
 import co.electriccoin.zcash.ui.design.util.getValue
-import co.electriccoin.zcash.ui.design.util.scaffoldPadding
 import co.electriccoin.zcash.ui.design.util.stringRes
 import co.electriccoin.zcash.ui.screen.voting.component.VoteAppBar
 import kotlinx.coroutines.delay
@@ -112,7 +104,14 @@ fun VoteChainConfigView(state: VoteChainConfigState?) {
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .scaffoldPadding(padding),
+                        .padding(top = padding.calculateTopPadding()),
+                contentPadding =
+                    PaddingValues(
+                        start = ZashiDimensions.Spacing.spacing3xl,
+                        top = ZashiDimensions.Spacing.spacingLg,
+                        end = ZashiDimensions.Spacing.spacing3xl,
+                        bottom = padding.calculateBottomPadding() + ZashiDimensions.Spacing.spacing3xl
+                    ),
                 verticalArrangement = Arrangement.spacedBy(ZashiDimensions.Spacing.spacing3xl)
             ) {
                 item(key = "intro") {
@@ -160,7 +159,6 @@ private fun Intro() {
 @Composable
 private fun ChainItem(state: VoteChainConfigItemState) {
     val isSelected = state.radioButtonState.isChecked
-    var menuExpanded by remember { mutableStateOf(false) }
 
     Surface(
         modifier =
@@ -250,50 +248,17 @@ private fun ChainItem(state: VoteChainConfigItemState) {
                 )
             }
 
-            if (state.editButton != null || state.deleteButton != null) {
-                Box {
-                    IconButton(
-                        onClick = { menuExpanded = true },
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        DotsHorizontalIcon()
-                    }
-                    DropdownMenu(
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
-                    ) {
-                        state.editButton?.let { editButton ->
-                            DropdownMenuItem(
-                                enabled = editButton.isEnabled,
-                                text = {
-                                    Text(
-                                        text = editButton.text.getValue(),
-                                        style = ZashiTypography.textSm
-                                    )
-                                },
-                                onClick = {
-                                    menuExpanded = false
-                                    editButton.onClick()
-                                }
-                            )
-                        }
-                        state.deleteButton?.let { deleteButton ->
-                            DropdownMenuItem(
-                                enabled = deleteButton.isEnabled,
-                                text = {
-                                    Text(
-                                        text = deleteButton.text.getValue(),
-                                        style = ZashiTypography.textSm,
-                                        color = ZashiColors.Utility.ErrorRed.utilityError700
-                                    )
-                                },
-                                onClick = {
-                                    menuExpanded = false
-                                    deleteButton.onClick()
-                                }
-                            )
-                        }
-                    }
+            state.editButton?.let { editButton ->
+                IconButton(
+                    onClick = editButton.onClick,
+                    enabled = editButton.isEnabled,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(co.electriccoin.zcash.ui.design.R.drawable.ic_chevron_right),
+                        contentDescription = editButton.text.getValue(),
+                        tint = ZashiColors.Text.textPrimary
+                    )
                 }
             }
         }
@@ -327,21 +292,6 @@ private fun RadioIndicator(
                         .background(ZashiColors.Surfaces.bgPrimary, CircleShape)
             )
         }
-    }
-}
-
-@Composable
-private fun DotsHorizontalIcon(modifier: Modifier = Modifier) {
-    val dotColor = ZashiColors.Text.textPrimary
-
-    Canvas(modifier = modifier.size(20.dp)) {
-        val radius = 1.7.dp.toPx()
-        val centerY = size.height / 2f
-        val centerX = size.width / 2f
-        val gap = 6.dp.toPx()
-        drawCircle(color = dotColor, radius = radius, center = Offset(centerX - gap, centerY))
-        drawCircle(color = dotColor, radius = radius, center = Offset(centerX, centerY))
-        drawCircle(color = dotColor, radius = radius, center = Offset(centerX + gap, centerY))
     }
 }
 
@@ -603,59 +553,29 @@ private fun VoteChainConfigPreview() =
     ZcashTheme {
         VoteChainConfigView(
             state =
-                VoteChainConfigState(
+                VoteChainConfigState.preview.copy(
                     chains =
                         listOf(
-                            VoteChainConfigItemState(
-                                id = "default",
-                                radioButtonState =
-                                    RadioButtonState(
-                                        text = stringRes("Coinholder Poll"),
-                                        subtitle = stringRes("https://voting.valargroup.org/static-voting-config.json"),
-                                        isChecked = true,
-                                        onClick = {}
-                                    ),
-                                fullUrl =
-                                    stringRes(
-                                        "https://voting.valargroup.org/static-voting-config.json?checksum=sha256:abc"
-                                    ),
-                                isDefault = true,
-                                editButton = null,
-                                deleteButton = null
-                            ),
-                            VoteChainConfigItemState(
+                            VoteChainConfigItemState.preview,
+                            VoteChainConfigItemState.preview.copy(
                                 id = "custom",
                                 radioButtonState =
                                     RadioButtonState(
                                         text = stringRes("Local test"),
                                         subtitle = stringRes("https://example.com/static-voting-config.json"),
                                         isChecked = false,
-                                        onClick = {}
+                                        onClick = {},
                                     ),
                                 fullUrl = stringRes("https://example.com/static-voting-config.json"),
                                 isDefault = false,
-                                editButton =
-                                    ButtonState(
-                                        text = stringRes("Edit"),
-                                        style = ButtonStyle.TERTIARY
-                                    ),
+                                editButton = ButtonState(text = stringRes("Edit"), style = ButtonStyle.TERTIARY),
                                 deleteButton =
                                     ButtonState(
                                         text = stringRes("Delete"),
                                         style = ButtonStyle.DESTRUCTIVE2
-                                    )
-                            )
+                                    ),
+                            ),
                         ),
-                    editor = null,
-                    errorSheet = null,
-                    isValidating = false,
-                    saveChangesButton =
-                        ButtonState(
-                            text = stringRes("Save changes"),
-                            style = ButtonStyle.PRIMARY
-                        ),
-                    onBack = {},
-                    onAddCustom = {}
                 )
         )
     }

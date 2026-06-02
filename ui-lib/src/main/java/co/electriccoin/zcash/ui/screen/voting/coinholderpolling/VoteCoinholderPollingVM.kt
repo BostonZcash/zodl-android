@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.electriccoin.zcash.ui.NavigationRouter
 import co.electriccoin.zcash.ui.R
+import co.electriccoin.zcash.ui.common.component.error
 import co.electriccoin.zcash.ui.common.model.Lce
 import co.electriccoin.zcash.ui.common.model.LceContent
 import co.electriccoin.zcash.ui.common.model.LceSource
+import co.electriccoin.zcash.ui.common.model.LceState
 import co.electriccoin.zcash.ui.common.model.mutableLce
 import co.electriccoin.zcash.ui.common.model.stateIn
 import co.electriccoin.zcash.ui.common.model.voting.SessionStatus
@@ -60,6 +62,7 @@ import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+@Suppress("LargeClass")
 class VoteCoinholderPollingVM(
     private val refreshActiveVotingSession: RefreshActiveVotingSessionUseCase,
     private val refreshVotingRounds: RefreshVotingRoundsUseCase,
@@ -141,6 +144,14 @@ class VoteCoinholderPollingVM(
             )
         }
 
+    private val initialLoadingState: VoteCoinholderPollingState
+        get() =
+            VoteCoinholderPollingState(
+                onBack = ::onBack,
+                onRefresh = ::refreshVotingData,
+                onConfigSettings = ::onConfigSettings,
+            )
+
     val state =
         combine(
             apiSnapshotWithConfigReadiness,
@@ -158,7 +169,8 @@ class VoteCoinholderPollingVM(
                     roundsLceState.content is LceContent.Success -> emptyList()
                     else -> null
                 }
-            val currentAccountUuid = accountUuid ?: return@combine null
+
+            val currentAccountUuid = accountUuid ?: return@combine initialLoadingState
 
             rounds?.let {
                 val normalizedEndorsedRoundIds = apiSnapshot.zodlEndorsedRoundIds.normalizedVotingRoundIds()
@@ -177,23 +189,35 @@ class VoteCoinholderPollingVM(
                         endorsedRoundIds = normalizedEndorsedRoundIds,
                         isOnDefaultConfig = apiSnapshotWithConfig.isOnDefaultConfig
                     )
-                val sortedRounds =
-                    visibleRounds
-                        .sortedWith(
-                            compareByDescending<VotingRound> { round -> round.createdAtHeight.takeIf { it > 0 } ?: round.snapshotHeight }
-                                .thenByDescending { round -> round.snapshotHeight }
-                                .thenByDescending { round -> round.votingEnd.epochSecond }
-                                .thenBy { round -> round.id }
-                        )
+                // Only truly ACTIVE rounds can be voted on; TALLYING rounds are already closed.
                 val (activeSrc, pastSrc) =
-                    sortedRounds
-                        .partition { round ->
-                            round.status == SessionStatus.ACTIVE || round.status == SessionStatus.TALLYING
-                        }
+                    visibleRounds
+                        .partition { round -> round.status == SessionStatus.ACTIVE }
+
+                // Split active rounds into voted (VOTED card) and not-yet-voted (ACTIVE card).
+                val (votedActiveSrc, unvotedActiveSrc) =
+                    activeSrc.partition { round ->
+                        (
+                            sessionState.submittedProposalCount(currentAccountUuid, round.id)
+                                ?: persistedVoteCounts[round.id]
+                        ) != null
+                    }
+
+                val votingEndAsc =
+                    compareBy<VotingRound> { round -> round.votingEnd.epochSecond }
+                        .thenBy { round -> round.id }
+                val votingEndDesc =
+                    compareByDescending<VotingRound> { round -> round.votingEnd.epochSecond }
+                        .thenBy { round -> round.id }
+
+                // Order: Active (unvoted) → Voted (voted) → Closed; each group by votingEnd.
+                val sortedActiveRounds =
+                    unvotedActiveSrc.sortedWith(votingEndAsc) + votedActiveSrc.sortedWith(votingEndAsc)
+                val sortedPastRounds = pastSrc.sortedWith(votingEndDesc)
 
                 VoteCoinholderPollingState(
                     activeRounds =
-                        activeSrc.map { round ->
+                        sortedActiveRounds.map { round ->
                             buildCard(
                                 round = round,
                                 roundNumber = roundNumbersById[round.id] ?: 0,
@@ -209,7 +233,7 @@ class VoteCoinholderPollingVM(
                             )
                         },
                     pastRounds =
-                        pastSrc.map { round ->
+                        sortedPastRounds.map { round ->
                             buildCard(
                                 round = round,
                                 roundNumber = roundNumbersById[round.id] ?: 0,
@@ -228,7 +252,7 @@ class VoteCoinholderPollingVM(
                     onRefresh = ::refreshVotingData,
                     onConfigSettings = ::onConfigSettings,
                 )
-            }
+            } ?: initialLoadingState
         }.let { contentFlow ->
             combine(
                 contentFlow,
@@ -236,10 +260,17 @@ class VoteCoinholderPollingVM(
                 configRefreshPending,
                 configErrorSheet,
                 unverifiedPollWarningSheet
-            ) { content, refreshPending, configPending, configSheet, unverifiedSheet ->
-                content?.copy(
+            ) { content, _, _, configSheet, unverifiedSheet ->
+                val noRoundsSheet =
+                    if (content.activeRounds?.isEmpty() == true && content.pastRounds?.isEmpty() == true) {
+                        buildNoRoundsSheet()
+                    } else {
+                        null
+                    }
+                content.copy(
                     configErrorSheet = configSheet,
-                    unverifiedPollWarningSheet = unverifiedSheet
+                    unverifiedPollWarningSheet = unverifiedSheet,
+                    noRoundsSheet = noRoundsSheet
                 )
             }
         }.withLce(pollListLceSource) { error ->
@@ -249,7 +280,10 @@ class VoteCoinholderPollingVM(
                 message = stringRes(R.string.vote_error_unable_to_load_polls_message),
                 primaryStyle = ButtonStyle.PRIMARY
             )
-        }.stateIn(this)
+        }.stateIn(
+            viewModel = this,
+            initialValue = LceState(initialLoadingState)
+        )
 
     private fun buildCard(
         round: VotingRound,
@@ -647,6 +681,19 @@ class VoteCoinholderPollingVM(
     private fun onBack() = navigationRouter.back()
 
     private fun onConfigSettings() = navigationRouter.forward(VoteChainConfigArgs)
+
+    private fun buildNoRoundsSheet() =
+        ZashiConfirmationState.error(
+            title = stringRes(R.string.vote_poll_list_empty_title),
+            message = stringRes(R.string.vote_poll_list_empty_subtitle),
+            primaryText = stringRes(R.string.vote_poll_list_empty_refresh),
+            primaryStyle = ButtonStyle.TERTIARY,
+            secondaryText = stringRes(R.string.vote_poll_list_empty_got_it),
+            secondaryStyle = ButtonStyle.PRIMARY,
+            onPrimary = ::refreshVotingData,
+            onSecondary = ::onBack,
+            onBack = ::onBack,
+        )
 
     private fun buildConfigErrorSheet(rawMessage: String) =
         ZashiConfirmationState(
