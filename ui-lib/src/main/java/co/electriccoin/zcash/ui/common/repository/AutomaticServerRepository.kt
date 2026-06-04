@@ -26,13 +26,22 @@ interface AutomaticServerRepository {
 }
 
 class AutomaticServerRepositoryImpl(
-    private val applicationStateProvider: ApplicationStateProvider,
-    private val isServerSelectionAutomaticProvider: IsServerSelectionAutomaticProvider,
     private val walletRepository: WalletRepository,
+    private val zashiProposalRepository: ZashiProposalRepository,
+    private val keystoneProposalRepository: KeystoneProposalRepository,
+    private val applicationStateProvider: ApplicationStateProvider,
+    private val persistableWalletProvider: PersistableWalletProvider,
     private val lightWalletEndpointProvider: LightWalletEndpointProvider,
-    private val persistableWalletProvider: PersistableWalletProvider
+    private val isServerSelectionAutomaticProvider: IsServerSelectionAutomaticProvider,
 ) : AutomaticServerRepository {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    private val isAppInTransactionState: Boolean
+        get() =
+            zashiProposalRepository.transactionProposal.value != null ||
+                zashiProposalRepository.submitState.value != null ||
+                keystoneProposalRepository.transactionProposal.value != null ||
+                keystoneProposalRepository.submitState.value != null
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val isServerAutomatic: Flow<Boolean> =
@@ -62,13 +71,15 @@ class AutomaticServerRepositoryImpl(
                     emptyFlow()
                 }
             }.onEach { fastestServer ->
-                walletRepository.updateWalletEndpoint(fastestServer)
+                if (!isAppInTransactionState) {
+                    walletRepository.updateWalletEndpoint(fastestServer)
+                }
             }.launchIn(scope)
 
         applicationStateProvider
             .observeOnForeground()
             .onEach {
-                if (isServerSelectionAutomaticProvider.get() != false) {
+                if (isServerSelectionAutomaticProvider.get() != false && !isAppInTransactionState) {
                     walletRepository.refreshFastestServers()
                 }
             }.launchIn(scope)
