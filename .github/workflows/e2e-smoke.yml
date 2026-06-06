@@ -56,7 +56,11 @@ jobs:
   e2e-android:
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # Cold-cache phase 2 runs (no cached SDK DB yet for the seed)
+    # spend most of the budget scanning blocks from birthday height.
+    # 45 min leaves headroom for the first run; warm-cache runs
+    # finish in ~10-15 min.
+    timeout-minutes: 45
     permissions:
       contents: read
     strategy:
