@@ -34,6 +34,12 @@ data class NearSwapQuote(
             "Swap quote asset mismatch: requested destinationAsset=${destinationAsset.assetId} " +
                 "but server returned ${response.quoteRequest.destinationAsset}"
         }
+        // Guards zecExchangeRate (= amountInUsd / amountInFormatted) and the fee math below it against a
+        // divide-by-zero. A quote with a non-positive input amount is invalid anyway; fail closed with a
+        // clear message rather than letting an ArithmeticException surface from the property initializers.
+        require(response.quote.amountInFormatted.signum() > 0) {
+            "Swap quote has non-positive amountInFormatted=${response.quote.amountInFormatted}"
+        }
         requireConsistent(
             name = "amountIn",
             raw = response.quote.amountIn,

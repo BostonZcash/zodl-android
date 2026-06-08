@@ -269,6 +269,16 @@ class RequestSwapQuoteUseCase(
         }
     }
 
+    /**
+     * Asserts the quote's asset matches the asset the user had selected when this request started.
+     * `expected` is snapshotted at the start of the public request method (before the suspending
+     * `requestNextShieldedAddress()` call), while the repository re-reads the selected asset when it
+     * actually builds the request — so this guards the user switching assets mid-request.
+     *
+     * This is NOT redundant with [NearSwapQuote]'s `init` assetId check: that one guards the *server*
+     * substituting the asset in its echo (requested vs returned), whereas this guards the *local
+     * selection* changing between method entry and request build. Both links must hold.
+     */
     private fun requireExpectedAsset(name: String, expected: SwapAsset?, actual: SwapAsset) {
         if (expected == null) return
         requireMatchingAsset(

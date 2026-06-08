@@ -23,6 +23,12 @@ data class NearSwapQuoteStatus(
     init {
         val details = response.swapDetails
         if (details != null) {
+            // zecExchangeRate divides by the effective amountInFormatted (swapDetails value when present),
+            // so reject a non-positive server-supplied value to avoid a divide-by-zero. A null value is
+            // fine: it falls back to the quote's amountInFormatted, which is already guarded.
+            require(details.amountInFormatted == null || details.amountInFormatted.signum() > 0) {
+                "Swap status has non-positive amountInFormatted=${details.amountInFormatted}"
+            }
             requireConsistent(
                 name = "amountIn",
                 raw = details.amountIn,
