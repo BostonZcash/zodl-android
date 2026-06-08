@@ -3,7 +3,6 @@ package co.electriccoin.zcash.ui.common.usecase
 import co.electriccoin.zcash.ui.common.datasource.SwapDataSource
 import co.electriccoin.zcash.ui.common.datasource.TokenNotFoundException
 import co.electriccoin.zcash.ui.common.model.SwapQuoteStatus
-import co.electriccoin.zcash.ui.common.model.SwapStatus
 import co.electriccoin.zcash.ui.common.model.near.requireMatchingAsset
 import co.electriccoin.zcash.ui.common.repository.MetadataRepository
 import co.electriccoin.zcash.ui.common.repository.SwapRepository
@@ -85,7 +84,7 @@ class GetSwapStatusUseCase(
                                 error = null
                             )
                         }
-                        if (result.status in listOf(SwapStatus.SUCCESS, SwapStatus.REFUNDED)) {
+                        if (result.status.isTerminal) {
                             break
                         }
                     } catch (e: TokenNotFoundException) {
