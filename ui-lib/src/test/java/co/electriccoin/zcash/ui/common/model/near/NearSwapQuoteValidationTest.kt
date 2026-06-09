@@ -111,6 +111,65 @@ class NearSwapQuoteValidationTest {
         requireWithinSlippage(null, BigDecimal("100"), BigDecimal("100"), BigDecimal("1"), BigDecimal("1"), BPS_10_PCT)
     }
 
+    @Test
+    fun requireWithinSlippage_outputFloating_acceptsServerIntegerTruncatedFloor() {
+        // Real NEAR 1Click response from a $10 ZEC → USDC quote at 30% slippage. amountOut=9897372
+        // × 0.70 = 6928160.4; the server truncates DOWN to 6928160. The check passes because the
+        // wallet's floor is computed in integer base units (rounded DOWN) the same way.
+        requireWithinSlippage(
+            swapType = SwapType.EXACT_INPUT,
+            amountIn = BigDecimal("2245828"),
+            amountOut = BigDecimal("9897372"),
+            minAmountIn = null,
+            minAmountOut = BigDecimal("6928160"),
+            slippageToleranceBps = 3000
+        )
+    }
+
+    @Test
+    fun requireWithinSlippage_outputFloating_stillRejectsBelowIntegerFloor() {
+        // One base unit below the rounded-down integer floor is genuinely out of tolerance.
+        assertFailsWith<IllegalArgumentException> {
+            requireWithinSlippage(
+                swapType = SwapType.EXACT_INPUT,
+                amountIn = BigDecimal("2245828"),
+                amountOut = BigDecimal("9897372"),
+                minAmountIn = null,
+                minAmountOut = BigDecimal("6928159"),
+                slippageToleranceBps = 3000
+            )
+        }
+    }
+
+    @Test
+    fun requireWithinSlippage_inputFloating_acceptsServerIntegerRoundedCeiling() {
+        // Symmetric case for EXACT_OUTPUT: amountIn=9897372 × 1.30 = 12866583.6; the server rounds
+        // UP to 12866584 to keep its guarantee conservative. The wallet's ceiling rounds UP too.
+        requireWithinSlippage(
+            swapType = SwapType.EXACT_OUTPUT,
+            amountIn = BigDecimal("9897372"),
+            amountOut = BigDecimal("2245828"),
+            minAmountIn = BigDecimal("12866584"),
+            minAmountOut = null,
+            slippageToleranceBps = 3000
+        )
+    }
+
+    @Test
+    fun requireWithinSlippage_inputFloating_stillRejectsAboveIntegerCeiling() {
+        // One base unit above the rounded-up integer ceiling is genuinely out of tolerance.
+        assertFailsWith<IllegalArgumentException> {
+            requireWithinSlippage(
+                swapType = SwapType.EXACT_OUTPUT,
+                amountIn = BigDecimal("9897372"),
+                amountOut = BigDecimal("2245828"),
+                minAmountIn = BigDecimal("12866585"),
+                minAmountOut = null,
+                slippageToleranceBps = 3000
+            )
+        }
+    }
+
     // endregion
 
     // region requireMatchingAsset — Z3: returned asset must match the expected asset (ticker + chain)
