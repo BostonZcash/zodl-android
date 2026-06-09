@@ -128,7 +128,7 @@ class WalletRepositoryImpl(
                                     synchronizerEmitted &&
                                         !previousState?.servers.isNullOrEmpty() &&
                                         !previousState.isLoading
-                                    )
+                                )
                             ) {
                                 null
                             } else {
