@@ -72,6 +72,29 @@ class NearSwapQuoteTest {
         assertEquals(SwapMode.EXACT_INPUT, quote.mode)
     }
 
+    @Test
+    fun rejectsServerWidenedSlippageTolerance() {
+        // Z7: client requested 100 bps (1%) but the server echoed a wider 10000 bps (100%) to collapse the
+        // slippage floor to zero. The client-vs-echo equality check must fail closed before the floor math.
+        assertFailsWith<IllegalArgumentException> {
+            nearSwapQuote(
+                quoteResponse(slippageBps = 10000, minAmountOut = BigDecimal("1990000")),
+                expectedSlippageToleranceBps = 100
+            )
+        }
+    }
+
+    @Test
+    fun acceptsMatchingClientAndServerSlippageTolerance() {
+        val quote =
+            nearSwapQuote(
+                quoteResponse(slippageBps = 100, minAmountOut = BigDecimal("1990000")),
+                expectedSlippageToleranceBps = 100
+            )
+
+        assertEquals(SwapMode.EXACT_INPUT, quote.mode)
+    }
+
     @Suppress("LongParameterList")
     private fun quoteResponse(
         swapType: SwapType = SwapType.EXACT_INPUT,
@@ -117,14 +140,15 @@ class NearSwapQuoteTest {
                 )
         )
 
-    private fun nearSwapQuote(response: QuoteResponseDto) =
+    private fun nearSwapQuote(response: QuoteResponseDto, expectedSlippageToleranceBps: Int? = null) =
         NearSwapQuote(
             response = response,
             originAsset = asset(assetId = ORIGIN_ID, token = "TKA", chain = "chaina", decimals = 8),
             destinationAsset = asset(assetId = DEST_ID, token = "TKB", chain = "chainb", decimals = 6),
             depositAddress = DynamicSwapAddress(DEPOSIT_ADDRESS),
             destinationAddress = DynamicSwapAddress(RECIPIENT_ADDRESS),
-            refundAddress = DynamicSwapAddress(REFUND_ADDRESS)
+            refundAddress = DynamicSwapAddress(REFUND_ADDRESS),
+            expectedSlippageToleranceBps = expectedSlippageToleranceBps
         )
 
     private fun asset(assetId: String, token: String, chain: String, decimals: Int): SwapAsset =

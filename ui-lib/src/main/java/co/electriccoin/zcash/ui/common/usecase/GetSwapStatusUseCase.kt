@@ -58,14 +58,16 @@ class GetSwapStatusUseCase(
                         expectedMetadata?.origin?.let {
                             requireMatchingAsset(
                                 name = "origin",
-                                expected = it,
+                                expectedTokenTicker = it.tokenTicker,
+                                expectedChainTicker = it.chainTicker,
                                 actual = result.quote.originAsset
                             )
                         }
                         expectedMetadata?.destination?.let {
                             requireMatchingAsset(
                                 name = "destination",
-                                expected = it,
+                                expectedTokenTicker = it.tokenTicker,
+                                expectedChainTicker = it.chainTicker,
                                 actual = result.quote.destinationAsset
                             )
                         }

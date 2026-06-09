@@ -11,6 +11,7 @@ import java.math.MathContext
 import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaInstant
+import co.electriccoin.zcash.ui.common.model.SwapStatus as ModelSwapStatus
 
 data class NearSwapQuoteStatus(
     val response: SwapStatusResponseDto,
@@ -59,23 +60,23 @@ data class NearSwapQuoteStatus(
     override val originAssetId: String = origin.assetId
     override val destinationAssetId: String = destination.assetId
 
-    override val status: co.electriccoin.zcash.ui.common.model.SwapStatus
+    override val status: ModelSwapStatus
         get() =
             if (
                 response.status == SwapStatus.PENDING_DEPOSIT &&
                 Instant.now() > (response.quoteResponse.quote.deadline - 5.minutes).toJavaInstant()
             ) {
-                co.electriccoin.zcash.ui.common.model.SwapStatus.EXPIRED
+                ModelSwapStatus.EXPIRED
             } else {
                 when (response.status) {
-                    SwapStatus.KNOWN_DEPOSIT_TX -> co.electriccoin.zcash.ui.common.model.SwapStatus.PENDING
-                    SwapStatus.PENDING_DEPOSIT -> co.electriccoin.zcash.ui.common.model.SwapStatus.PENDING
-                    SwapStatus.INCOMPLETE_DEPOSIT -> co.electriccoin.zcash.ui.common.model.SwapStatus.INCOMPLETE_DEPOSIT
-                    SwapStatus.PROCESSING -> co.electriccoin.zcash.ui.common.model.SwapStatus.PROCESSING
-                    SwapStatus.SUCCESS -> co.electriccoin.zcash.ui.common.model.SwapStatus.SUCCESS
-                    SwapStatus.REFUNDED -> co.electriccoin.zcash.ui.common.model.SwapStatus.REFUNDED
-                    SwapStatus.FAILED -> co.electriccoin.zcash.ui.common.model.SwapStatus.FAILED
-                    null -> co.electriccoin.zcash.ui.common.model.SwapStatus.PENDING
+                    SwapStatus.KNOWN_DEPOSIT_TX -> ModelSwapStatus.PENDING
+                    SwapStatus.PENDING_DEPOSIT -> ModelSwapStatus.PENDING
+                    SwapStatus.INCOMPLETE_DEPOSIT -> ModelSwapStatus.INCOMPLETE_DEPOSIT
+                    SwapStatus.PROCESSING -> ModelSwapStatus.PROCESSING
+                    SwapStatus.SUCCESS -> ModelSwapStatus.SUCCESS
+                    SwapStatus.REFUNDED -> ModelSwapStatus.REFUNDED
+                    SwapStatus.FAILED -> ModelSwapStatus.FAILED
+                    null -> ModelSwapStatus.PENDING
                 }
             }
 

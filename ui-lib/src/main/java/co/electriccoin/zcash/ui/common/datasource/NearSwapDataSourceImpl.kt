@@ -77,6 +77,8 @@ class NearSwapDataSourceImpl(
         val integer = shifted.toBigInteger().toBigDecimal()
         val normalizedAmount = shifted.round(MathContext(integer.precision(), RoundingMode.DOWN))
 
+        val slippageToleranceBps = slippage.multiply(BigDecimal(100), MathContext.DECIMAL128).toInt()
+
         val request =
             QuoteRequest(
                 dry = false,
@@ -86,7 +88,7 @@ class NearSwapDataSourceImpl(
                         SwapMode.FLEX_INPUT -> SwapType.FLEX_INPUT
                         SwapMode.EXACT_OUTPUT -> SwapType.EXACT_OUTPUT
                     },
-                slippageTolerance = slippage.multiply(BigDecimal(100), MathContext.DECIMAL128).toInt(),
+                slippageTolerance = slippageToleranceBps,
                 originAsset = originAsset.assetId,
                 depositType = RefundType.ORIGIN_CHAIN,
                 destinationAsset = destinationAsset.assetId,
@@ -120,6 +122,7 @@ class NearSwapDataSourceImpl(
                 depositAddress = getDepositAddress(response, originAsset),
                 destinationAddress = getDestinationAddress(response, originAsset),
                 refundAddress = getRefundAddress(response, originAsset),
+                expectedSlippageToleranceBps = slippageToleranceBps,
             )
         } catch (e: ResponseWithNearErrorException) {
             when {

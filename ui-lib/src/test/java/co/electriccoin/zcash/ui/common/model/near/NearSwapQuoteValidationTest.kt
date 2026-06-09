@@ -1,6 +1,5 @@
 package co.electriccoin.zcash.ui.common.model.near
 
-import co.electriccoin.zcash.ui.common.model.DynamicSimpleSwapAsset
 import co.electriccoin.zcash.ui.common.model.DynamicSwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapBlockchain
 import co.electriccoin.zcash.ui.design.util.StringResource
@@ -24,14 +23,24 @@ class NearSwapQuoteValidationTest {
 
     @Test
     fun requireConsistent_passesRegardlessOfFormattedScale() {
-        requireConsistent(name = "amountIn", raw = BigDecimal("100000000"), formatted = BigDecimal("1.00"), decimals = 8)
+        requireConsistent(
+            name = "amountIn",
+            raw = BigDecimal("100000000"),
+            formatted = BigDecimal("1.00"),
+            decimals = 8
+        )
     }
 
     @Test
     fun requireConsistent_throwsWhenRawDoesNotMatchFormatted() {
         assertFailsWith<IllegalArgumentException> {
             // formatted=2 -> expects 200_000_000 base units, raw says 100_000_000
-            requireConsistent(name = "amountIn", raw = BigDecimal("100000000"), formatted = BigDecimal("2"), decimals = 8)
+            requireConsistent(
+                name = "amountIn",
+                raw = BigDecimal("100000000"),
+                formatted = BigDecimal("2"),
+                decimals = 8
+            )
         }
     }
 
@@ -57,7 +66,14 @@ class NearSwapQuoteValidationTest {
     fun requireWithinSlippage_outputFloating_throwsBelowFloor() {
         assertFailsWith<IllegalArgumentException> {
             // floor=90, server only guarantees 89
-            requireWithinSlippage(SwapType.EXACT_INPUT, A_THOUSAND, BigDecimal("100"), null, BigDecimal("89"), BPS_10_PCT)
+            requireWithinSlippage(
+                SwapType.EXACT_INPUT,
+                A_THOUSAND,
+                BigDecimal("100"),
+                null,
+                BigDecimal("89"),
+                BPS_10_PCT
+            )
         }
     }
 
@@ -72,7 +88,14 @@ class NearSwapQuoteValidationTest {
     fun requireWithinSlippage_inputFloating_throwsAboveCeiling() {
         assertFailsWith<IllegalArgumentException> {
             // ceiling=110, server demands at least 111
-            requireWithinSlippage(SwapType.EXACT_OUTPUT, BigDecimal("100"), A_THOUSAND, BigDecimal("111"), null, BPS_10_PCT)
+            requireWithinSlippage(
+                SwapType.EXACT_OUTPUT,
+                BigDecimal("100"),
+                A_THOUSAND,
+                BigDecimal("111"),
+                null,
+                BPS_10_PCT
+            )
         }
     }
 
@@ -96,7 +119,8 @@ class NearSwapQuoteValidationTest {
     fun requireMatchingAsset_passesOnSameTickerAndChainCaseInsensitive() {
         requireMatchingAsset(
             name = "originAsset",
-            expected = simpleAsset(token = "btc", chain = "bitcoin"),
+            expectedTokenTicker = "btc",
+            expectedChainTicker = "bitcoin",
             actual = asset(token = "BTC", chain = "BITCOIN")
         )
     }
@@ -106,7 +130,8 @@ class NearSwapQuoteValidationTest {
         assertFailsWith<IllegalArgumentException> {
             requireMatchingAsset(
                 name = "originAsset",
-                expected = simpleAsset(token = "BTC", chain = "Bitcoin"),
+                expectedTokenTicker = "BTC",
+                expectedChainTicker = "Bitcoin",
                 actual = asset(token = "ETH", chain = "Bitcoin")
             )
         }
@@ -117,9 +142,50 @@ class NearSwapQuoteValidationTest {
         assertFailsWith<IllegalArgumentException> {
             requireMatchingAsset(
                 name = "destinationAsset",
-                expected = simpleAsset(token = "USDC", chain = "Ethereum"),
+                expectedTokenTicker = "USDC",
+                expectedChainTicker = "Ethereum",
                 actual = asset(token = "USDC", chain = "Polygon")
             )
+        }
+    }
+
+    // endregion
+
+    // region requireQuoteMatchesUserAmount — quote must echo the user-requested amount at asset precision
+
+    @Test
+    fun requireQuoteMatchesUserAmount_passesOnExactMatchRegardlessOfScale() {
+        requireQuoteMatchesUserAmount(quoted = BigDecimal("1.00000000"), requested = BigDecimal("1"), decimals = 8)
+        requireQuoteMatchesUserAmount(quoted = BigDecimal("1"), requested = BigDecimal("1.00"), decimals = 8)
+    }
+
+    @Test
+    fun requireQuoteMatchesUserAmount_truncatesRequestedBeyondDecimalsBeforeComparing() {
+        // User enters more precision than the 8-decimal asset can represent; the excess is dropped (DOWN),
+        // so a quote of 1.12345678 matches a request of 1.123456789.
+        requireQuoteMatchesUserAmount(
+            quoted = BigDecimal("1.12345678"),
+            requested = BigDecimal("1.123456789"),
+            decimals = 8
+        )
+    }
+
+    @Test
+    fun requireQuoteMatchesUserAmount_throwsWhenQuoteUsesUntruncatedPrecision() {
+        // The quote must match the truncated request (1.12345678), not the raw entry (1.123456789).
+        assertFailsWith<IllegalArgumentException> {
+            requireQuoteMatchesUserAmount(
+                quoted = BigDecimal("1.123456789"),
+                requested = BigDecimal("1.123456789"),
+                decimals = 8
+            )
+        }
+    }
+
+    @Test
+    fun requireQuoteMatchesUserAmount_throwsWhenAmountsDiffer() {
+        assertFailsWith<IllegalArgumentException> {
+            requireQuoteMatchesUserAmount(quoted = BigDecimal("2"), requested = BigDecimal("1"), decimals = 8)
         }
     }
 
@@ -136,14 +202,6 @@ class NearSwapQuoteValidationTest {
             usdPrice = null,
             assetId = "$token.$chain",
             decimals = 8,
-            blockchain = blockchain(chain)
-        )
-
-    private fun simpleAsset(token: String, chain: String) =
-        DynamicSimpleSwapAsset(
-            tokenTicker = token,
-            tokenName = StringResource.ByString(token),
-            tokenIcon = imageRes(token),
             blockchain = blockchain(chain)
         )
 

@@ -6,7 +6,6 @@ import cash.z.ecc.android.sdk.model.Proposal
 import cash.z.ecc.android.sdk.model.Zatoshi
 import cash.z.ecc.sdk.extension.ZERO
 import co.electriccoin.zcash.ui.common.datasource.AFFILIATE_FEE_BPS
-import co.electriccoin.zcash.ui.common.model.SimpleSwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapAddress
 import co.electriccoin.zcash.ui.common.model.SwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapMode
@@ -15,8 +14,17 @@ import co.electriccoin.zcash.ui.common.model.ZecSwapAsset
 import co.electriccoin.zcash.ui.common.model.isSame
 import java.math.BigDecimal
 import java.math.MathContext
+import java.math.RoundingMode
 import kotlin.time.Instant
 
+/**
+ * @param expectedSlippageToleranceBps The slippage tolerance (in basis points) the client actually requested,
+ * snapshotted before the call. The fail-closed slippage check below MUST use this rather than the server-echoed
+ * `response.quoteRequest.slippageTolerance`: a malicious server could echo a wider tolerance (e.g.
+ * 10000 = 100%) so the slippage floor collapses to zero and the check always passes. When non-null
+ * the echo is additionally required to match it exactly. Null only for the status-display path,
+ * where the original client request is no longer available and there is nothing left to authorize.
+ */
 data class NearSwapQuote(
     val response: QuoteResponseDto,
     override val originAsset: SwapAsset,
@@ -24,6 +32,7 @@ data class NearSwapQuote(
     override val depositAddress: SwapAddress,
     override val destinationAddress: SwapAddress,
     override val refundAddress: SwapAddress,
+    val expectedSlippageToleranceBps: Int? = null,
 ) : SwapQuote {
     init {
         require(response.quoteRequest.originAsset == originAsset.assetId) {
@@ -52,13 +61,22 @@ data class NearSwapQuote(
             formatted = response.quote.amountOutFormatted,
             decimals = destinationAsset.decimals
         )
+        // The slippage tolerance must come from the client, not from the server's echoed request. When we
+        // know what we asked for, require the echo to match it exactly so the displayed `slippage` (derived
+        // below from the echo) is also trustworthy; then feed the client value into the fail-closed check.
+        if (expectedSlippageToleranceBps != null) {
+            require(response.quoteRequest.slippageTolerance == expectedSlippageToleranceBps) {
+                "Swap slippage tolerance mismatch: requested $expectedSlippageToleranceBps bps " +
+                    "but server returned ${response.quoteRequest.slippageTolerance}"
+            }
+        }
         requireWithinSlippage(
             swapType = response.quoteRequest.swapType,
             amountIn = response.quote.amountIn,
             amountOut = response.quote.amountOut,
             minAmountIn = response.quote.minAmountIn,
             minAmountOut = response.quote.minAmountOut,
-            slippageToleranceBps = response.quoteRequest.slippageTolerance
+            slippageToleranceBps = expectedSlippageToleranceBps ?: response.quoteRequest.slippageTolerance
         )
     }
 
@@ -147,9 +165,29 @@ internal fun requireConsistent(name: String, raw: BigDecimal?, formatted: BigDec
     }
 }
 
-internal fun requireMatchingAsset(name: String, expected: SimpleSwapAsset, actual: SwapAsset) {
-    require(actual.isSame(expected.tokenTicker, expected.chainTicker)) {
-        "Swap asset mismatch: expected $name=${expected.tokenTicker}/${expected.chainTicker} " +
+/**
+ * Asserts the quote echoes back the amount the user actually requested for the user-fixed side of the
+ * swap. The requested amount is truncated (RoundingMode.DOWN) to the asset's decimal precision before
+ * comparing, because that is the precision the request is sent at — anything beyond `decimals` cannot be
+ * represented on-chain and is intentionally dropped. So e.g. a user entry of 1.123456789 on an 8-decimal
+ * asset is accepted against a quote of 1.12345678.
+ */
+internal fun requireQuoteMatchesUserAmount(quoted: BigDecimal, requested: BigDecimal, decimals: Int) {
+    val truncated = requested.setScale(decimals, RoundingMode.DOWN)
+    require(quoted.compareTo(truncated) == 0) {
+        "Swap quote does not match user-requested amount: " +
+            "quote=$quoted, requested=$truncated (at $decimals decimals)"
+    }
+}
+
+internal fun requireMatchingAsset(
+    name: String,
+    expectedTokenTicker: String,
+    expectedChainTicker: String,
+    actual: SwapAsset
+) {
+    require(actual.isSame(expectedTokenTicker, expectedChainTicker)) {
+        "Swap asset mismatch: expected $name=$expectedTokenTicker/$expectedChainTicker " +
             "but server returned ${actual.tokenTicker}/${actual.chainTicker}"
     }
 }
@@ -173,7 +211,8 @@ internal fun requireWithinSlippage(
         // Output floats: the guaranteed minimum out must not be worse than amountOut * (1 - slippage).
         SwapType.EXACT_INPUT, SwapType.FLEX_INPUT -> {
             minAmountOut?.let { min ->
-                val floor = amountOut.multiply(BigDecimal.ONE - slippageFraction, MathContext.DECIMAL128)
+                val floorFactor = BigDecimal.ONE.subtract(slippageFraction, MathContext.DECIMAL128)
+                val floor = amountOut.multiply(floorFactor, MathContext.DECIMAL128)
                 require(min >= floor) {
                     "Swap slippage exceeded: server-guaranteed minAmountOut=$min is below the slippage " +
                         "floor=$floor (amountOut=$amountOut, slippage=$slippageFraction)"
@@ -182,12 +221,15 @@ internal fun requireWithinSlippage(
         }
 
         // Input floats: the guaranteed input must not exceed amountIn * (1 + slippage).
+        // Note: the server names this field `minAmountIn`, but for EXACT_OUTPUT it is the worst-case
+        // *maximum* input you may pay, hence `maxInputGuarantee`.
         SwapType.EXACT_OUTPUT -> {
-            minAmountIn?.let { min ->
-                val ceiling = amountIn.multiply(BigDecimal.ONE + slippageFraction, MathContext.DECIMAL128)
-                require(min <= ceiling) {
-                    "Swap slippage exceeded: server-guaranteed minAmountIn=$min is above the slippage " +
-                        "ceiling=$ceiling (amountIn=$amountIn, slippage=$slippageFraction)"
+            minAmountIn?.let { maxInputGuarantee ->
+                val ceilingFactor = BigDecimal.ONE.add(slippageFraction, MathContext.DECIMAL128)
+                val ceiling = amountIn.multiply(ceilingFactor, MathContext.DECIMAL128)
+                require(maxInputGuarantee <= ceiling) {
+                    "Swap slippage exceeded: server-guaranteed minAmountIn=$maxInputGuarantee is above the " +
+                        "slippage ceiling=$ceiling (amountIn=$amountIn, slippage=$slippageFraction)"
                 }
             }
         }

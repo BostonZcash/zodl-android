@@ -17,7 +17,7 @@ import co.electriccoin.zcash.ui.common.model.SwapMode.FLEX_INPUT
 import co.electriccoin.zcash.ui.common.model.SwapQuote
 import co.electriccoin.zcash.ui.common.model.ZashiAccount
 import co.electriccoin.zcash.ui.common.model.near.requireMatchingAsset
-import co.electriccoin.zcash.ui.common.provider.SimpleSwapAssetProvider
+import co.electriccoin.zcash.ui.common.model.near.requireQuoteMatchesUserAmount
 import co.electriccoin.zcash.ui.common.provider.SynchronizerProvider
 import co.electriccoin.zcash.ui.common.repository.KeystoneProposalRepository
 import co.electriccoin.zcash.ui.common.repository.SwapQuoteData
@@ -33,7 +33,6 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
-import java.math.RoundingMode
 
 class RequestSwapQuoteUseCase(
     private val navigationRouter: NavigationRouter,
@@ -43,7 +42,6 @@ class RequestSwapQuoteUseCase(
     private val keystoneProposalRepository: KeystoneProposalRepository,
     private val accountDataSource: AccountDataSource,
     private val synchronizerProvider: SynchronizerProvider,
-    private val simpleSwapAssetProvider: SimpleSwapAssetProvider,
 ) {
     suspend fun requestExactInput(
         amount: BigDecimal,
@@ -261,14 +259,6 @@ class RequestSwapQuoteUseCase(
         }
     }
 
-    private fun requireQuoteMatchesUserAmount(quoted: BigDecimal, requested: BigDecimal, decimals: Int) {
-        val truncated = requested.setScale(decimals, RoundingMode.DOWN)
-        require(quoted.compareTo(truncated) == 0) {
-            "Swap quote does not match user-requested amount: " +
-                "quote=$quoted, requested=$truncated (at $decimals decimals)"
-        }
-    }
-
     /**
      * Asserts the quote's asset matches the asset the user had selected when this request started.
      * `expected` is snapshotted at the start of the public request method (before the suspending
@@ -283,7 +273,8 @@ class RequestSwapQuoteUseCase(
         if (expected == null) return
         requireMatchingAsset(
             name = name,
-            expected = simpleSwapAssetProvider.get(expected.tokenTicker, expected.chainTicker),
+            expectedTokenTicker = expected.tokenTicker,
+            expectedChainTicker = expected.chainTicker,
             actual = actual
         )
     }
