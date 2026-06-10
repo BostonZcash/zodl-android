@@ -463,7 +463,7 @@ jobs:
         uses: ./.github/actions/foss/strip
 
       - name: Build FOSS APK
-        timeout-minutes: 25
+        timeout-minutes: 35
         env:
           ORG_GRADLE_PROJECT_ZCASH_RELEASE_KEYSTORE_PATH: ${{ format('{0}/release.jks', env.home) }}
           ORG_GRADLE_PROJECT_ZCASH_RELEASE_KEYSTORE_PASSWORD: android
