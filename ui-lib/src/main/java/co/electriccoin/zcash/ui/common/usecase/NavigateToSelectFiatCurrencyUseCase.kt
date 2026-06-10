@@ -18,7 +18,8 @@ class NavigateToSelectFiatCurrencyUseCase(
     private val pipeline = MutableSharedFlow<SelectFiatCurrencyPipelineResult>()
 
     suspend operator fun invoke(selected: FiatCurrency?): FiatCurrency? {
-        val args = CurrencyConversionPickerArgs(selectedCode = selected?.code)
+        // A missing preference defaults to USD, so the picker always highlights a concrete currency.
+        val args = CurrencyConversionPickerArgs(selectedCode = (selected ?: FiatCurrency.USD).code)
         navigationRouter.forward(args)
         val result = pipeline.first { it.args.requestId == args.requestId }
         return when (result) {
