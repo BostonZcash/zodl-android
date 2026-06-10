@@ -94,7 +94,7 @@ class ExchangeRateRepositoryImpl(
                                             emit(cache.copy(isLoading = false))
                                         }
                                     }.catch {
-                                        if (!VersionInfo.IS_CMC_AVAILABLE || fiat == FiatCurrency.USD) {
+                                        if (shouldFallBackToSynchronizerRoute(VersionInfo.IS_CMC_AVAILABLE, fiat)) {
                                             synchronizerProvider.getSynchronizer().refreshExchangeRateUsd()
                                             emitAll(exchangeRateDataSource.observeSynchronizerRoute())
                                         }
@@ -193,6 +193,19 @@ class ExchangeRateRepositoryImpl(
             }
         }
 }
+
+/**
+ * Decides whether to fall back to the SDK synchronizer route when the CMC exchange-rate lookup
+ * fails or is unavailable. The synchronizer route only provides a USD rate.
+ *
+ * - When CMC is not available it is the only rate source, so always fall back regardless of [fiat].
+ * - When CMC is available, only fall back for USD; for any other fiat the synchronizer route
+ *   cannot provide a matching rate.
+ */
+internal fun shouldFallBackToSynchronizerRoute(
+    isCmcAvailable: Boolean,
+    fiat: FiatCurrency,
+): Boolean = !isCmcAvailable || fiat == FiatCurrency.USD
 
 private val USD_EXCHANGE_REFRESH_LOCK_THRESHOLD = 2.minutes
 private val USD_EXCHANGE_STALE_LOCK_THRESHOLD = 15.minutes

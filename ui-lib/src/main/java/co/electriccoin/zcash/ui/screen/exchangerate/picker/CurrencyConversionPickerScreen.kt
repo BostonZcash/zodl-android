@@ -17,6 +17,6 @@ fun CurrencyConversionPickerScreen(args: CurrencyConversionPickerArgs) {
 
 @Serializable
 data class CurrencyConversionPickerArgs(
-    val selectedCode: String? = null,
+    val selectedCode: String,
     val requestId: String = UUID.randomUUID().toString()
 )
