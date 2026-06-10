@@ -2,7 +2,6 @@ package co.electriccoin.zcash.ui.common.repository
 
 import android.app.Application
 import cash.z.ecc.android.sdk.SdkSynchronizer
-import cash.z.ecc.android.sdk.Synchronizer
 import cash.z.ecc.android.sdk.WalletInitMode
 import cash.z.ecc.android.sdk.model.BlockHeight
 import cash.z.ecc.android.sdk.model.FastestServersResult
@@ -28,18 +27,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -49,8 +42,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.takeWhile
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 interface WalletRepository {
@@ -69,6 +60,8 @@ interface WalletRepository {
     )
 
     suspend fun updateWalletEndpoint(endpoint: LightWalletEndpoint)
+
+    fun init()
 
     fun refreshFastestServers()
 }
@@ -188,6 +181,17 @@ class WalletRepositoryImpl(
                 started = SharingStarted.WhileSubscribed(ANDROID_STATE_FLOW_TIMEOUT),
                 initialValue = WalletRestoringState.NONE
             )
+
+    override fun init() {
+        scope.launch { migrateDecommissionedEndpointIfNeeded() }
+    }
+
+    private suspend fun migrateDecommissionedEndpointIfNeeded() {
+        val wallet = persistableWalletProvider.getPersistableWallet() ?: return
+        if (wallet.endpoint.host in lightWalletEndpointProvider.getDecommissionedHosts()) {
+            persistWalletInternal(wallet.copy(endpoint = lightWalletEndpointProvider.getDefaultEndpoint()))
+        }
+    }
 
     override suspend fun updateWalletEndpoint(endpoint: LightWalletEndpoint) {
         val selectedWallet = persistableWalletProvider.getPersistableWallet() ?: return
