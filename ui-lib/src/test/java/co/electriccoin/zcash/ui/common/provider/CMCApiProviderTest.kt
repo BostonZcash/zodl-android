@@ -33,7 +33,13 @@ class CMCApiProviderTest {
                 httpClientProvider.createCalls,
                 "CMC must never use create() (which can fall back to clearnet)"
             )
-            assertEquals(RATE.toBigDecimal(), response.data["ZEC"]?.quote?.get("USD")?.price)
+            assertEquals(
+                RATE.toBigDecimal(),
+                response.data["ZEC"]
+                    ?.quote
+                    ?.get("USD")
+                    ?.price
+            )
             assertTrue(httpClientProvider.requestedHosts.all { it == CMC_HOST })
         }
 }
