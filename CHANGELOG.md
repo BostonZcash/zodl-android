@@ -8,6 +8,7 @@ and this application adheres to [Semantic Versioning](https://semver.org/spec/v2
 
 ### Fixed:
 - Network request/response bodies and voting diagnostics are no longer written to logs in release builds, preventing sensitive data (recipient/refund addresses, amounts, transaction hashes) from leaking to logcat, bug reports, and crash dumps. Credential headers are also redacted from logs.
+- On the wallet-backup screen the recovery phrase is now masked until the biometric reveal, so the plaintext words can no longer be read from the accessibility/view tree behind the visual blur.
 
 ## [3.5.3 (1745)] - 2026-06-05
 
