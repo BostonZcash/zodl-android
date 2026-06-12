@@ -6,6 +6,7 @@ import co.electriccoin.zcash.ui.design.util.StringResource
 import co.electriccoin.zcash.ui.design.util.imageRes
 import java.math.BigDecimal
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 /**
@@ -33,15 +34,20 @@ class NearSwapQuoteValidationTest {
 
     @Test
     fun requireConsistent_throwsWhenRawDoesNotMatchFormatted() {
-        assertFailsWith<IllegalArgumentException> {
-            // formatted=2 -> expects 200_000_000 base units, raw says 100_000_000
-            requireConsistent(
-                name = "amountIn",
-                raw = BigDecimal("100000000"),
-                formatted = BigDecimal("2"),
-                decimals = 8
-            )
-        }
+        // Distinct subtype (MOB-1371) so the data source can emit a sanitized monitoring signal; still an
+        // IllegalArgumentException so the generic quote-rejection handling is unchanged.
+        val e =
+            assertFailsWith<SwapAmountInconsistencyException> {
+                // formatted=2 -> expects 200_000_000 base units, raw says 100_000_000
+                requireConsistent(
+                    name = "amountIn",
+                    raw = BigDecimal("100000000"),
+                    formatted = BigDecimal("2"),
+                    decimals = 8
+                )
+            }
+        assertEquals("amountIn", e.field)
+        assertEquals(8, e.decimals)
     }
 
     @Test

@@ -160,10 +160,33 @@ data class NearSwapQuote(
 
 internal fun requireConsistent(name: String, raw: BigDecimal?, formatted: BigDecimal?, decimals: Int) {
     if (raw == null || formatted == null) return
-    require(raw.compareTo(formatted.movePointRight(decimals)) == 0) {
-        "Swap amount inconsistency: $name ($raw) does not match ${name}Formatted ($formatted) at $decimals decimals"
+    if (raw.compareTo(formatted.movePointRight(decimals)) != 0) {
+        throw SwapAmountInconsistencyException(
+            field = name,
+            decimals = decimals,
+            message =
+                "Swap amount inconsistency: $name ($raw) does not match " +
+                    "${name}Formatted ($formatted) at $decimals decimals"
+        )
     }
 }
+
+/**
+ * Thrown by [requireConsistent] when the server's raw base-unit amount does not equal the exact decimal
+ * expansion of its displayed `*Formatted` value.
+ *
+ * The exact-equality posture is intentional and must NOT be relaxed to a tolerance: it is the "trust the
+ * quote 0% or 100%" stance (MOB-1371). It is kept as a distinct [IllegalArgumentException] subtype — so it
+ * still flows through the generic quote-rejection handling unchanged — that carries only the non-sensitive
+ * [field] / [decimals]. The data source uses those to emit a sanitized crash-monitoring signal (never the
+ * amounts), so that if the 1Click API ever starts returning rounded display values, the resulting
+ * rejections surface as an observable "quotes blocked" signal instead of silent breakage for users.
+ */
+class SwapAmountInconsistencyException(
+    val field: String,
+    val decimals: Int,
+    message: String
+) : IllegalArgumentException(message)
 
 /**
  * Asserts the quote echoes back the amount the user actually requested for the user-fixed side of the
