@@ -130,7 +130,9 @@ private fun String.isExchangeRateHost(): Boolean = this == CMC_API_HOST
  * uncaught-exception handler rather than corrupting the call.
  */
 class ClearnetExchangeRateBlockedError :
-    AssertionError("Exchange rate fetching over clearnet is not allowed while Tor is disabled")
+    AssertionError(
+        "Exchange rate fetching over clearnet is not allowed while Tor is disabled"
+    )
 
 private const val MAX_RETRIES = 4
 private const val DEFAULT_REQUEST_TIMEOUT_MILLIS = 120_000L
