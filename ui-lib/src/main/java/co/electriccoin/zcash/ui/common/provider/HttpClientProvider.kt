@@ -14,7 +14,6 @@ import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
-import java.io.IOException
 
 interface HttpClientProvider {
     suspend fun create(): HttpClient
@@ -60,7 +59,7 @@ class HttpClientProviderImpl(
                             .url.host
                             .isExchangeRateHost()
                     ) {
-                        throw IOException("Exchange rate fetching over clearnet is not allowed while Tor is disabled")
+                        throw ClearnetExchangeRateBlockedError()
                     }
                     chain.proceed(chain.request())
                 }
@@ -120,6 +119,18 @@ private fun String.isVotingHelperPath(): Boolean =
 // direct (clearnet) client. Matched on the host (not a substring of the full URL) so a path or query
 // that happens to echo the host can't trigger a false match. The host literal lives in CMCApiProvider.
 private fun String.isExchangeRateHost(): Boolean = this == CMC_API_HOST
+
+/**
+ * MOB-1378: raised by the direct (clearnet) client's backstop interceptor when an exchange-rate request
+ * would leave over clearnet. This is an unrecoverable invariant violation — a caller regressing from
+ * createTor() to create() for the CMC host — not a network condition to recover from. Extends
+ * [AssertionError] (an `Error`, not an `Exception`) so it is NOT swallowed by the `catch (Exception)`
+ * fallbacks downstream (e.g. ExchangeRateRepository) and instead crashes the app loudly. OkHttp's async
+ * dispatch rethrows non-IOException throwables on its dispatcher thread, so this propagates to the
+ * uncaught-exception handler rather than corrupting the call.
+ */
+class ClearnetExchangeRateBlockedError :
+    AssertionError("Exchange rate fetching over clearnet is not allowed while Tor is disabled")
 
 private const val MAX_RETRIES = 4
 private const val DEFAULT_REQUEST_TIMEOUT_MILLIS = 120_000L
