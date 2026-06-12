@@ -18,6 +18,12 @@ import io.ktor.serialization.kotlinx.json.json
 interface HttpClientProvider {
     suspend fun create(): HttpClient
 
+    /**
+     * Returns a client that always routes over Tor, regardless of the user's Tor preference. Used for
+     * requests that must never touch clearnet (e.g. exchange-rate fetching, MOB-1378).
+     */
+    suspend fun createTor(): HttpClient
+
     suspend fun supportsKtorTimeouts(): Boolean = true
 }
 
@@ -30,7 +36,7 @@ class HttpClientProviderImpl(
 
     override suspend fun supportsKtorTimeouts(): Boolean = isTorEnabledStorageProvider.get() != true
 
-    private suspend fun createTor() =
+    override suspend fun createTor() =
         synchronizerProvider
             .getSynchronizer()
             .getTorHttpClient {
@@ -41,14 +47,33 @@ class HttpClientProviderImpl(
     private fun createDirect() =
         HttpClient(OkHttp) {
             configureHttpClient(installTimeouts = true)
+            engine {
+                // MOB-1378: Currency Conversion exchange rates must only ever be fetched over Tor (the
+                // in-app copy promises rates are fetched over Tor to protect the user's IP). CMCApiProvider
+                // already routes through createTor(), so this clearnet client should never see a CMC
+                // request — this interceptor is a backstop that fails loudly if a future caller regresses
+                // to create(), rather than silently leaking the user's IP / request timing.
+                addInterceptor { chain ->
+                    if (chain
+                            .request()
+                            .url.host
+                            .isExchangeRateHost()
+                    ) {
+                        throw ClearnetExchangeRateBlockedError()
+                    }
+                    chain.proceed(chain.request())
+                }
+            }
             install(HttpRequestRetry) {
                 maxRetries = MAX_RETRIES
                 retryIf { request, response ->
                     !request.url.toString().isVotingHelperPath() &&
+                        !request.url.host.isExchangeRateHost() &&
                         response.status.value in 500..599
                 }
                 retryOnExceptionIf { request, _ ->
-                    !request.url.toString().isVotingHelperPath()
+                    !request.url.toString().isVotingHelperPath() &&
+                        !request.url.host.isExchangeRateHost()
                 }
                 exponentialDelay()
             }
@@ -89,6 +114,25 @@ private class KtorLogger : Logger {
 private fun String.isVotingHelperPath(): Boolean =
     contains("/shielded-vote/v1/shares") ||
         contains("/shielded-vote/v1/share-status/")
+
+// MOB-1378: the CMC quote API is the exchange-rate provider; requests to it must never leave over the
+// direct (clearnet) client. Matched on the host (not a substring of the full URL) so a path or query
+// that happens to echo the host can't trigger a false match. The host literal lives in CMCApiProvider.
+private fun String.isExchangeRateHost(): Boolean = this == CMC_API_HOST
+
+/**
+ * MOB-1378: raised by the direct (clearnet) client's backstop interceptor when an exchange-rate request
+ * would leave over clearnet. This is an unrecoverable invariant violation — a caller regressing from
+ * createTor() to create() for the CMC host — not a network condition to recover from. Extends
+ * [AssertionError] (an `Error`, not an `Exception`) so it is NOT swallowed by the `catch (Exception)`
+ * fallbacks downstream (e.g. ExchangeRateRepository) and instead crashes the app loudly. OkHttp's async
+ * dispatch rethrows non-IOException throwables on its dispatcher thread, so this propagates to the
+ * uncaught-exception handler rather than corrupting the call.
+ */
+class ClearnetExchangeRateBlockedError :
+    AssertionError(
+        "Exchange rate fetching over clearnet is not allowed while Tor is disabled"
+    )
 
 private const val MAX_RETRIES = 4
 private const val DEFAULT_REQUEST_TIMEOUT_MILLIS = 120_000L
