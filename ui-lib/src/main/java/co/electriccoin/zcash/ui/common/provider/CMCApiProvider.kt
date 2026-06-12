@@ -22,7 +22,7 @@ class CMCApiProviderImpl(
 ) : CMCApiProvider {
     override suspend fun getExchangeRateQuote(apiKey: String): GetCMCQuoteResponse =
         execute {
-            get("https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest") {
+            get("https://$CMC_API_HOST/v1/cryptocurrency/quotes/latest") {
                 parameter("symbol", "ZEC")
                 parameter("convert", "USD")
                 contentType(ContentType.Application.Json)
@@ -39,3 +39,7 @@ class CMCApiProviderImpl(
         // the Tor-only client rather than create(), which would fall back to clearnet when Tor is off.
         withContext(Dispatchers.IO) { httpClientProvider.createTor().use { block(it) } }
 }
+
+// MOB-1378: single source of truth for the exchange-rate provider host. Used both to build the request
+// URL above and by [HttpClientProvider] to refuse the same host on the direct (clearnet) client.
+internal const val CMC_API_HOST = "pro-api.coinmarketcap.com"

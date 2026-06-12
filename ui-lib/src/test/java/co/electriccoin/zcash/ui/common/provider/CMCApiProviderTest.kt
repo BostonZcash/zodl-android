@@ -40,12 +40,11 @@ class CMCApiProviderTest {
                     ?.get("USD")
                     ?.price
             )
-            assertTrue(httpClientProvider.requestedHosts.all { it == CMC_HOST })
+            assertTrue(httpClientProvider.requestedHosts.all { it == CMC_API_HOST })
         }
 }
 
 private const val RATE = 42.0
-private const val CMC_HOST = "pro-api.coinmarketcap.com"
 
 private class RecordingHttpClientProvider : HttpClientProvider {
     var createCalls = 0
