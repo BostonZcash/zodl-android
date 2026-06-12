@@ -56,10 +56,10 @@ class NearSwapQuoteValidationTest {
 
     @Test
     fun requireWithinSlippage_outputFloating_passesAtAndAboveFloor() {
-        // 10% slippage, amountOut=100 -> floor=90
-        requireWithinSlippage(SwapType.EXACT_INPUT, A_THOUSAND, BigDecimal("100"), null, BigDecimal("90"), BPS_10_PCT)
-        requireWithinSlippage(SwapType.EXACT_INPUT, A_THOUSAND, BigDecimal("100"), null, BigDecimal("95"), BPS_10_PCT)
-        requireWithinSlippage(SwapType.FLEX_INPUT, A_THOUSAND, BigDecimal("100"), null, BigDecimal("90"), BPS_10_PCT)
+        // 10% slippage, amountOut=100 -> floor=90. minAmountIn is the fixed side (== amountIn) and ignored here.
+        requireWithinSlippage(SwapType.EXACT_INPUT, A_THOUSAND, HUNDRED, A_THOUSAND, BigDecimal("90"), BPS_10_PCT)
+        requireWithinSlippage(SwapType.EXACT_INPUT, A_THOUSAND, HUNDRED, A_THOUSAND, BigDecimal("95"), BPS_10_PCT)
+        requireWithinSlippage(SwapType.FLEX_INPUT, A_THOUSAND, HUNDRED, A_THOUSAND, BigDecimal("90"), BPS_10_PCT)
     }
 
     @Test
@@ -70,7 +70,7 @@ class NearSwapQuoteValidationTest {
                 SwapType.EXACT_INPUT,
                 A_THOUSAND,
                 BigDecimal("100"),
-                null,
+                A_THOUSAND,
                 BigDecimal("89"),
                 BPS_10_PCT
             )
@@ -79,9 +79,9 @@ class NearSwapQuoteValidationTest {
 
     @Test
     fun requireWithinSlippage_inputFloating_passesAtAndBelowCeiling() {
-        // 10% slippage, amountIn=100 -> ceiling=110
-        requireWithinSlippage(SwapType.EXACT_OUTPUT, BigDecimal("100"), A_THOUSAND, BigDecimal("110"), null, BPS_10_PCT)
-        requireWithinSlippage(SwapType.EXACT_OUTPUT, BigDecimal("100"), A_THOUSAND, BigDecimal("105"), null, BPS_10_PCT)
+        // 10% slippage, amountIn=100 -> ceiling=110. minAmountOut is the fixed side (== amountOut) and ignored here.
+        requireWithinSlippage(SwapType.EXACT_OUTPUT, HUNDRED, A_THOUSAND, BigDecimal("110"), A_THOUSAND, BPS_10_PCT)
+        requireWithinSlippage(SwapType.EXACT_OUTPUT, HUNDRED, A_THOUSAND, BigDecimal("105"), A_THOUSAND, BPS_10_PCT)
     }
 
     @Test
@@ -93,17 +93,10 @@ class NearSwapQuoteValidationTest {
                 BigDecimal("100"),
                 A_THOUSAND,
                 BigDecimal("111"),
-                null,
+                A_THOUSAND,
                 BPS_10_PCT
             )
         }
-    }
-
-    @Test
-    fun requireWithinSlippage_noOpWhenBoundAbsent() {
-        // Server omitted min* — defense-in-depth only, must not reject (see QuoteDetails nullability note).
-        requireWithinSlippage(SwapType.EXACT_INPUT, A_THOUSAND, BigDecimal("100"), null, null, BPS_10_PCT)
-        requireWithinSlippage(SwapType.EXACT_OUTPUT, BigDecimal("100"), A_THOUSAND, null, null, BPS_10_PCT)
     }
 
     @Test
@@ -120,7 +113,7 @@ class NearSwapQuoteValidationTest {
             swapType = SwapType.EXACT_INPUT,
             amountIn = BigDecimal("2245828"),
             amountOut = BigDecimal("9897372"),
-            minAmountIn = null,
+            minAmountIn = BigDecimal("2245828"),
             minAmountOut = BigDecimal("6928160"),
             slippageToleranceBps = 3000
         )
@@ -134,7 +127,7 @@ class NearSwapQuoteValidationTest {
                 swapType = SwapType.EXACT_INPUT,
                 amountIn = BigDecimal("2245828"),
                 amountOut = BigDecimal("9897372"),
-                minAmountIn = null,
+                minAmountIn = BigDecimal("2245828"),
                 minAmountOut = BigDecimal("6928159"),
                 slippageToleranceBps = 3000
             )
@@ -150,7 +143,7 @@ class NearSwapQuoteValidationTest {
             amountIn = BigDecimal("9897372"),
             amountOut = BigDecimal("2245828"),
             minAmountIn = BigDecimal("12866584"),
-            minAmountOut = null,
+            minAmountOut = BigDecimal("2245828"),
             slippageToleranceBps = 3000
         )
     }
@@ -164,7 +157,7 @@ class NearSwapQuoteValidationTest {
                 amountIn = BigDecimal("9897372"),
                 amountOut = BigDecimal("2245828"),
                 minAmountIn = BigDecimal("12866585"),
-                minAmountOut = null,
+                minAmountOut = BigDecimal("2245828"),
                 slippageToleranceBps = 3000
             )
         }
@@ -266,6 +259,7 @@ class NearSwapQuoteValidationTest {
 
     private companion object {
         val A_THOUSAND: BigDecimal = BigDecimal("1000")
+        val HUNDRED: BigDecimal = BigDecimal("100")
         const val BPS_10_PCT = 1000
     }
 }

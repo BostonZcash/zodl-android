@@ -196,14 +196,17 @@ internal fun requireMatchingAsset(
  * Fail-closed slippage check on the server-determined (floating) side of the quote. The user-fixed side
  * is already pinned by requireQuoteMatchesUserAmount in the use case; this asserts the server's own
  * worst-case guarantee (minAmountOut / minAmountIn) does not exceed the slippage the user requested.
- * Only enforced when the server actually returns the bound — see the nullability note in QuoteDetails.
+ *
+ * Both bounds are required fields of the 1Click quote response (see QuoteDetails), so the check is always
+ * enforced: a server that omits them fails deserialization rather than reaching this point with a null
+ * bound that would silently skip the assertion.
  */
 internal fun requireWithinSlippage(
     swapType: SwapType?,
     amountIn: BigDecimal,
     amountOut: BigDecimal,
-    minAmountIn: BigDecimal?,
-    minAmountOut: BigDecimal?,
+    minAmountIn: BigDecimal,
+    minAmountOut: BigDecimal,
     slippageToleranceBps: Int
 ) {
     // Both bounds are computed in integer base units to match the server's integer arithmetic.
@@ -218,15 +221,13 @@ internal fun requireWithinSlippage(
         // Round DOWN — the server's worst-case minAmountOut is truncated DOWN for its own safety, so the
         // wallet's floor must do the same to accept the boundary case.
         SwapType.EXACT_INPUT, SwapType.FLEX_INPUT -> {
-            minAmountOut?.let { min ->
-                val floor =
-                    amountOut
-                        .multiply(basisPointsDenominator.subtract(bps))
-                        .divide(basisPointsDenominator, 0, RoundingMode.DOWN)
-                require(min >= floor) {
-                    "Swap slippage exceeded: server-guaranteed minAmountOut=$min is below the slippage " +
-                        "floor=$floor (amountOut=$amountOut, slippageBps=$slippageToleranceBps)"
-                }
+            val floor =
+                amountOut
+                    .multiply(basisPointsDenominator.subtract(bps))
+                    .divide(basisPointsDenominator, 0, RoundingMode.DOWN)
+            require(minAmountOut >= floor) {
+                "Swap slippage exceeded: server-guaranteed minAmountOut=$minAmountOut is below the slippage " +
+                    "floor=$floor (amountOut=$amountOut, slippageBps=$slippageToleranceBps)"
             }
         }
 
@@ -235,15 +236,14 @@ internal fun requireWithinSlippage(
         // *maximum* input you may pay, hence `maxInputGuarantee`. Round UP — the server's worst-case
         // maxInput is truncated UP for its own safety, so the wallet's ceiling must do the same.
         SwapType.EXACT_OUTPUT -> {
-            minAmountIn?.let { maxInputGuarantee ->
-                val ceiling =
-                    amountIn
-                        .multiply(basisPointsDenominator.add(bps))
-                        .divide(basisPointsDenominator, 0, RoundingMode.UP)
-                require(maxInputGuarantee <= ceiling) {
-                    "Swap slippage exceeded: server-guaranteed minAmountIn=$maxInputGuarantee is above the " +
-                        "slippage ceiling=$ceiling (amountIn=$amountIn, slippageBps=$slippageToleranceBps)"
-                }
+            val maxInputGuarantee = minAmountIn
+            val ceiling =
+                amountIn
+                    .multiply(basisPointsDenominator.add(bps))
+                    .divide(basisPointsDenominator, 0, RoundingMode.UP)
+            require(maxInputGuarantee <= ceiling) {
+                "Swap slippage exceeded: server-guaranteed minAmountIn=$maxInputGuarantee is above the " +
+                    "slippage ceiling=$ceiling (amountIn=$amountIn, slippageBps=$slippageToleranceBps)"
             }
         }
 
