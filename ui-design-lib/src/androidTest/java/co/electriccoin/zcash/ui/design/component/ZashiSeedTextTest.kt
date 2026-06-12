@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.filters.MediumTest
 import androidx.test.platform.app.InstrumentationRegistry
@@ -22,11 +22,11 @@ class ZashiSeedTextTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val maskedSeedWord =
+    private val hiddenSeedWordDescription =
         InstrumentationRegistry
             .getInstrumentation()
             .targetContext
-            .getString(R.string.general_masked_seed_word)
+            .getString(R.string.general_hidden_seed_word)
 
     private val seedWords = List(SEED_WORD_COUNT) { "word$it" }
 
@@ -54,8 +54,11 @@ class ZashiSeedTextTest {
             composeTestRule.onNodeWithText(word).assertDoesNotExist()
         }
 
+        // While hidden, each word node exposes only a descriptive content description (the visible
+        // "•••••" mask is cleared from the accessibility tree) so a screen reader does not spell
+        // out the mask for every word.
         composeTestRule
-            .onAllNodesWithText(maskedSeedWord)
+            .onAllNodesWithContentDescription(hiddenSeedWordDescription)
             .assertCountEquals(SEED_WORD_COUNT)
     }
 
@@ -68,7 +71,7 @@ class ZashiSeedTextTest {
             composeTestRule.onNodeWithText(word).assertExists()
         }
 
-        composeTestRule.onAllNodesWithText(maskedSeedWord).assertCountEquals(0)
+        composeTestRule.onAllNodesWithContentDescription(hiddenSeedWordDescription).assertCountEquals(0)
     }
 }
 

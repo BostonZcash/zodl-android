@@ -43,6 +43,7 @@ fun ZashiSeedText(
     modifier: Modifier = Modifier
 ) {
     val maskedSeedWord = stringResource(R.string.general_masked_seed_word)
+    val hiddenSeedWordDescription = stringResource(R.string.general_hidden_seed_word)
     val blur by animateDpAsState(if (state.isRevealed) 0.dp else 14.dp, label = "")
     val color by animateColorAsState(
         when {
@@ -88,6 +89,7 @@ fun ZashiSeedText(
                             content = { mod, text ->
                                 ZashiSeedWordTextContent(
                                     text = text,
+                                    contentDescription = if (state.isRevealed) null else hiddenSeedWordDescription,
                                     modifier = mod.blurCompat(blur, 14.dp)
                                 )
                             },
