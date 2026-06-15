@@ -9,6 +9,15 @@ and this application adheres to [Semantic Versioning](https://semver.org/spec/v2
 ### Fixed:
 - Network request/response bodies and voting diagnostics are no longer written to logs in release builds, preventing sensitive data (recipient/refund addresses, amounts, transaction hashes) from leaking to logcat, bug reports, and crash dumps. Credential headers are also redacted from logs.
 
+## [3.6.0 (1907)] - 2026-06-15
+
+### Added:
+- Until now, balances only displayed in US dollars. We added multi-currency support — pick your preferred fiat in Currency Conversion settings and on the Wallet Status Widget opt-in.
+
+### Changed:
+- New Automatic/Manual server selection improves reliability — Automatic keeps you on the best server. Users on custom servers stay on Manual.
+- New wallets now sync from the chain tip instead of a bundled checkpoint, skipping the first-launch scan.
+
 ## [3.5.3 (1745)] - 2026-06-05
 
 ### Changed:

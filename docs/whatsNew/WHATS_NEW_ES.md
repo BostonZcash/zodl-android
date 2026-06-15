@@ -12,6 +12,15 @@ directly impact users rather than highlighting other key architectural updates.*
 
 ## [Unreleased]
 
+## [3.6.0 (1907)] - 2026-06-15
+
+### Añadido:
+- Hasta ahora los saldos solo se mostraban en USD. Añadimos soporte multimoneda: elige tu moneda en Conversión de Moneda y en el widget de Estado de la Billetera.
+
+### Cambiado:
+- La nueva selección Automático/Manual mejora la confiabilidad: Automático te mantiene en el mejor servidor. Quienes usan servidor personalizado siguen en Manual.
+- Las nuevas carteras se sincronizan desde la altura actual de la cadena en vez del checkpoint integrado, omitiendo el escaneo inicial.
+
 ## [3.5.3 (1745)] - 2026-06-05
 
 ### Cambiado:
