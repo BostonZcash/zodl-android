@@ -12,6 +12,15 @@ directly impact users rather than highlighting other key architectural updates.*
 
 ## [Unreleased]
 
+## [3.6.0 (1907)] - 2026-06-15
+
+### Added:
+- Until now, balances only displayed in US dollars. We added multi-currency support — pick your preferred fiat in Currency Conversion settings and on the Wallet Status Widget opt-in.
+
+### Changed:
+- New Automatic/Manual server selection improves reliability — Automatic keeps you on the best server. Users on custom servers stay on Manual.
+- New wallets now sync from the chain tip instead of a bundled checkpoint, skipping the first-launch scan.
+
 ## [3.5.3 (1745)] - 2026-06-05
 
 ### Changed:
