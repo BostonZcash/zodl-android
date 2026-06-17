@@ -1,5 +1,6 @@
 package co.electriccoin.zcash.ui.common.repository
 
+import co.electriccoin.zcash.ui.common.datasource.resolveIsServerSelectionAutomatic
 import co.electriccoin.zcash.ui.common.provider.ApplicationStateProvider
 import co.electriccoin.zcash.ui.common.provider.IsServerSelectionAutomaticProvider
 import co.electriccoin.zcash.ui.common.provider.LightWalletEndpointProvider
@@ -51,23 +52,32 @@ class AutomaticServerRepositoryImpl(
             .observe()
             .distinctUntilChanged()
             .flatMapLatest { isAutomatic ->
-                isAutomatic?.let { flowOf(it) }
-                    ?: persistableWalletProvider.persistableWallet
+                if (isAutomatic != null) {
+                    flowOf(isAutomatic)
+                } else {
+                    persistableWalletProvider.persistableWallet
                         .mapNotNull { it?.endpoint }
-                        .map {
-                            !lightWalletEndpointProvider.getEndpoints().contains(it)
-                        }.map { isCustomEndpoint ->
-                            !isCustomEndpoint
+                        .map { endpoint ->
+                            resolveIsServerSelectionAutomatic(
+                                isAutomaticPreference = null,
+                                currentEndpoint = endpoint,
+                                knownEndpoints = lightWalletEndpointProvider.getEndpoints()
+                            )
                         }
+                }
             }.distinctUntilChanged()
 
-    @Suppress("ReturnCount")
     override suspend fun isServerAutomatic(): Boolean {
-        val isAutomatic = isServerSelectionAutomaticProvider.get()
-        if (isAutomatic != null) return isAutomatic
-        val endpoint = persistableWalletProvider.getPersistableWallet()?.endpoint ?: return true
-        val isCustomEndpoint = !lightWalletEndpointProvider.getEndpoints().contains(endpoint)
-        return !isCustomEndpoint
+        val preference = isServerSelectionAutomaticProvider.get()
+        // Only the wallet read is guarded; resolving a custom endpoint is needed solely when the
+        // preference was never written. getEndpoints() is an in-memory list, so it stays unguarded.
+        val currentEndpoint =
+            if (preference == null) persistableWalletProvider.getPersistableWallet()?.endpoint else null
+        return resolveIsServerSelectionAutomatic(
+            isAutomaticPreference = preference,
+            currentEndpoint = currentEndpoint,
+            knownEndpoints = lightWalletEndpointProvider.getEndpoints()
+        )
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

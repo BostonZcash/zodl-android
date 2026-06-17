@@ -342,19 +342,6 @@ class TransactionProgressVM(
         )
     }
 
-    private fun SubmitResult.GrpcFailure.pendingDescription(): StyledStringResource? =
-        when (reason) {
-            SubmitResult.GrpcFailure.Reason.TIMEOUT -> {
-                stringRes(R.string.send_confirmation_pending_timeout_subtitle).withStyle()
-            }
-
-            null -> {
-                description
-                    ?.takeIf { it.isNotBlank() }
-                    ?.let { stringRes(it).withStyle() }
-            }
-        }
-
     private fun createNonResubmittableErrorState(
         proposal: TransactionProposal,
         result: SubmitResult.NonResubmittableError
@@ -425,3 +412,22 @@ class TransactionProgressVM(
 
     private fun onViewTransactionDetailClick(txId: String) = viewTransactionDetailAfterSuccessfulProposal(txId)
 }
+
+/**
+ * Subtitle shown on the pending screen for a resubmittable [SubmitResult.GrpcFailure]. A timeout
+ * gets dedicated copy ("may still have been broadcast"); a non-timeout failure surfaces its
+ * description when present. Returns null when there is nothing failure-specific to show, so the
+ * caller falls back to the proposal-type default subtitle.
+ */
+internal fun SubmitResult.GrpcFailure.pendingDescription(): StyledStringResource? =
+    when (reason) {
+        SubmitResult.GrpcFailure.Reason.TIMEOUT -> {
+            stringRes(R.string.send_confirmation_pending_timeout_subtitle).withStyle()
+        }
+
+        null -> {
+            description
+                ?.takeIf { it.isNotBlank() }
+                ?.let { stringRes(it).withStyle() }
+        }
+    }

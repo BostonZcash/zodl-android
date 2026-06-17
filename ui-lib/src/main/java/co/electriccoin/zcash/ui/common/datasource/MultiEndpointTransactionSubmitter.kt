@@ -16,57 +16,85 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
-internal class MultiEndpointTransactionSubmitter(
-    closeableScopeHolder: CloseableScopeHolder = CloseableScopeHolderImpl(Dispatchers.IO),
-    private val globalTimeoutMillis: Long = MULTI_SUBMIT_GLOBAL_TIMEOUT_MILLIS,
-    private val timeoutDrainMillis: Long = MULTI_SUBMIT_TIMEOUT_DRAIN_MILLIS,
-    private val gracePeriodMillis: Long = MULTI_SUBMIT_GRACE_PERIOD_MILLIS,
-    private val logger: MultiEndpointTransactionSubmitterLogger = TwigMultiEndpointTransactionSubmitterLogger,
-    private val submit: suspend (CreatedTransaction, LightWalletEndpoint) -> TransactionSubmitResult
-) : CloseableScopeHolder by closeableScopeHolder {
+internal interface MultiEndpointTransactionSubmitter {
     suspend fun submitTransactions(
         transactions: List<CreatedTransaction>,
         endpoints: List<LightWalletEndpoint>,
         logTag: String
+    ): List<TransactionSubmitResult>
+
+    companion object {
+        operator fun invoke(
+            closeableScopeHolder: CloseableScopeHolder = CloseableScopeHolderImpl(Dispatchers.IO),
+            globalTimeout: Duration = 30.seconds,
+            timeoutDrain: Duration = 2.seconds,
+            gracePeriod: Duration = 5.seconds,
+            logger: MultiEndpointTransactionSubmitterLogger = TwigMultiEndpointTransactionSubmitterLogger,
+            submit: suspend (CreatedTransaction, LightWalletEndpoint) -> TransactionSubmitResult
+        ): MultiEndpointTransactionSubmitter =
+            MultiEndpointTransactionSubmitterImpl(
+                closeableScopeHolder = closeableScopeHolder,
+                globalTimeout = globalTimeout,
+                timeoutDrain = timeoutDrain,
+                gracePeriod = gracePeriod,
+                logger = logger,
+                submit = submit
+            )
+    }
+}
+
+private class MultiEndpointTransactionSubmitterImpl(
+    closeableScopeHolder: CloseableScopeHolder,
+    private val globalTimeout: Duration,
+    private val timeoutDrain: Duration,
+    private val gracePeriod: Duration,
+    private val logger: MultiEndpointTransactionSubmitterLogger,
+    private val submit: suspend (CreatedTransaction, LightWalletEndpoint) -> TransactionSubmitResult
+) : MultiEndpointTransactionSubmitter, CloseableScopeHolder by closeableScopeHolder {
+    override suspend fun submitTransactions(
+        transactions: List<CreatedTransaction>,
+        endpoints: List<LightWalletEndpoint>,
+        logTag: String
     ): List<TransactionSubmitResult> {
-        var anySubmissionFailed = false
         var hasSuccessfulBroadcast = false
         var completedNormally = false
 
         try {
+            // Submit every created transaction even after an earlier one fails. The SDK only records a
+            // retry plan (and keeps rebroadcasting in the background until the transaction mines or expires)
+            // for transactions it was asked to submit; skipping later transactions on a failure would strand
+            // them forever. Matches the iOS Broadcaster integration.
             val results =
                 transactions.mapIndexed { index, transaction ->
-                    if (anySubmissionFailed) {
-                        TransactionSubmitResult.NotAttempted(transaction.txId)
-                    } else {
-                        val result =
-                            submitTransaction(
-                                transaction = transaction,
-                                endpoints = endpoints,
-                                index = index,
-                                transactionCount = transactions.size,
-                                logTag = logTag
-                            )
+                    val result =
+                        submitTransaction(
+                            transaction = transaction,
+                            endpoints = endpoints,
+                            index = index,
+                            transactionCount = transactions.size,
+                            logTag = logTag
+                        )
 
-                        if (result is TransactionSubmitResult.Success) {
-                            hasSuccessfulBroadcast = true
-                        } else {
-                            anySubmissionFailed = true
-                        }
-
-                        result
+                    if (result is TransactionSubmitResult.Success) {
+                        hasSuccessfulBroadcast = true
                     }
+
+                    result
                 }
             completedNormally = true
             return results
         } finally {
-            if (completedNormally && hasSuccessfulBroadcast) {
-                scope.launch {
-                    delay(gracePeriodMillis)
-                    close()
-                }
-            } else {
+            // Tear down the broadcast scope from a coroutine launched on it rather than inline: close()
+            // is non-blocking (it only cancels the scope) but the Closeable contract trips the
+            // blocking-call inspection when invoked directly in this suspend body. After a successful
+            // broadcast we keep the remaining endpoints publishing for a short grace period; otherwise we
+            // close immediately.
+            val closeDelay = if (completedNormally && hasSuccessfulBroadcast) gracePeriod else Duration.ZERO
+            scope.launch {
+                delay(closeDelay)
                 close()
             }
         }
@@ -160,7 +188,7 @@ internal class MultiEndpointTransactionSubmitter(
         val timeoutJob =
             scope.launch {
                 // Let endpoint calls that completed at the deadline publish their result before reporting timeout.
-                delay(globalTimeoutMillis + timeoutDrainMillis)
+                delay(globalTimeout + timeoutDrain)
                 if (completion.isCompleted) {
                     return@launch
                 }
@@ -222,7 +250,7 @@ internal class MultiEndpointTransactionSubmitter(
 
     private fun BroadcastSubmissionState.cancelJobsAfterGracePeriod() {
         scope.launch {
-            delay(gracePeriodMillis)
+            delay(gracePeriod)
             cancel()
         }
     }
@@ -262,7 +290,7 @@ internal class MultiEndpointTransactionSubmitter(
             throw e
         } catch (_: Exception) {
             logger.warn { "$logTag $endpointLabel FAILED $transactionLabel with exception." }
-            createGrpcFailure(transaction, SUBMIT_EXCEPTION_DESCRIPTION)
+            createGrpcFailure(transaction, "Endpoint submission failed")
         }
 
     private fun selectRejectedResult(
@@ -341,11 +369,7 @@ private object TwigMultiEndpointTransactionSubmitterLogger : MultiEndpointTransa
     override fun error(message: () -> String) = Twig.error(message)
 }
 
-private const val MULTI_SUBMIT_GRACE_PERIOD_MILLIS = 5_000L
-private const val MULTI_SUBMIT_GLOBAL_TIMEOUT_MILLIS = 30_000L
-private const val MULTI_SUBMIT_TIMEOUT_DRAIN_MILLIS = 2_000L
 private const val MULTI_SUBMIT_GRPC_FAILURE_CODE = -1
-private const val SUBMIT_EXCEPTION_DESCRIPTION = "Endpoint submission failed"
 internal const val MULTI_SUBMIT_TIMEOUT_DESCRIPTION =
     "Timed out waiting for endpoint response; transaction may still have been broadcast"
 

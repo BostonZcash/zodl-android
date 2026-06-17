@@ -328,12 +328,15 @@ class ProposalDataSourceImpl(
         )
 
     private suspend fun getSubmissionEndpoints(): List<LightWalletEndpoint> {
-        val isAutomatic = isServerSelectionAutomaticProvider.get() != false
-        return if (isAutomatic) {
-            lightWalletEndpointProvider.getEndpoints()
-        } else {
-            listOf(persistableWalletProvider.requirePersistableWallet().endpoint)
-        }
+        val knownEndpoints = lightWalletEndpointProvider.getEndpoints()
+        val currentEndpoint = persistableWalletProvider.requirePersistableWallet().endpoint
+        val isAutomatic =
+            resolveIsServerSelectionAutomatic(
+                isAutomaticPreference = isServerSelectionAutomaticProvider.get(),
+                currentEndpoint = currentEndpoint,
+                knownEndpoints = knownEndpoints
+            )
+        return if (isAutomatic) knownEndpoints else listOf(currentEndpoint)
     }
 
     @Suppress("TooGenericExceptionCaught")

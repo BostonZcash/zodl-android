@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.time.Duration.Companion.milliseconds
 
 class MultiEndpointTransactionSubmitterTest {
     @Test
@@ -55,8 +56,8 @@ class MultiEndpointTransactionSubmitterTest {
             val submitter =
                 MultiEndpointTransactionSubmitter(
                     closeableScopeHolder = CloseableScopeHolderImpl(backgroundScope),
-                    globalTimeoutMillis = 100,
-                    timeoutDrainMillis = 100,
+                    globalTimeout = 100.milliseconds,
+                    timeoutDrain = 100.milliseconds,
                     logger = noOpLogger,
                     submit = { _, _ -> awaitCancellation() }
                 )
@@ -83,8 +84,8 @@ class MultiEndpointTransactionSubmitterTest {
             val submitter =
                 MultiEndpointTransactionSubmitter(
                     closeableScopeHolder = CloseableScopeHolderImpl(backgroundScope),
-                    globalTimeoutMillis = 100,
-                    timeoutDrainMillis = 100,
+                    globalTimeout = 100.milliseconds,
+                    timeoutDrain = 100.milliseconds,
                     logger = noOpLogger,
                     submit = { _, submittedEndpoint ->
                         when (submittedEndpoint.host) {
@@ -123,7 +124,7 @@ class MultiEndpointTransactionSubmitterTest {
             val submitter =
                 MultiEndpointTransactionSubmitter(
                     closeableScopeHolder = CloseableScopeHolderImpl(backgroundScope),
-                    gracePeriodMillis = 100,
+                    gracePeriod = 100.milliseconds,
                     logger = noOpLogger,
                     submit = { _, submittedEndpoint ->
                         when (submittedEndpoint.host) {
@@ -247,8 +248,8 @@ class MultiEndpointTransactionSubmitterTest {
             val submitter =
                 MultiEndpointTransactionSubmitter(
                     closeableScopeHolder = CloseableScopeHolderImpl(backgroundScope),
-                    globalTimeoutMillis = 100,
-                    timeoutDrainMillis = 100,
+                    globalTimeout = 100.milliseconds,
+                    timeoutDrain = 100.milliseconds,
                     logger = noOpLogger,
                     submit = { _, submittedEndpoint ->
                         when (submittedEndpoint.host) {
@@ -321,32 +322,44 @@ class MultiEndpointTransactionSubmitterTest {
         }
 
     @Test
-    fun laterTransactionsAreNotAttemptedAfterFirstFailure() =
+    fun everyTransactionIsSubmittedEvenAfterEarlierFailure() =
         runTest {
             val firstTransaction = transaction(6)
             val secondTransaction = transaction(7)
-            val submissions = AtomicInteger(0)
+            val thirdTransaction = transaction(24)
+            val submittedTxIds = Collections.synchronizedList(mutableListOf<FirstClassByteArray>())
             val firstFailure = failure(firstTransaction, code = 18, grpcError = false)
+            val secondFailure = failure(secondTransaction, code = -1, grpcError = true)
             val submitter =
                 MultiEndpointTransactionSubmitter(
                     closeableScopeHolder = CloseableScopeHolderImpl(backgroundScope),
                     logger = noOpLogger,
-                    submit = { _, _ ->
-                        submissions.incrementAndGet()
-                        firstFailure
+                    submit = { transaction, _ ->
+                        submittedTxIds += transaction.txId
+                        when (transaction.txId) {
+                            firstTransaction.txId -> firstFailure
+                            secondTransaction.txId -> secondFailure
+                            else -> TransactionSubmitResult.Success(transaction.txId)
+                        }
                     }
                 )
 
             val results =
                 submitter.submitTransactions(
-                    transactions = listOf(firstTransaction, secondTransaction),
+                    transactions = listOf(firstTransaction, secondTransaction, thirdTransaction),
                     endpoints = listOf(endpoint("manual.example.com")),
                     logTag = LOG_TAG
                 )
 
+            // A failure must not stop later transactions from being submitted; an unsubmitted
+            // transaction never gets a retry plan in the SDK and would be stranded forever.
+            assertEquals(
+                listOf(firstTransaction.txId, secondTransaction.txId, thirdTransaction.txId),
+                submittedTxIds.toList()
+            )
             assertEquals(firstFailure, results[0])
-            assertEquals(TransactionSubmitResult.NotAttempted(secondTransaction.txId), results[1])
-            assertEquals(1, submissions.get())
+            assertEquals(secondFailure, results[1])
+            assertEquals(TransactionSubmitResult.Success(thirdTransaction.txId), results[2])
         }
 
     @Test

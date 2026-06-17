@@ -36,23 +36,13 @@ class CreateFlexaTransactionUseCase(
             )
             zashiProposalRepository.createProposal(getZecSend(transaction.getOrNull()))
 
-            when (val result = zashiProposalRepository.submit()) {
-                // A GrpcFailure (timeout or gRPC-level rejection) is resubmittable precisely because the
-                // transaction was likely broadcast, so notify Flexa as we would on success - otherwise a paid
-                // commerce session is left hanging even though the network may already have the transaction.
-                is SubmitResult.Success,
-                is SubmitResult.GrpcFailure -> {
-                    Flexa
-                        .buildSpend()
-                        .transactionSent(
-                            commerceSessionId = transaction.getOrNull()?.commerceSessionId.orEmpty(),
-                            txSignature = result.txIds.first()
-                        )
-                }
-
-                else -> {
-                    // do nothing
-                }
+            zashiProposalRepository.submit().flexaTransactionSignatureOrNull()?.let { txSignature ->
+                Flexa
+                    .buildSpend()
+                    .transactionSent(
+                        commerceSessionId = transaction.getOrNull()?.commerceSessionId.orEmpty(),
+                        txSignature = txSignature
+                    )
             }
         } catch (_: BiometricsFailureException) {
             // do nothing
@@ -97,3 +87,21 @@ class CreateFlexaTransactionUseCase(
         )
     }
 }
+
+/**
+ * The transaction signature Flexa should be told about, or null when the payment must surface as a
+ * failure instead. A [SubmitResult.GrpcFailure] (timeout or gRPC-level rejection) is resubmittable
+ * precisely because the transaction was likely broadcast, so it reports as sent just like a success;
+ * otherwise a paid commerce session would hang even though the network may already have the
+ * transaction. A missing tx id reports nothing, so a session is never completed without a real
+ * transaction signature.
+ */
+internal fun SubmitResult.flexaTransactionSignatureOrNull(): String? =
+    when (this) {
+        is SubmitResult.Success,
+        is SubmitResult.GrpcFailure -> txIds.firstOrNull()
+
+        is SubmitResult.Failure,
+        is SubmitResult.Partial,
+        is SubmitResult.Error -> null
+    }
