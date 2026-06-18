@@ -327,6 +327,13 @@ class ProposalDataSourceImpl(
             logTag = logTag
         )
 
+    /**
+     * Resolves which endpoints a created transaction is broadcast to. In automatic server-selection
+     * mode this returns every bundled endpoint: broadcasting to all of them trades a small amount of
+     * privacy (the transaction is sent to each bundled server, not just one) for higher reliability
+     * and faster confirmation. Manual mode honors the user's explicit choice and submits only through
+     * the selected endpoint.
+     */
     private suspend fun getSubmissionEndpoints(): List<LightWalletEndpoint> {
         val knownEndpoints = lightWalletEndpointProvider.getEndpoints()
         val currentEndpoint = persistableWalletProvider.requirePersistableWallet().endpoint
