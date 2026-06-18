@@ -83,49 +83,66 @@ class ZashiNumberTextFieldParserTest {
 
     // endregion
 
-    // region normalize + parse end-to-end
+    // region separator handling matrix
 
     @Test
-    fun commaInput_normalizesAndParses() {
-        val normalized = ZashiNumberTextFieldParser.normalizeInput("1,5")
-        assertNumericEquals("1.5", ZashiNumberTextFieldParser.toBigDecimalOrNull(normalized))
+    fun normalizeInput_allIdenticalSeparators_areGrouping() {
+        // The all-grouping branch: two or more identical separators are all grouping and removed.
+        mapOf(
+            "1,234,567" to "1234567",
+            "1,234,567,890" to "1234567890",
+            "1.234.567" to "1234567",
+            "12,34,567" to "1234567", // non-uniform group sizes are still pure grouping
+            "1,,234" to "1234" // repeated separator
+        ).forEach { (input, expected) ->
+            assertEquals(expected, ZashiNumberTextFieldParser.normalizeInput(input), "normalizeInput(\"$input\")")
+        }
     }
 
     @Test
-    fun pastedUsGrouped_dropsGroupingKeepsDecimal() {
-        // "1,234.56": last separator '.' is the decimal; the earlier ',' grouping is removed.
-        assertEquals("1234.56", ZashiNumberTextFieldParser.normalizeInput("1,234.56"))
-        assertNumericEquals(
-            "1234.56",
-            ZashiNumberTextFieldParser.toBigDecimalOrNull(ZashiNumberTextFieldParser.normalizeInput("1,234.56"))
-        )
+    fun normalizeInput_singleSeparator_isDecimal() {
+        // Boundary of the all-grouping branch: a lone separator is always the decimal point.
+        mapOf(
+            "1,5" to "1.5",
+            "1.5" to "1.5",
+            "1,234" to "1.234",
+            "100,000" to "100.000"
+        ).forEach { (input, expected) ->
+            assertEquals(expected, ZashiNumberTextFieldParser.normalizeInput(input), "normalizeInput(\"$input\")")
+        }
     }
 
     @Test
-    fun pastedEuropeanGrouped_dropsGroupingKeepsDecimal() {
-        // "1.234,56": last separator ',' is the decimal; the earlier '.' grouping is removed.
-        assertEquals("1234.56", ZashiNumberTextFieldParser.normalizeInput("1.234,56"))
+    fun normalizeInput_mixedSeparators_keepLastAsDecimal() {
+        mapOf(
+            "1,234.56" to "1234.56",
+            "1.234,56" to "1234.56",
+            "1,234,567.89" to "1234567.89",
+            "1.234.567,89" to "1234567.89",
+            "12,34,567.8" to "1234567.8"
+        ).forEach { (input, expected) ->
+            assertEquals(expected, ZashiNumberTextFieldParser.normalizeInput(input), "normalizeInput(\"$input\")")
+        }
     }
 
     @Test
-    fun pastedMultiGroup_dropsAllGroupingKeepsDecimal() {
-        assertEquals("1234567.89", ZashiNumberTextFieldParser.normalizeInput("1,234,567.89"))
+    fun normalizeInput_spacesAreGroupingThenSingleDecimal() {
+        // Spaces (regular) are stripped first, leaving a single comma decimal.
+        assertEquals("1234567.89", ZashiNumberTextFieldParser.normalizeInput("1 234 567,89"))
     }
 
     @Test
-    fun pastedGroupedInteger_dropsAllGrouping() {
-        // All separators identical → pure grouping, no decimal part.
-        assertEquals("1234567", ZashiNumberTextFieldParser.normalizeInput("1,234,567"))
-        assertNumericEquals(
-            "1234567",
-            ZashiNumberTextFieldParser.toBigDecimalOrNull(ZashiNumberTextFieldParser.normalizeInput("1,234,567"))
-        )
-    }
-
-    @Test
-    fun pastedDotGroupedInteger_dropsAllGrouping() {
-        // European dot grouping, all identical → "1234567".
-        assertEquals("1234567", ZashiNumberTextFieldParser.normalizeInput("1.234.567"))
+    fun pastedNumbers_normalizeAndParseToExpectedValue() {
+        mapOf(
+            "1,234.56" to "1234.56",
+            "1.234,56" to "1234.56",
+            "1,234,567" to "1234567",
+            "1.234.567" to "1234567",
+            "1,234,567.89" to "1234567.89"
+        ).forEach { (input, expected) ->
+            val normalized = ZashiNumberTextFieldParser.normalizeInput(input)
+            assertNumericEquals(expected, ZashiNumberTextFieldParser.toBigDecimalOrNull(normalized))
+        }
     }
 
     // endregion
