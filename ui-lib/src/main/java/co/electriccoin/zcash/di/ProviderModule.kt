@@ -101,6 +101,7 @@ val providerModule =
         singleOf(::HasSeenHowToVoteKeystoneStorageProviderImpl) bind
             HasSeenHowToVoteKeystoneStorageProvider::class
         singleOf(::IsTorEnabledStorageProviderImpl) bind IsTorEnabledStorageProvider::class
+        singleOf(::IsServerSelectionAutomaticProviderImpl) bind IsServerSelectionAutomaticProvider::class
         singleOf(::BlockchainProviderImpl) bind BlockchainProvider::class
         singleOf(::TokenIconProviderImpl) bind TokenIconProvider::class
         singleOf(::TokenNameProviderImpl) bind TokenNameProvider::class
