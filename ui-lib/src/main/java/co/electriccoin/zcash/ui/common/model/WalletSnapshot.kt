@@ -10,5 +10,6 @@ data class WalletSnapshot(
     val progress: PercentDecimal,
     val synchronizerError: SynchronizerError?,
     val isSpendable: Boolean,
-    val restoringState: WalletRestoringState
+    val restoringState: WalletRestoringState,
+    val blocksRemaining: Long = -1L,
 )

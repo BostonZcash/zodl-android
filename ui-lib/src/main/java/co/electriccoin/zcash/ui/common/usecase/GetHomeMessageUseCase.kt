@@ -235,7 +235,6 @@ class GetHomeMessageUseCase(
             null
         }
 
-    @Suppress("MagicNumber")
     private fun createSyncingMessage(
         walletSnapshot: WalletSnapshot,
         syncMessageShownBefore: Boolean,
@@ -250,10 +249,16 @@ class GetHomeMessageUseCase(
             HomeMessageData.Restoring(walletSnapshot.isSpendable && someBalance, progress)
         } else {
             if (!syncMessageShownBefore) {
-                if (progress >= 98f || progress == 0f) null else HomeMessageData.Syncing(progress = progress)
+                if (walletSnapshot.blocksRemaining < SYNCING_BANNER_HIDE_BELOW_BLOCKS) {
+                    null
+                } else {
+                    HomeMessageData.Syncing(progress = progress)
+                }
             } else {
                 HomeMessageData.Syncing(progress = progress)
             }
         }
     }
 }
+
+private const val SYNCING_BANNER_HIDE_BELOW_BLOCKS = 3456L
