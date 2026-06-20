@@ -239,26 +239,32 @@ class GetHomeMessageUseCase(
         walletSnapshot: WalletSnapshot,
         syncMessageShownBefore: Boolean,
         someBalance: Boolean,
-    ): RuntimeMessage? {
-        if (walletSnapshot.status != Synchronizer.Status.SYNCING) return null
+    ): RuntimeMessage? = syncingMessageFor(walletSnapshot, syncMessageShownBefore, someBalance)
+}
 
-        val progress = walletSnapshot.progress.decimal * 100f
-        return if (walletSnapshot.restoringState == WalletRestoringState.RESYNCING) {
-            HomeMessageData.Resyncing(progress)
-        } else if (walletSnapshot.restoringState == WalletRestoringState.RESTORING) {
-            HomeMessageData.Restoring(walletSnapshot.isSpendable && someBalance, progress)
-        } else {
-            if (!syncMessageShownBefore) {
-                if (walletSnapshot.blocksRemaining < SYNCING_BANNER_HIDE_BELOW_BLOCKS) {
-                    null
-                } else {
-                    HomeMessageData.Syncing(progress = progress)
-                }
+internal const val SYNCING_BANNER_HIDE_BELOW_BLOCKS = 3456L
+
+internal fun syncingMessageFor(
+    walletSnapshot: WalletSnapshot,
+    syncMessageShownBefore: Boolean,
+    someBalance: Boolean,
+): RuntimeMessage? {
+    if (walletSnapshot.status != Synchronizer.Status.SYNCING) return null
+
+    val progress = walletSnapshot.progress.decimal * 100f
+    return if (walletSnapshot.restoringState == WalletRestoringState.RESYNCING) {
+        HomeMessageData.Resyncing(progress)
+    } else if (walletSnapshot.restoringState == WalletRestoringState.RESTORING) {
+        HomeMessageData.Restoring(walletSnapshot.isSpendable && someBalance, progress)
+    } else {
+        if (!syncMessageShownBefore) {
+            if (walletSnapshot.blocksRemaining < SYNCING_BANNER_HIDE_BELOW_BLOCKS) {
+                null
             } else {
                 HomeMessageData.Syncing(progress = progress)
             }
+        } else {
+            HomeMessageData.Syncing(progress = progress)
         }
     }
 }
-
-private const val SYNCING_BANNER_HIDE_BELOW_BLOCKS = 3456L
