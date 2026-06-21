@@ -266,21 +266,22 @@ class TransactionProgressVM(
                     }
                 },
             subtitle =
-                when (proposal) {
-                    is Zip321TransactionProposal,
-                    is RegularTransactionProposal -> {
-                        stringRes(R.string.send_confirmation_pending_transaction_subtitle)
-                    }
+                result.pendingDescription()
+                    ?: when (proposal) {
+                        is Zip321TransactionProposal,
+                        is RegularTransactionProposal -> {
+                            stringRes(R.string.send_confirmation_pending_transaction_subtitle)
+                        }
 
-                    is ExactInputSwapTransactionProposal,
-                    is ExactOutputSwapTransactionProposal -> {
-                        stringRes(R.string.send_confirmation_pending_swap_subtitle)
-                    }
+                        is ExactInputSwapTransactionProposal,
+                        is ExactOutputSwapTransactionProposal -> {
+                            stringRes(R.string.send_confirmation_pending_swap_subtitle)
+                        }
 
-                    is ShieldTransactionProposal -> {
-                        stringRes(R.string.send_confirmation_pending_shielding_subtitle)
-                    }
-                }.withStyle(),
+                        is ShieldTransactionProposal -> {
+                            stringRes(R.string.send_confirmation_pending_shielding_subtitle)
+                        }
+                    }.withStyle(),
             middleButton =
                 when (proposal) {
                     is ExactInputSwapTransactionProposal,
@@ -411,3 +412,22 @@ class TransactionProgressVM(
 
     private fun onViewTransactionDetailClick(txId: String) = viewTransactionDetailAfterSuccessfulProposal(txId)
 }
+
+/**
+ * Subtitle shown on the pending screen for a resubmittable [SubmitResult.GrpcFailure]. A timeout
+ * gets dedicated copy ("may still have been broadcast"); a non-timeout failure surfaces its
+ * description when present. Returns null when there is nothing failure-specific to show, so the
+ * caller falls back to the proposal-type default subtitle.
+ */
+internal fun SubmitResult.GrpcFailure.pendingDescription(): StyledStringResource? =
+    when (reason) {
+        SubmitResult.GrpcFailure.Reason.TIMEOUT -> {
+            stringRes(R.string.send_confirmation_pending_timeout_subtitle).withStyle()
+        }
+
+        null -> {
+            description
+                ?.takeIf { it.isNotBlank() }
+                ?.let { stringRes(it).withStyle() }
+        }
+    }

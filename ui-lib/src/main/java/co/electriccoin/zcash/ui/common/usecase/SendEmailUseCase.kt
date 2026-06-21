@@ -119,11 +119,18 @@ class SendEmailUseCase(
      * Sends a support email for gRPC failure.
      */
     operator fun invoke(submitResult: SubmitResult.GrpcFailure) {
+        val reportDescription =
+            grpcFailureReportDescription(
+                reason = submitResult.reason,
+                description = submitResult.description,
+                timeoutCopy = { context.getString(R.string.send_confirmation_pending_timeout_subtitle) }
+            )
+
         sendSupportEmail(
             subject = context.getString(R.string.app_name),
             messageBody =
                 EmailUtil.formatMessage(
-                    body = "Grpc failure",
+                    body = buildGrpcFailureEmailBody(reportDescription),
                     supportInfo = ""
                 )
         )
@@ -215,4 +222,34 @@ private fun Throwable.stackTraceToLimitedString(limit: Int) =
             )
     } else {
         null
+    }
+
+/**
+ * The human-readable detail attached to a gRPC-failure support email: dedicated timeout copy for a
+ * timeout, otherwise the failure's own description. [timeoutCopy] is lazy so the localized string is
+ * only resolved when the reason is actually a timeout.
+ */
+internal fun grpcFailureReportDescription(
+    reason: SubmitResult.GrpcFailure.Reason?,
+    description: String?,
+    timeoutCopy: () -> String
+): String? =
+    when (reason) {
+        SubmitResult.GrpcFailure.Reason.TIMEOUT -> timeoutCopy()
+        null -> description
+    }
+
+/**
+ * Builds the gRPC-failure support email body: a "Grpc failure" header, followed by [reportDescription]
+ * on its own paragraph when it carries non-blank detail.
+ */
+internal fun buildGrpcFailureEmailBody(reportDescription: String?): String =
+    buildString {
+        appendLine("Grpc failure")
+        reportDescription
+            ?.takeIf { it.isNotBlank() }
+            ?.let {
+                appendLine()
+                appendLine(it)
+            }
     }
