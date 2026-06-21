@@ -18,6 +18,15 @@ and this application adheres to [Semantic Versioning](https://semver.org/spec/v2
 - Swap quotes rejected by the amount-consistency safety check are now reported to monitoring (without any amounts), so a future swap-provider format change surfaces as an observable signal instead of silently blocking swaps.
 - Exchange rates are no longer requested over a direct (non-Tor) connection. When Tor Protection is disabled the request to the rate provider is now blocked instead of falling back to clearnet, preventing the user's IP address and request timing from being exposed.
 
+## [3.6.0 (1914)] - 2026-06-16
+
+### Added:
+- Until now, balances only displayed in US dollars. We added multi-currency support — pick your preferred fiat in Currency Conversion settings and on the Wallet Status Widget opt-in.
+
+### Changed:
+- New Automatic/Manual server selection improves reliability — Automatic keeps you on the best server. Users on custom servers stay on Manual.
+- New wallets now sync from the chain tip instead of a bundled checkpoint, skipping the first-launch scan.
+
 ## [3.5.3 (1745)] - 2026-06-05
 
 ### Changed:
