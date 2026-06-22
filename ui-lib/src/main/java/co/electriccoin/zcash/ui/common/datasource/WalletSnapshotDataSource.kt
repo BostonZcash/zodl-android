@@ -34,6 +34,17 @@ class WalletSnapshotDataSourceImpl(
                 if (synchronizer == null) {
                     flowOf(null)
                 } else {
+                    val blocksRemainingFlow =
+                        combine(
+                            synchronizer.networkHeight,
+                            synchronizer.fullyScannedHeight,
+                        ) { networkHeight, fullyScannedHeight ->
+                            if (networkHeight != null && fullyScannedHeight != null) {
+                                (networkHeight.value - fullyScannedHeight.value).coerceAtLeast(0L)
+                            } else {
+                                -1L
+                            }
+                        }
                     combine(
                         synchronizer.status,
                         synchronizer.progress,
@@ -48,6 +59,8 @@ class WalletSnapshotDataSourceImpl(
                             isSpendable = isSpendable,
                             restoringState = restoringState,
                         )
+                    }.combine(blocksRemainingFlow) { snapshot, blocksRemaining ->
+                        snapshot.copy(blocksRemaining = blocksRemaining)
                     }
                 }
             }.stateIn(
