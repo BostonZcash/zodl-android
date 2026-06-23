@@ -12,6 +12,18 @@ directly impact users rather than highlighting other key architectural updates.*
 
 ## [Unreleased]
 
+## [3.7.0 (1986)] - 2026-06-23
+
+### Added:
+- When your server selection is set to Automatic, we now broadcast your transactions across several servers at once, so they're more likely to send reliably. You can change this in Advanced Settings.
+
+### Changed:
+- We made a range of security and privacy improvements.
+
+### Fixed:
+- We fixed an issue with disconnecting a Keystone hardware wallet.
+- We fixed a couple of transaction status display issues.
+
 ## [3.6.0 (1914)] - 2026-06-16
 
 ### Added:

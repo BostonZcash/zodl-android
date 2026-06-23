@@ -6,6 +6,18 @@ and this application adheres to [Semantic Versioning](https://semver.org/spec/v2
 
 ## [Unreleased]
 
+## [3.7.0 (1986)] - 2026-06-23
+
+### Added:
+- When your server selection is set to Automatic, we now broadcast your transactions across several servers at once, so they're more likely to send reliably. You can change this in Advanced Settings.
+
+### Changed:
+- We made a range of security and privacy improvements.
+
+### Fixed:
+- We fixed an issue with disconnecting a Keystone hardware wallet.
+- We fixed a couple of transaction status display issues.
+
 ### Added:
 - Currency Conversion now supports multiple fiat currencies. You can pick which currency your balances and payment amounts are shown in from the Currency Conversion settings and opt-in screens.
 - When opening Send or Request while the selected currency's exchange rate can't be fetched, a bottom sheet now explains the issue and offers to switch to USD or continue entering amounts in ZEC.
