@@ -12,6 +12,18 @@ directly impact users rather than highlighting other key architectural updates.*
 
 ## [Unreleased]
 
+## [3.7.0 (1986)] - 2026-06-23
+
+### Añadido:
+- Cuando la selección de servidor está en Automático, ahora transmitimos tus transacciones a través de varios servidores para un envío más confiable. Puedes cambiarlo en Configuración avanzada.
+
+### Cambiado:
+- Realizamos varias mejoras de seguridad y privacidad.
+
+### Corregido:
+- Corregimos un problema con la desconexión de una billetera de hardware Keystone.
+- Corregimos varios problemas con la visualización del estado de las transacciones.
+
 ## [3.6.0 (1914)] - 2026-06-16
 
 ### Añadido:
