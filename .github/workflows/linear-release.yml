@@ -1,0 +1,43 @@
+name: Linear release tracking
+
+# Records a published GitHub Release in Linear. The single job runs Linear's
+# release action, which scans commits since the previous release tag for
+# `MOB-###` references and creates a matching release under the Android Linear
+# pipeline (Settings → Releases in Linear), with those issues attached.
+#
+# Why `release: published` and not `push: tags`? For tag-push events GitHub runs
+# the workflow file *as it exists on the tagged commit*. Release tags are cut
+# from prerelease branches that can predate this file, so a tag trigger would
+# silently miss them (the same limitation documented in create-release.yml).
+# `release` events run the workflow from the default branch (main) instead, so
+# this file is always used regardless of what the tag points at — while still
+# scanning exactly the released tag's commit range.
+#
+# This fires off the same `release: published` event that create-release.yml
+# emits (via its App-token cascade / "Force published event" step), so it runs
+# automatically whenever a release is published — no manual step required.
+#
+# Requires the LINEAR_ACCESS_KEY repo secret, generated against the Android
+# pipeline in Linear's UI.
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  linear-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.release.tag_name }}  # the released tag's commit
+          fetch-depth: 0  # full history so the Linear release action sees every commit since the previous tag
+
+      - name: Create Linear release
+        uses: linear/linear-release-action@v0
+        with:
+          access_key: ${{ secrets.LINEAR_ACCESS_KEY }}
