@@ -2,6 +2,7 @@ package co.electriccoin.zcash.ui.screen.transactionprogress
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cash.z.ecc.android.sdk.exception.TransactionEncoderException
 import cash.z.ecc.sdk.ANDROID_STATE_FLOW_TIMEOUT
 import co.electriccoin.zcash.ui.R
 import co.electriccoin.zcash.ui.common.datasource.ExactInputSwapTransactionProposal
@@ -357,6 +358,8 @@ class TransactionProgressVM(
                 },
             subtitle =
                 when {
+                    // Checked first — anchor errors can occur on any proposal type (swap, shield, regular)
+                    // and the sync-guidance message is correct in all cases.
                     result.isAnchorError() -> {
                         stringRes(R.string.send_confirmation_failure_anchor_subtitle)
                     }
@@ -436,11 +439,16 @@ internal fun SubmitResult.GrpcFailure.pendingDescription(): StyledStringResource
         }
     }
 
+// MOB-385: TransactionNotCreatedException is the typed SDK wrapper for Rust creation failures.
+// The anchor string comes from Rust (zcash_client_sqlite) — no typed sub-code exists yet.
+// If the SDK ever adds one, replace the string check with it and drop the comment.
 private fun SubmitResult.NonResubmittableError.isAnchorError(): Boolean {
     val error = (this as? SubmitResult.Error)?.cause ?: return false
     var throwable: Throwable? = error
     while (throwable != null) {
-        if (throwable.message?.contains("Unable to compute anchor", ignoreCase = true) == true) return true
+        if (throwable is TransactionEncoderException.TransactionNotCreatedException &&
+            throwable.rootCause.message?.contains("Unable to compute anchor", ignoreCase = true) == true
+        ) return true
         throwable = throwable.cause
     }
     return false
