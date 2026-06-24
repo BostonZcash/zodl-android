@@ -448,7 +448,9 @@ private fun SubmitResult.NonResubmittableError.isAnchorError(): Boolean {
     while (throwable != null) {
         if (throwable is TransactionEncoderException.TransactionNotCreatedException &&
             throwable.rootCause.message?.contains("Unable to compute anchor", ignoreCase = true) == true
-        ) return true
+        ) {
+            return true
+        }
         throwable = throwable.cause
     }
     return false
