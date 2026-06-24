@@ -29,7 +29,6 @@ import co.electriccoin.zcash.ui.screen.insufficientfunds.InsufficientFundsArgs
 import co.electriccoin.zcash.ui.screen.swap.quote.SwapQuoteArgs
 import co.electriccoin.zcash.ui.screen.texunsupported.TEXUnsupportedArgs
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import java.math.BigDecimal
@@ -46,17 +45,20 @@ class RequestSwapQuoteUseCase(
     suspend fun requestExactInput(
         amount: BigDecimal,
         address: String,
+        selectedAsset: SwapAsset,
+        slippage: BigDecimal,
         canNavigateToSwapQuote: () -> Boolean
     ) {
         val expectedOrigin = swapRepository.assets.value.zecAsset
-        val expectedDestination = swapRepository.selectedAsset.value
         val newAddress = accountDataSource.requestNextShieldedAddress()
         requestQuote(
             requestQuote = {
                 swapRepository.requestExactInputQuote(
                     amount = amount,
                     address = address,
-                    refundAddress = newAddress.address
+                    refundAddress = newAddress.address,
+                    destinationAsset = selectedAsset,
+                    slippage = slippage
                 )
             },
             validateQuote = { quote ->
@@ -72,7 +74,7 @@ class RequestSwapQuoteUseCase(
                 )
                 requireExpectedAsset(
                     name = "destinationAsset",
-                    expected = expectedDestination,
+                    expected = selectedAsset,
                     actual = quote.destinationAsset
                 )
                 requireMatchingAddress(
@@ -94,17 +96,20 @@ class RequestSwapQuoteUseCase(
     suspend fun requestExactOutput(
         amount: BigDecimal,
         address: String,
+        selectedAsset: SwapAsset,
+        slippage: BigDecimal,
         canNavigateToSwapQuote: () -> Boolean
     ) {
         val expectedOrigin = swapRepository.assets.value.zecAsset
-        val expectedDestination = swapRepository.selectedAsset.value
         val newAddress = accountDataSource.requestNextShieldedAddress()
         requestQuote(
             requestQuote = {
                 swapRepository.requestExactOutputQuote(
                     amount = amount,
                     address = address,
-                    refundAddress = newAddress.address
+                    refundAddress = newAddress.address,
+                    destinationAsset = selectedAsset,
+                    slippage = slippage
                 )
             },
             validateQuote = { quote ->
@@ -120,7 +125,7 @@ class RequestSwapQuoteUseCase(
                 )
                 requireExpectedAsset(
                     name = "destinationAsset",
-                    expected = expectedDestination,
+                    expected = selectedAsset,
                     actual = quote.destinationAsset
                 )
                 requireMatchingAddress(
@@ -142,9 +147,10 @@ class RequestSwapQuoteUseCase(
     suspend fun requestFlexInputIntoZec(
         amount: BigDecimal,
         refundAddress: String,
+        selectedAsset: SwapAsset,
+        slippage: BigDecimal,
         canNavigateToSwapQuote: () -> Boolean
     ) {
-        val expectedOrigin = swapRepository.selectedAsset.value
         val expectedDestination = swapRepository.assets.value.zecAsset
         val newAddress = accountDataSource.requestNextShieldedAddress()
         requestQuote(
@@ -153,7 +159,9 @@ class RequestSwapQuoteUseCase(
                     .requestFlexInputIntoZec(
                         amount = amount,
                         refundAddress = refundAddress,
-                        destinationAddress = newAddress.address
+                        destinationAddress = newAddress.address,
+                        originAsset = selectedAsset,
+                        slippage = slippage
                     )
             },
             validateQuote = { quote ->
@@ -164,7 +172,7 @@ class RequestSwapQuoteUseCase(
                 )
                 requireExpectedAsset(
                     name = "originAsset",
-                    expected = expectedOrigin,
+                    expected = selectedAsset,
                     actual = quote.originAsset
                 )
                 requireExpectedAsset(
@@ -197,7 +205,7 @@ class RequestSwapQuoteUseCase(
     ) = withContext(Dispatchers.Default) {
         requestQuote()
 
-        val result = swapRepository.quote.filter { it !in listOf(null, SwapQuoteData.Loading) }.first()
+        val result = swapRepository.quote.first { it !in listOf(null, SwapQuoteData.Loading) }
 
         if (result is SwapQuoteData.Success) {
             try {
@@ -260,14 +268,15 @@ class RequestSwapQuoteUseCase(
     }
 
     /**
-     * Asserts the quote's asset matches the asset the user had selected when this request started.
-     * `expected` is snapshotted at the start of the public request method (before the suspending
-     * `requestNextShieldedAddress()` call), while the repository re-reads the selected asset when it
-     * actually builds the request — so this guards the user switching assets mid-request.
+     * Asserts the quote's asset matches the asset the caller passed in for this request. The selected
+     * asset is now owned by the calling ViewModel and pinned at button-press time, then threaded both
+     * into the repository request and into this `expected` snapshot — so this guards that the
+     * repository actually built the request with the asset it was handed (e.g. a future bug where the
+     * repo ignores its parameter).
      *
-     * This is NOT redundant with [NearSwapQuote]'s `init` assetId check: that one guards the *server*
-     * substituting the asset in its echo (requested vs returned), whereas this guards the *local
-     * selection* changing between method entry and request build. Both links must hold.
+     * This is NOT redundant with [co.electriccoin.zcash.ui.common.model.near.NearSwapQuote]'s `init` assetId
+     * check: that one guards the *server* substituting the asset in its echo (requested vs returned), whereas this
+     * guards the *request build* honoring the asset the user selected. Both links must hold.
      */
     private fun requireExpectedAsset(name: String, expected: SwapAsset?, actual: SwapAsset) {
         if (expected == null) return
