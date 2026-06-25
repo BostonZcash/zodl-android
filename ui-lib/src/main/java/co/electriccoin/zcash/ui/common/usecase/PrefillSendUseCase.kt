@@ -10,14 +10,17 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import org.zecdev.zip321.model.PaymentRequest
 
-class PrefillSendUseCase {
+// `open` so tests can reliably mock it by subclassing: mockk's inline mock-maker intermittently
+// fails to intercept this final class's methods depending on JVM/test-load order (green locally, red
+// on CI), running the real (uninitialized) instance instead.
+open class PrefillSendUseCase {
     private val bus = Channel<PrefillSendData>()
 
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     operator fun invoke() = bus.receiveAsFlow()
 
-    fun clear() {
+    open fun clear() {
         while (bus.tryReceive().isSuccess) {
             // Drain the channel
         }
