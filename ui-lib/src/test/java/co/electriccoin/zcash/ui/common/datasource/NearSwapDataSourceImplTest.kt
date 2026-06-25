@@ -6,13 +6,17 @@ import co.electriccoin.zcash.ui.common.model.near.ErrorDto
 import co.electriccoin.zcash.ui.common.model.near.NearTokenDto
 import co.electriccoin.zcash.ui.common.model.near.QuoteRequest
 import co.electriccoin.zcash.ui.common.model.near.QuoteResponseDto
+import co.electriccoin.zcash.ui.common.model.near.SubmitDepositTransactionRequest
+import co.electriccoin.zcash.ui.common.model.near.SwapStatusResponseDto
 import co.electriccoin.zcash.ui.common.model.near.SwapType
 import co.electriccoin.zcash.ui.common.provider.NearApiProvider
 import co.electriccoin.zcash.ui.common.provider.ResponseWithNearErrorException
 import co.electriccoin.zcash.ui.common.provider.SwapAssetProvider
 import co.electriccoin.zcash.ui.common.provider.SynchronizerProvider
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -229,6 +233,159 @@ class NearSwapDataSourceImplTest {
             }
         }
     }
+
+    @Test
+    fun requestQuoteBuildsExactOutputRequestNormalizedToDestinationDecimals() =
+        runBlocking {
+            val destination = SwapAssetTestFixture.asset(tokenTicker = "usdc", chainTicker = "eth", decimals = 6)
+            val request = slot<QuoteRequest>()
+            coEvery { nearApiProvider.requestQuote(capture(request)) } throws nearError("No quotes found")
+
+            assertFailsWith<QuoteLowAmountException> {
+                dataSource.requestQuote(
+                    swapMode = SwapMode.EXACT_OUTPUT,
+                    amount = BigDecimal("1.5"),
+                    refundAddress = "refund",
+                    originAsset = zec,
+                    destinationAddress = "destination",
+                    destinationAsset = destination,
+                    slippage = BigDecimal("2"),
+                    affiliateAddress = "affiliate"
+                )
+            }
+
+            val captured = request.captured
+            assertEquals(SwapType.EXACT_OUTPUT, captured.swapType)
+            // EXACT_OUTPUT normalizes against the destination's 6 decimals, not the origin's.
+            assertEquals(0, BigDecimal("1500000").compareTo(captured.amount))
+        }
+
+    @Test
+    fun requestQuoteBuildsFlexInputRequestNormalizedToOriginDecimals() =
+        runBlocking {
+            val request = slot<QuoteRequest>()
+            coEvery { nearApiProvider.requestQuote(capture(request)) } throws nearError("No quotes found")
+
+            assertFailsWith<QuoteLowAmountException> {
+                dataSource.requestQuote(
+                    swapMode = SwapMode.FLEX_INPUT,
+                    amount = BigDecimal("1.5"),
+                    refundAddress = "refund",
+                    originAsset = origin,
+                    destinationAddress = "destination",
+                    destinationAsset = zec,
+                    slippage = BigDecimal("2"),
+                    affiliateAddress = "affiliate"
+                )
+            }
+
+            val captured = request.captured
+            assertEquals(SwapType.FLEX_INPUT, captured.swapType)
+            // FLEX_INPUT normalizes against the origin's 8 decimals.
+            assertEquals(0, BigDecimal("150000000").compareTo(captured.amount))
+        }
+
+    @Test
+    fun requestQuoteMapsAmountTooLowToOriginAssetForFlexInput() =
+        runBlocking {
+            coEvery { nearApiProvider.requestQuote(any()) } throws
+                nearError("Amount is too low for bridge, try at least 1000")
+
+            val exception =
+                assertFailsWith<QuoteLowAmountException> {
+                    dataSource.requestQuote(
+                        swapMode = SwapMode.FLEX_INPUT,
+                        amount = BigDecimal("1"),
+                        refundAddress = "refund",
+                        originAsset = origin,
+                        destinationAddress = "destination",
+                        destinationAsset = zec,
+                        slippage = BigDecimal("2"),
+                        affiliateAddress = "affiliate"
+                    )
+                }
+
+            assertEquals(origin, exception.asset)
+            assertEquals(0, BigDecimal("1000").compareTo(exception.amount))
+        }
+
+    @Test
+    fun requestQuoteRethrowsAmountTooLowWhenAmountIsNotParsable() {
+        runBlocking {
+            // The trailing token isn't a number, so the error can't be mapped and is rethrown verbatim.
+            coEvery { nearApiProvider.requestQuote(any()) } throws
+                nearError("Amount is too low for bridge, try at least soon")
+
+            assertFailsWith<ResponseWithNearErrorException> {
+                dataSource.requestQuote(
+                    swapMode = SwapMode.EXACT_INPUT,
+                    amount = BigDecimal("1"),
+                    refundAddress = "refund",
+                    originAsset = origin,
+                    destinationAddress = "destination",
+                    destinationAsset = zec,
+                    slippage = BigDecimal("2"),
+                    affiliateAddress = "affiliate"
+                )
+            }
+        }
+    }
+
+    @Test
+    fun submitDepositTransactionForwardsTxHashAndAddressToProvider() =
+        runBlocking {
+            val request = slot<SubmitDepositTransactionRequest>()
+            coEvery { nearApiProvider.submitDepositTransaction(capture(request)) } just Runs
+
+            dataSource.submitDepositTransaction(txHash = "hash", depositAddress = "deposit")
+
+            assertEquals("hash", request.captured.txHash)
+            assertEquals("deposit", request.captured.depositAddress)
+        }
+
+    @Test
+    fun checkSwapStatusThrowsWhenOriginTokenNotSupported() {
+        runBlocking {
+            coEvery { nearApiProvider.checkSwapStatus(any()) } returns
+                statusResponse(originAssetId = "missing", destinationAssetId = origin.assetId)
+
+            val exception =
+                assertFailsWith<TokenNotFoundException> {
+                    dataSource.checkSwapStatus(depositAddress = "deposit", supportedTokens = listOf(origin))
+                }
+            assertEquals(true, exception.message?.contains("missing"))
+        }
+    }
+
+    @Test
+    fun checkSwapStatusThrowsWhenDestinationTokenNotSupported() {
+        runBlocking {
+            coEvery { nearApiProvider.checkSwapStatus(any()) } returns
+                statusResponse(originAssetId = origin.assetId, destinationAssetId = "missing")
+
+            val exception =
+                assertFailsWith<TokenNotFoundException> {
+                    dataSource.checkSwapStatus(depositAddress = "deposit", supportedTokens = listOf(origin))
+                }
+            // The origin resolves; the unsupported destination is what's reported missing.
+            assertEquals(true, exception.message?.contains("missing"))
+        }
+    }
+
+    private fun statusResponse(
+        originAssetId: String,
+        destinationAssetId: String
+    ): SwapStatusResponseDto =
+        mockk {
+            every { quoteResponse } returns
+                mockk {
+                    every { quoteRequest } returns
+                        mockk {
+                            every { originAsset } returns originAssetId
+                            every { destinationAsset } returns destinationAssetId
+                        }
+                }
+        }
 
     private fun nearError(message: String): ResponseWithNearErrorException =
         mockk(relaxed = true) {

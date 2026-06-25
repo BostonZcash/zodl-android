@@ -5,6 +5,7 @@ import co.electriccoin.zcash.ui.common.model.SwapMode
 import co.electriccoin.zcash.ui.screen.swap.slippage.SwapSlippageArgs
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onSubscription
 import java.math.BigDecimal
 
 class NavigateToSlippageUseCase(
@@ -23,8 +24,12 @@ class NavigateToSlippageUseCase(
                 fiatAmount = fiatAmount?.toPlainString(),
                 mode = mode
             )
-        navigationRouter.forward(args)
-        val result = pipeline.first { it.args.requestId == args.requestId }
+        // Subscribe before forwarding so a result emitted as soon as the screen appears can never be
+        // dropped (a bare SharedFlow emit with no collector is lost and would hang the caller).
+        val result =
+            pipeline
+                .onSubscription { navigationRouter.forward(args) }
+                .first { it.args.requestId == args.requestId }
         return when (result) {
             is SelectSlippagePipelineResult.Cancelled -> null
             is SelectSlippagePipelineResult.Selected -> result.slippage

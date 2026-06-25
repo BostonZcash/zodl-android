@@ -50,6 +50,7 @@ class RequestSwapQuoteUseCase(
         canNavigateToSwapQuote: () -> Boolean
     ) {
         val expectedOrigin = swapRepository.assets.value.zecAsset
+        val supportedAssets = swapRepository.assets.value.data
         val newAddress = accountDataSource.requestNextShieldedAddress()
         requestQuote(
             requestQuote = {
@@ -72,9 +73,10 @@ class RequestSwapQuoteUseCase(
                     expected = expectedOrigin,
                     actual = quote.originAsset
                 )
-                requireExpectedAsset(
+                requireSupportedSelectedAsset(
                     name = "destinationAsset",
-                    expected = selectedAsset,
+                    supportedAssets = supportedAssets,
+                    selectedAsset = selectedAsset,
                     actual = quote.destinationAsset
                 )
                 requireMatchingAddress(
@@ -101,6 +103,7 @@ class RequestSwapQuoteUseCase(
         canNavigateToSwapQuote: () -> Boolean
     ) {
         val expectedOrigin = swapRepository.assets.value.zecAsset
+        val supportedAssets = swapRepository.assets.value.data
         val newAddress = accountDataSource.requestNextShieldedAddress()
         requestQuote(
             requestQuote = {
@@ -123,9 +126,10 @@ class RequestSwapQuoteUseCase(
                     expected = expectedOrigin,
                     actual = quote.originAsset
                 )
-                requireExpectedAsset(
+                requireSupportedSelectedAsset(
                     name = "destinationAsset",
-                    expected = selectedAsset,
+                    supportedAssets = supportedAssets,
+                    selectedAsset = selectedAsset,
                     actual = quote.destinationAsset
                 )
                 requireMatchingAddress(
@@ -152,6 +156,7 @@ class RequestSwapQuoteUseCase(
         canNavigateToSwapQuote: () -> Boolean
     ) {
         val expectedDestination = swapRepository.assets.value.zecAsset
+        val supportedAssets = swapRepository.assets.value.data
         val newAddress = accountDataSource.requestNextShieldedAddress()
         requestQuote(
             requestQuote = {
@@ -170,9 +175,10 @@ class RequestSwapQuoteUseCase(
                     requested = amount,
                     decimals = quote.originAsset.decimals
                 )
-                requireExpectedAsset(
+                requireSupportedSelectedAsset(
                     name = "originAsset",
-                    expected = selectedAsset,
+                    supportedAssets = supportedAssets,
+                    selectedAsset = selectedAsset,
                     actual = quote.originAsset
                 )
                 requireExpectedAsset(
@@ -268,15 +274,15 @@ class RequestSwapQuoteUseCase(
     }
 
     /**
-     * Asserts the quote's asset matches the asset the caller passed in for this request. The selected
-     * asset is now owned by the calling ViewModel and pinned at button-press time, then threaded both
-     * into the repository request and into this `expected` snapshot — so this guards that the
-     * repository actually built the request with the asset it was handed (e.g. a future bug where the
-     * repo ignores its parameter).
-     *
-     * This is NOT redundant with [co.electriccoin.zcash.ui.common.model.near.NearSwapQuote]'s `init` assetId
-     * check: that one guards the *server* substituting the asset in its echo (requested vs returned), whereas this
-     * guards the *request build* honoring the asset the user selected. Both links must hold.
+     * Asserts the quote's asset matches what this request was built from. The strength differs by
+     * caller:
+     * - For the ZEC side, `expected` is an independent snapshot of `assets.value.zecAsset`, so this is
+     *   a genuine cross-check that the repository used the right ZEC asset.
+     * - For the user-selected asset, `expected` is the same value the ViewModel pinned at button-press
+     *   time and threaded into the repository request, so the check is weaker: it only guards that the
+     *   repository honored the asset it was handed. Combined with
+     *   [co.electriccoin.zcash.ui.common.model.near.NearSwapQuote]'s `init` requested-vs-returned check
+     *   (which guards the *server* substituting the asset), the two together still cover the full path.
      */
     private fun requireExpectedAsset(name: String, expected: SwapAsset?, actual: SwapAsset) {
         if (expected == null) return
@@ -284,6 +290,31 @@ class RequestSwapQuoteUseCase(
             name = name,
             expectedTokenTicker = expected.tokenTicker,
             expectedChainTicker = expected.chainTicker,
+            actual = actual
+        )
+    }
+
+    /**
+     * Stricter counterpart of [requireExpectedAsset] for the user-selected asset. It looks the
+     * selection up in [supportedAssets] (an independent snapshot of `SwapRepository.assets.value.data`)
+     * by id, requiring it to still be a currently-supported asset, then matches the quote against that
+     * canonical record. This catches a stale/unknown selected asset and a selected asset whose
+     * ticker/chain disagrees with the supported record.
+     */
+    private fun requireSupportedSelectedAsset(
+        name: String,
+        supportedAssets: List<SwapAsset>?,
+        selectedAsset: SwapAsset,
+        actual: SwapAsset
+    ) {
+        val supported = supportedAssets?.firstOrNull { it.assetId == selectedAsset.assetId }
+        requireNotNull(supported) {
+            "Swap quote asset mismatch: $name=${selectedAsset.assetId} is not a currently-supported swap asset"
+        }
+        requireMatchingAsset(
+            name = name,
+            expectedTokenTicker = supported.tokenTicker,
+            expectedChainTicker = supported.chainTicker,
             actual = actual
         )
     }
@@ -304,14 +335,14 @@ class RequestSwapQuoteUseCase(
         }
 }
 
-internal fun BigDecimal.toExactQuoteZatoshi(): Zatoshi =
+private fun BigDecimal.toExactQuoteZatoshi(): Zatoshi =
     try {
         Zatoshi(longValueExact())
     } catch (e: ArithmeticException) {
         throw InvalidSwapQuoteAmountException(this, e)
     }
 
-internal class InvalidSwapQuoteAmountException(
+private class InvalidSwapQuoteAmountException(
     val amount: BigDecimal,
     cause: ArithmeticException
 ) : IllegalArgumentException("Swap quote amount must be an exact zatoshi value: $amount", cause)

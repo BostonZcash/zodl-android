@@ -14,6 +14,7 @@ import co.electriccoin.zcash.ui.common.repository.EnhancedABContact
 import co.electriccoin.zcash.ui.common.repository.SwapAssetsData
 import co.electriccoin.zcash.ui.common.repository.SwapRepository
 import co.electriccoin.zcash.ui.common.usecase.CancelSwapUseCase
+import co.electriccoin.zcash.ui.common.usecase.GetPreselectedSwapAssetUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetSelectedWalletAccountUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetSwapAssetsUseCase
 import co.electriccoin.zcash.ui.common.usecase.IsABContactHintVisibleUseCase
@@ -22,7 +23,6 @@ import co.electriccoin.zcash.ui.common.usecase.NavigateToSelectABSwapRecipientUs
 import co.electriccoin.zcash.ui.common.usecase.NavigateToSlippageUseCase
 import co.electriccoin.zcash.ui.common.usecase.NavigateToSwapAssetPickerUseCase
 import co.electriccoin.zcash.ui.common.usecase.NavigateToSwapQuoteIfAvailableUseCase
-import co.electriccoin.zcash.ui.common.usecase.PreselectSwapAssetUseCase
 import co.electriccoin.zcash.ui.common.usecase.RequestSwapQuoteUseCase
 import co.electriccoin.zcash.ui.design.component.ButtonState
 import co.electriccoin.zcash.ui.design.component.NumberTextFieldInnerState
@@ -57,7 +57,7 @@ internal class PayVM(
     private val navigateToScanAddress: NavigateToScanGenericAddressUseCase,
     private val navigateToSelectSwapRecipient: NavigateToSelectABSwapRecipientUseCase,
     private val isABContactHintVisible: IsABContactHintVisibleUseCase,
-    private val preselectSwapAsset: PreselectSwapAssetUseCase,
+    private val getPreselectedSwapAsset: GetPreselectedSwapAssetUseCase,
     private val navigateToSlippage: NavigateToSlippageUseCase,
     private val navigateToSwapAssetPicker: NavigateToSwapAssetPickerUseCase,
 ) : ViewModel() {
@@ -154,7 +154,7 @@ internal class PayVM(
 
     init {
         viewModelScope.launch {
-            val asset = preselectSwapAsset()
+            val asset = getPreselectedSwapAsset()
             internalState.update { if (it.asset == null) it.withAsset(asset) else it }
         }
     }

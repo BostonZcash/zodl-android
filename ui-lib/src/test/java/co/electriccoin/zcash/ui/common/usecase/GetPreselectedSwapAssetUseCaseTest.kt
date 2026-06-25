@@ -20,11 +20,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * [PreselectSwapAssetUseCase] resolves the asset to preselect from the last-used history, falling
+ * [GetPreselectedSwapAssetUseCase] resolves the asset to preselect from the last-used history, falling
  * back to a hardcoded BTC default, and only returns once the swap assets have loaded.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class PreselectSwapAssetUseCaseTest {
+class GetPreselectedSwapAssetUseCaseTest {
     @Test
     fun resolvesMostRecentlyUsedAssetFromHistory() =
         runTest {
@@ -131,7 +131,7 @@ class PreselectSwapAssetUseCaseTest {
         assets: SwapAssetsData = SwapAssetTestFixture.assetsData(),
         assetsFlow: MutableStateFlow<SwapAssetsData> = MutableStateFlow(assets),
         history: Set<SimpleSwapAsset> = emptySet()
-    ): PreselectSwapAssetUseCase {
+    ): GetPreselectedSwapAssetUseCase {
         val swapRepository = mockk<SwapRepository> { every { this@mockk.assets } returns assetsFlow }
         val metadataRepository =
             mockk<MetadataRepository> { every { observeLastUsedAssetHistory() } returns flowOf(history) }
@@ -141,6 +141,6 @@ class PreselectSwapAssetUseCaseTest {
                     SwapAssetTestFixture.simpleAsset(tokenTicker = firstArg(), chainTicker = secondArg())
                 }
             }
-        return PreselectSwapAssetUseCase(swapRepository, metadataRepository, simpleSwapAssetProvider)
+        return GetPreselectedSwapAssetUseCase(swapRepository, metadataRepository, simpleSwapAssetProvider)
     }
 }

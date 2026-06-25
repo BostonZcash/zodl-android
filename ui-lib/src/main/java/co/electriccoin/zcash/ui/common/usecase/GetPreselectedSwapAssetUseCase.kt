@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
 
-class PreselectSwapAssetUseCase(
+class GetPreselectedSwapAssetUseCase(
     private val swapRepository: SwapRepository,
     private val metadataRepository: MetadataRepository,
     private val simpleSwapAssetProvider: SimpleSwapAssetProvider
