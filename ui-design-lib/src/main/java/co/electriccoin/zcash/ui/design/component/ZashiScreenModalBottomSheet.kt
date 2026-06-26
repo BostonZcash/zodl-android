@@ -195,7 +195,3 @@ fun rememberScreenModalBottomSheetState(
 // Matches Material3's BottomSheetDefaults.ScrimColor (scrim @ 0.32 opacity); FLAG_DIM_BEHIND draws
 // black, so the dim amount alone reproduces the default scrim.
 private const val SCRIM_DIM_AMOUNT = 0.32f
-
-// Kept in sync with the window exit animation duration (see anim/scrim_fade_out.xml) so the
-// in-Compose dim fade (drag/scrim-tap) and the window dim fade (forward/back) feel identical.
-private const val SCRIM_ANIMATION_DURATION_MS = 250
