@@ -9,7 +9,7 @@ import co.electriccoin.zcash.ui.common.model.SwapMode.EXACT_INPUT
 import co.electriccoin.zcash.ui.common.model.SwapMode.EXACT_OUTPUT
 import co.electriccoin.zcash.ui.common.model.SwapMode.FLEX_INPUT
 import co.electriccoin.zcash.ui.common.model.SwapQuote
-import co.electriccoin.zcash.ui.common.model.ZecSwapAsset
+import co.electriccoin.zcash.ui.common.model.isZCashAsset
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -116,7 +116,7 @@ class SwapRepositoryImpl(
 
     @Suppress("TooGenericExceptionCaught")
     private suspend fun refreshAssetsInternal() {
-        fun findZecSwapAsset(assets: List<SwapAsset>) = assets.find { asset -> asset is ZecSwapAsset }
+        fun findZecSwapAsset(assets: List<SwapAsset>) = assets.find { asset -> asset.isZCashAsset }
 
         fun filterSwapAssets(assets: List<SwapAsset>) =
             assets
@@ -124,7 +124,7 @@ class SwapRepositoryImpl(
                 .apply {
                     removeIf {
                         val usdPrice = it.usdPrice
-                        it is ZecSwapAsset || usdPrice == null || usdPrice == BigDecimal.ZERO
+                        it.isZCashAsset || usdPrice == null || usdPrice == BigDecimal.ZERO
                     }
                 }.toList()
 

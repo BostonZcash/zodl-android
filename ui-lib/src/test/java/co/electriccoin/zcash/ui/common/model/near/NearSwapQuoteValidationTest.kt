@@ -1,6 +1,6 @@
 package co.electriccoin.zcash.ui.common.model.near
 
-import co.electriccoin.zcash.ui.common.model.GenericSwapAsset
+import co.electriccoin.zcash.ui.common.model.NearSwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapBlockchain
 import co.electriccoin.zcash.ui.design.util.StringResource
 import co.electriccoin.zcash.ui.design.util.imageRes
@@ -253,13 +253,17 @@ class NearSwapQuoteValidationTest {
         SwapBlockchain(chainTicker = chain, chainName = StringResource.ByString(chain), chainIcon = imageRes(chain))
 
     private fun asset(token: String, chain: String) =
-        GenericSwapAsset(
-            tokenTicker = token,
+        NearSwapAsset(
+            dto =
+                NearTokenDto(
+                    assetId = "$token.$chain",
+                    decimals = 8,
+                    blockchain = chain,
+                    symbol = token,
+                    price = null
+                ),
             tokenName = StringResource.ByString(token),
             tokenIcon = imageRes(token),
-            usdPrice = null,
-            assetId = "$token.$chain",
-            decimals = 8,
             blockchain = blockchain(chain)
         )
 

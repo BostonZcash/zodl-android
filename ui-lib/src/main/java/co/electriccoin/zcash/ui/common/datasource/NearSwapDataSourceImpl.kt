@@ -3,7 +3,7 @@ package co.electriccoin.zcash.ui.common.datasource
 import cash.z.ecc.android.sdk.type.AddressType
 import co.electriccoin.zcash.crash.android.GlobalCrashReporter
 import co.electriccoin.zcash.ui.common.model.DynamicSwapAddress
-import co.electriccoin.zcash.ui.common.model.GenericSwapAsset
+import co.electriccoin.zcash.ui.common.model.NearSwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapAddress
 import co.electriccoin.zcash.ui.common.model.SwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapMode
@@ -12,10 +12,11 @@ import co.electriccoin.zcash.ui.common.model.SwapQuoteStatus
 import co.electriccoin.zcash.ui.common.model.ZcashShieldedSwapAddress
 import co.electriccoin.zcash.ui.common.model.ZcashSwapAddress
 import co.electriccoin.zcash.ui.common.model.ZcashTransparentSwapAddress
-import co.electriccoin.zcash.ui.common.model.ZecSwapAsset
+import co.electriccoin.zcash.ui.common.model.isZCashAsset
 import co.electriccoin.zcash.ui.common.model.near.AppFee
 import co.electriccoin.zcash.ui.common.model.near.NearSwapQuote
 import co.electriccoin.zcash.ui.common.model.near.NearSwapQuoteStatus
+import co.electriccoin.zcash.ui.common.model.near.NearTokenDto
 import co.electriccoin.zcash.ui.common.model.near.QuoteRequest
 import co.electriccoin.zcash.ui.common.model.near.QuoteResponseDto
 import co.electriccoin.zcash.ui.common.model.near.RecipientType
@@ -52,45 +53,16 @@ class NearSwapDataSourceImpl(
             nearApiProvider
                 .getSupportedTokens()
                 .distinctBy { Triple(it.symbol, it.blockchain, it.decimals) }
-                .map {
-                    buildSwapAsset(
-                        tokenTicker = it.symbol,
-                        chainTicker = it.blockchain,
-                        usdPrice = it.price,
-                        assetId = it.assetId,
-                        decimals = it.decimals
-                    )
-                }
+                .map { buildSwapAsset(it) }
         }
 
-    private fun buildSwapAsset(
-        tokenTicker: String,
-        chainTicker: String,
-        usdPrice: BigDecimal?,
-        assetId: String,
-        decimals: Int,
-    ): SwapAsset =
-        if (tokenTicker.lowercase() == "zec" && chainTicker.lowercase() == "zec") {
-            ZecSwapAsset(
-                tokenName = tokenNameProvider.getName(tokenTicker),
-                tokenIcon = tokenIconProvider.getIcon(tokenTicker),
-                blockchain = blockchainProvider.getBlockchain(chainTicker),
-                tokenTicker = tokenTicker,
-                usdPrice = usdPrice,
-                assetId = assetId,
-                decimals = decimals,
-            )
-        } else {
-            GenericSwapAsset(
-                tokenName = tokenNameProvider.getName(tokenTicker),
-                tokenIcon = tokenIconProvider.getIcon(tokenTicker),
-                blockchain = blockchainProvider.getBlockchain(chainTicker),
-                tokenTicker = tokenTicker,
-                usdPrice = usdPrice,
-                assetId = assetId,
-                decimals = decimals,
-            )
-        }
+    private fun buildSwapAsset(dto: NearTokenDto): SwapAsset =
+        NearSwapAsset(
+            dto = dto,
+            tokenName = tokenNameProvider.getName(dto.symbol),
+            tokenIcon = tokenIconProvider.getIcon(dto.symbol),
+            blockchain = blockchainProvider.getBlockchain(dto.blockchain),
+        )
 
     @Suppress("MagicNumber", "CyclomaticComplexMethod")
     override suspend fun requestQuote(
@@ -236,17 +208,17 @@ class NearSwapDataSourceImpl(
 
     private suspend fun getDepositAddress(response: QuoteResponseDto, originAsset: SwapAsset): SwapAddress {
         val address = response.quote.depositAddress
-        return if (originAsset is ZecSwapAsset) getZcashSwapAddress(address) else DynamicSwapAddress(address)
+        return if (originAsset.isZCashAsset) getZcashSwapAddress(address) else DynamicSwapAddress(address)
     }
 
     private suspend fun getDestinationAddress(response: QuoteResponseDto, originAsset: SwapAsset): SwapAddress {
         val address = response.quoteRequest.recipient
-        return if (originAsset is ZecSwapAsset) DynamicSwapAddress(address) else getZcashSwapAddress(address)
+        return if (originAsset.isZCashAsset) DynamicSwapAddress(address) else getZcashSwapAddress(address)
     }
 
     private suspend fun getRefundAddress(response: QuoteResponseDto, originAsset: SwapAsset): SwapAddress {
         val address = response.quoteRequest.refundTo
-        return if (originAsset is ZecSwapAsset) getZcashSwapAddress(address) else DynamicSwapAddress(address)
+        return if (originAsset.isZCashAsset) getZcashSwapAddress(address) else DynamicSwapAddress(address)
     }
 
     private suspend fun getZcashSwapAddress(address: String): ZcashSwapAddress =
@@ -255,8 +227,8 @@ class NearSwapDataSourceImpl(
             AddressType.Shielded -> ZcashShieldedSwapAddress(address)
 
             AddressType.Tex,
-            AddressType.Transparent,
-            is AddressType.Invalid -> ZcashTransparentSwapAddress(address)
+            AddressType.Transparent -> ZcashTransparentSwapAddress(address)
+            is AddressType.Invalid -> throw IllegalArgumentException("Zcash address is invalid")
         }
 }
 

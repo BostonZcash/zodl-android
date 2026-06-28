@@ -13,7 +13,7 @@ import co.electriccoin.zcash.ui.common.model.SwapStatus.PENDING
 import co.electriccoin.zcash.ui.common.model.SwapStatus.PROCESSING
 import co.electriccoin.zcash.ui.common.model.SwapStatus.REFUNDED
 import co.electriccoin.zcash.ui.common.model.SwapStatus.SUCCESS
-import co.electriccoin.zcash.ui.common.model.ZecSwapAsset
+import co.electriccoin.zcash.ui.common.model.isZCashAsset
 import co.electriccoin.zcash.ui.common.usecase.CopyToClipboardUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetORSwapQuoteUseCase
 import co.electriccoin.zcash.ui.common.usecase.SwapData
@@ -118,7 +118,7 @@ class SwapDetailVM(
                             amount = swapData.status.amountInFee,
                             ticker = swapData.status.quote.originAsset.tokenTicker
                         )
-                    if (swapData.status.quote.destinationAsset is ZecSwapAsset) {
+                    if (swapData.status.quote.destinationAsset.isZCashAsset) {
                         stringRes("~") + text
                     } else {
                         text

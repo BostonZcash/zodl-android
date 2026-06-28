@@ -1,5 +1,6 @@
 package co.electriccoin.zcash.ui.common.model
 
+import co.electriccoin.zcash.ui.common.model.near.NearTokenDto
 import co.electriccoin.zcash.ui.common.repository.SwapAssetsData
 import co.electriccoin.zcash.ui.design.util.imageRes
 import co.electriccoin.zcash.ui.design.util.stringRes
@@ -23,25 +24,33 @@ object SwapAssetTestFixture {
         usdPrice: BigDecimal? = BigDecimal("100000"),
         decimals: Int = 8
     ): SwapAsset =
-        GenericSwapAsset(
-            tokenTicker = tokenTicker,
+        NearSwapAsset(
+            dto =
+                NearTokenDto(
+                    assetId = "$tokenTicker-$chainTicker",
+                    decimals = decimals,
+                    blockchain = chainTicker,
+                    symbol = tokenTicker,
+                    price = usdPrice
+                ),
             tokenName = stringRes(tokenTicker.uppercase()),
             tokenIcon = imageRes(0),
-            usdPrice = usdPrice,
-            assetId = "$tokenTicker-$chainTicker",
-            decimals = decimals,
             blockchain = blockchain(chainTicker)
         )
 
     fun zecAsset(): SwapAsset =
-        ZecSwapAsset(
-            tokenTicker = "zec",
+        NearSwapAsset(
+            dto =
+                NearTokenDto(
+                    assetId = "zec-zec",
+                    decimals = 8,
+                    blockchain = "zec",
+                    symbol = "zec",
+                    price = BigDecimal("30")
+                ),
             tokenName = stringRes("ZEC"),
             tokenIcon = imageRes(0),
-            blockchain = blockchain("zec"),
-            usdPrice = BigDecimal("30"),
-            assetId = "zec-zec",
-            decimals = 8
+            blockchain = blockchain("zec")
         )
 
     fun simpleAsset(

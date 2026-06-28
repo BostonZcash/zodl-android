@@ -10,8 +10,8 @@ import co.electriccoin.zcash.ui.common.model.SwapAddress
 import co.electriccoin.zcash.ui.common.model.SwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapMode
 import co.electriccoin.zcash.ui.common.model.SwapQuote
-import co.electriccoin.zcash.ui.common.model.ZecSwapAsset
 import co.electriccoin.zcash.ui.common.model.isSame
+import co.electriccoin.zcash.ui.common.model.isZCashAsset
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
@@ -114,7 +114,7 @@ data class NearSwapQuote(
             )
 
     override val affiliateFeeZatoshi: Zatoshi =
-        if (originAsset is ZecSwapAsset) {
+        if (originAsset.isZCashAsset) {
             response.quote.amountInFormatted
                 .coerceAtLeast(BigDecimal(0))
                 .multiply(

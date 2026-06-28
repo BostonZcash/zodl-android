@@ -1,9 +1,8 @@
 package co.electriccoin.zcash.ui.common.model
 
-import co.electriccoin.zcash.ui.R
+import co.electriccoin.zcash.ui.common.model.near.NearTokenDto
 import co.electriccoin.zcash.ui.design.util.ImageResource
 import co.electriccoin.zcash.ui.design.util.StringResource
-import co.electriccoin.zcash.ui.design.util.imageRes
 import java.math.BigDecimal
 
 sealed interface SwapAsset {
@@ -30,37 +29,17 @@ fun SwapAsset.isSame(
     chain: String
 ): Boolean = tokenTicker.equals(token, true) && chainTicker.equals(chain, true)
 
-data class GenericSwapAsset(
-    override val tokenTicker: String,
-    override val tokenName: StringResource,
-    override val tokenIcon: ImageResource,
-    override val usdPrice: BigDecimal?,
-    override val assetId: String,
-    override val decimals: Int,
-    override val blockchain: SwapBlockchain,
-) : SwapAsset
+val SwapAsset.isZCashAsset: Boolean
+    get() = isSame(token = "zec", chain = "zec")
 
-data class ZecSwapAsset(
-    override val tokenTicker: String,
+data class NearSwapAsset(
     override val tokenName: StringResource,
     override val tokenIcon: ImageResource,
     override val blockchain: SwapBlockchain,
-    override val usdPrice: BigDecimal?,
-    override val assetId: String,
-    override val decimals: Int,
+    private val dto: NearTokenDto,
 ) : SwapAsset {
-    val alternativeTokenIcon: ImageResource = imageRes(R.drawable.ic_zec_round_full)
-
-    fun getQuoteChainIcon(isShielded: Boolean): ImageResource =
-        if (isShielded) {
-            imageRes(co.electriccoin.zcash.ui.design.R.drawable.ic_zec_shielded)
-        } else {
-            imageRes(co.electriccoin.zcash.ui.design.R.drawable.ic_zec_unshielded)
-        }
+    override val tokenTicker = dto.symbol
+    override val usdPrice = dto.price
+    override val assetId = dto.assetId
+    override val decimals = dto.decimals
 }
-
-fun SwapAsset.getQuoteTokenIcon(): ImageResource =
-    when (this) {
-        is GenericSwapAsset -> this.tokenIcon
-        is ZecSwapAsset -> this.alternativeTokenIcon
-    }
