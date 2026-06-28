@@ -30,4 +30,3 @@ fun SwapAsset.isSame(
 
 val SwapAsset.isZCashAsset: Boolean
     get() = isSame(token = "zec", chain = "zec")
-

@@ -19,15 +19,14 @@ import java.math.BigDecimal
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertIs
 import kotlin.test.assertNull
 
 /**
  * [GetSwapStatusUseCase.invoke] emits the first non-loading [SwapQuoteStatusData] for the swap
  * identified by the passed [TransactionSwapMetadata] (no metadata IO of its own): on success it
- * persists the latest status to metadata and surfaces it; a status-lookup failure or a stored
- * metadata/returned-asset mismatch (via `requireMatchingAsset`) is surfaced as an error state with
- * metadata left untouched.
+ * persists the latest status to metadata and surfaces it; a failure from
+ * [co.electriccoin.zcash.ui.common.repository.SwapRepository.checkSwapStatus] (lookup error or a
+ * stored metadata/returned-asset mismatch) is surfaced as an error state with metadata left untouched.
  */
 class GetSwapStatusUseCaseTest {
     private val btc = SwapAssetTestFixture.asset(tokenTicker = "btc", chainTicker = "btc")
@@ -74,26 +73,6 @@ class GetSwapStatusUseCaseTest {
 
             assertFalse(result.isLoading)
             assertEquals(failure, result.error)
-            assertNull(result.status)
-            verify(exactly = 0) { metadataRepository.updateSwap(any(), any(), any(), any(), any(), any()) }
-        }
-
-    @Test
-    fun surfacesErrorWhenStoredMetadataDoesNotMatchTheReturnedAssets() =
-        runTest {
-            val metadataRepository = mockk<MetadataRepository>(relaxed = true)
-            val swapRepository =
-                mockk<SwapRepository> {
-                    coEvery { checkSwapStatus(any()) } returns swapStatusResult()
-                }
-            // Stored origin is ETH but the server returns a BTC origin -> requireMatchingAsset rejects it.
-            val metadata =
-                swapMetadata(from = SwapAssetTestFixture.simpleAsset(tokenTicker = "eth", chainTicker = "eth"))
-
-            val result = GetSwapStatusUseCase(metadataRepository, swapRepository).invoke(metadata)
-
-            assertFalse(result.isLoading)
-            assertIs<IllegalArgumentException>(result.error)
             assertNull(result.status)
             verify(exactly = 0) { metadataRepository.updateSwap(any(), any(), any(), any(), any(), any()) }
         }

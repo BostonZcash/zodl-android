@@ -13,6 +13,8 @@ import co.electriccoin.zcash.ui.common.model.SwapMode.FLEX_INPUT
 import co.electriccoin.zcash.ui.common.model.SwapQuote
 import co.electriccoin.zcash.ui.common.model.SwapQuoteStatus
 import co.electriccoin.zcash.ui.common.model.isZCashAsset
+import co.electriccoin.zcash.ui.common.model.near.requireMatchingAsset
+import co.electriccoin.zcash.ui.common.model.near.requireQuoteMatchesUserAmount
 import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -63,7 +65,12 @@ interface SwapRepository {
     @Throws(ResponseException::class)
     suspend fun submitDepositTransaction(txId: String, transactionProposal: SwapTransactionProposal)
 
-    @Throws(ResponseException::class, AssetNotFoundException::class, SwapAssetsUnavailableException::class)
+    @Throws(
+        ResponseException::class,
+        AssetNotFoundException::class,
+        SwapAssetsUnavailableException::class,
+        IllegalArgumentException::class
+    )
     suspend fun checkSwapStatus(swapMetadata: TransactionSwapMetadata): SwapQuoteStatus
 
     fun clear()
@@ -223,6 +230,32 @@ class SwapRepositoryImpl(
                             slippage = slippage,
                             affiliateAddress = AFFILIATE_ADDRESS
                         )
+                    requireQuoteMatchesUserAmount(
+                        quoted = result.amountInFormatted,
+                        requested = amount,
+                        decimals = result.originAsset.decimals
+                    )
+                    requireSupportedSelectedAsset(
+                        name = "originAsset",
+                        supportedAssets = assets.value.data,
+                        selectedAsset = originAsset,
+                        actual = result.originAsset
+                    )
+                    requireExpectedAsset(
+                        name = "destinationAsset",
+                        expected = destinationAsset,
+                        actual = result.destinationAsset
+                    )
+                    requireMatchingAddress(
+                        name = "refundAddress",
+                        expected = refundAddress,
+                        actual = result.refundAddress.address
+                    )
+                    requireMatchingAddress(
+                        name = "destinationAddress",
+                        expected = destinationAddress,
+                        actual = result.destinationAddress.address
+                    )
                     quote.update { SwapQuoteData.Success(quote = result) }
                 } catch (e: Exception) {
                     quote.update { SwapQuoteData.Error(FLEX_INPUT, e) }
@@ -255,6 +288,45 @@ class SwapRepositoryImpl(
                             slippage = slippage,
                             affiliateAddress = AFFILIATE_ADDRESS
                         )
+                    when (mode) {
+                        EXACT_INPUT,
+                        FLEX_INPUT -> {
+                            requireQuoteMatchesUserAmount(
+                                quoted = result.amountInFormatted,
+                                requested = amount,
+                                decimals = result.originAsset.decimals
+                            )
+                        }
+
+                        EXACT_OUTPUT -> {
+                            requireQuoteMatchesUserAmount(
+                                quoted = result.amountOutFormatted,
+                                requested = amount,
+                                decimals = result.destinationAsset.decimals
+                            )
+                        }
+                    }
+                    requireExpectedAsset(
+                        name = "originAsset",
+                        expected = originAsset,
+                        actual = result.originAsset
+                    )
+                    requireSupportedSelectedAsset(
+                        name = "destinationAsset",
+                        supportedAssets = assets.value.data,
+                        selectedAsset = destinationAsset,
+                        actual = result.destinationAsset
+                    )
+                    requireMatchingAddress(
+                        name = "destinationAddress",
+                        expected = address,
+                        actual = result.destinationAddress.address
+                    )
+                    requireMatchingAddress(
+                        name = "refundAddress",
+                        expected = refundAddress,
+                        actual = result.refundAddress.address
+                    )
                     quote.update { SwapQuoteData.Success(quote = result) }
                 } catch (e: Exception) {
                     quote.update { SwapQuoteData.Error(mode, e) }
@@ -269,11 +341,26 @@ class SwapRepositoryImpl(
         )
     }
 
-    override suspend fun checkSwapStatus(swapMetadata: TransactionSwapMetadata): SwapQuoteStatus =
-        swapDataSource.checkSwapStatus(
-            depositAddress = swapMetadata.depositAddress,
-            supportedTokens = getSupportedTokensForStatus()
+    override suspend fun checkSwapStatus(swapMetadata: TransactionSwapMetadata): SwapQuoteStatus {
+        val result =
+            swapDataSource.checkSwapStatus(
+                depositAddress = swapMetadata.depositAddress,
+                supportedTokens = getSupportedTokensForStatus()
+            )
+        requireMatchingAsset(
+            name = "origin",
+            expectedTokenTicker = swapMetadata.origin.tokenTicker,
+            expectedChainTicker = swapMetadata.origin.chainTicker,
+            actual = result.originAsset
         )
+        requireMatchingAsset(
+            name = "destination",
+            expectedTokenTicker = swapMetadata.destination.tokenTicker,
+            expectedChainTicker = swapMetadata.destination.chainTicker,
+            actual = result.destinationAsset
+        )
+        return result
+    }
 
     /**
      * Resolves the supported-token list the status lookup needs to map asset ids back to [SwapAsset]s.
@@ -312,3 +399,47 @@ class SwapRepositoryImpl(
 }
 
 val DEFAULT_SLIPPAGE = BigDecimal("2")
+
+/**
+ * Asserts the quote's ZEC-side asset matches `expected` — an independent snapshot of the repository's
+ * ZEC asset — a cross-check that the right ZEC asset was used. The user-selected side is validated more
+ * strictly by [requireSupportedSelectedAsset].
+ */
+private fun requireExpectedAsset(name: String, expected: SwapAsset?, actual: SwapAsset) {
+    if (expected == null) return
+    requireMatchingAsset(
+        name = name,
+        expectedTokenTicker = expected.tokenTicker,
+        expectedChainTicker = expected.chainTicker,
+        actual = actual
+    )
+}
+
+/**
+ * Looks the user-selected asset up in the currently-supported assets by id (requiring it to still be
+ * supported) and matches the quote against that canonical record — catching a stale/unknown selection
+ * and a selection whose ticker/chain disagrees with the supported record.
+ */
+private fun requireSupportedSelectedAsset(
+    name: String,
+    supportedAssets: List<SwapAsset>?,
+    selectedAsset: SwapAsset,
+    actual: SwapAsset
+) {
+    val supported = supportedAssets?.firstOrNull { it.assetId == selectedAsset.assetId }
+    requireNotNull(supported) {
+        "Swap quote asset mismatch: $name=${selectedAsset.assetId} is not a currently-supported swap asset"
+    }
+    requireMatchingAsset(
+        name = name,
+        expectedTokenTicker = supported.tokenTicker,
+        expectedChainTicker = supported.chainTicker,
+        actual = actual
+    )
+}
+
+private fun requireMatchingAddress(name: String, expected: String, actual: String) {
+    require(expected == actual) {
+        "Swap quote address mismatch: expected $name=$expected but quote returned $actual"
+    }
+}

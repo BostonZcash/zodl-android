@@ -1,7 +1,6 @@
 package co.electriccoin.zcash.ui.common.usecase
 
 import co.electriccoin.zcash.ui.common.model.SwapQuoteStatus
-import co.electriccoin.zcash.ui.common.model.near.requireMatchingAsset
 import co.electriccoin.zcash.ui.common.repository.MetadataRepository
 import co.electriccoin.zcash.ui.common.repository.SwapRepository
 import co.electriccoin.zcash.ui.common.repository.TransactionSwapMetadata
@@ -35,18 +34,6 @@ class GetSwapStatusUseCase(
                 while (true) {
                     try {
                         val result = swapRepository.checkSwapStatus(swapMetadata)
-                        requireMatchingAsset(
-                            name = "origin",
-                            expectedTokenTicker = swapMetadata.origin.tokenTicker,
-                            expectedChainTicker = swapMetadata.origin.chainTicker,
-                            actual = result.originAsset
-                        )
-                        requireMatchingAsset(
-                            name = "destination",
-                            expectedTokenTicker = swapMetadata.destination.tokenTicker,
-                            expectedChainTicker = swapMetadata.destination.chainTicker,
-                            actual = result.destinationAsset
-                        )
                         metadataRepository.updateSwap(
                             depositAddress = swapMetadata.depositAddress,
                             amountOutFormatted = result.amountOutFormatted,
