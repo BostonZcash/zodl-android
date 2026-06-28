@@ -56,7 +56,6 @@ class FixEphemeralAddressUseCase(
                                     metadataRepository.getSwapMetadata(address) ?: return@launch
                                 getSwapStatus(swapMetadata)
                                     .status
-                                    ?.quote
                                     ?.destinationAddress
                                     ?.address
                                     ?: return@launch

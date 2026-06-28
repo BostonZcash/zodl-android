@@ -39,7 +39,7 @@ import java.math.RoundingMode
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 
-class NearSwapDataSourceImpl(
+class NearSwapDataSource(
     private val nearApiProvider: NearApiProvider,
     private val tokenIconProvider: TokenIconProvider,
     private val tokenNameProvider: TokenNameProvider,

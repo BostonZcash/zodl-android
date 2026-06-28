@@ -3,6 +3,7 @@ package co.electriccoin.zcash.ui.screen.swap
 import co.electriccoin.zcash.ui.NavigationRouter
 import co.electriccoin.zcash.ui.common.model.SwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapAssetTestFixture
+import co.electriccoin.zcash.ui.common.model.SwapDirection
 import co.electriccoin.zcash.ui.common.model.SwapMode
 import co.electriccoin.zcash.ui.common.model.WalletAccount
 import co.electriccoin.zcash.ui.common.repository.EnhancedABContact
@@ -105,11 +106,11 @@ class SwapVMTest {
             val harness = harness()
             harness.collectState(this)
 
-            assertEquals(Mode.SWAP_INTO_ZEC, harness.capturedState.mode)
+            assertEquals(SwapDirection.SWAP_INTO_ZEC, harness.capturedState.swapDirection)
 
             harness.onChangeButtonClick()
 
-            assertEquals(Mode.SWAP_FROM_ZEC, harness.capturedState.mode)
+            assertEquals(SwapDirection.SWAP_FROM_ZEC, harness.capturedState.swapDirection)
         }
 
     @Test

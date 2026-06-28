@@ -39,21 +39,21 @@ class GetSwapStatusUseCase(
                             name = "origin",
                             expectedTokenTicker = swapMetadata.origin.tokenTicker,
                             expectedChainTicker = swapMetadata.origin.chainTicker,
-                            actual = result.quote.originAsset
+                            actual = result.originAsset
                         )
                         requireMatchingAsset(
                             name = "destination",
                             expectedTokenTicker = swapMetadata.destination.tokenTicker,
                             expectedChainTicker = swapMetadata.destination.chainTicker,
-                            actual = result.quote.destinationAsset
+                            actual = result.destinationAsset
                         )
                         metadataRepository.updateSwap(
                             depositAddress = swapMetadata.depositAddress,
                             amountOutFormatted = result.amountOutFormatted,
                             status = result.status,
                             mode = result.mode,
-                            origin = result.quote.originAsset,
-                            destination = result.quote.destinationAsset
+                            origin = result.originAsset,
+                            destination = result.destinationAsset
                         )
                         data.update {
                             it.copy(
@@ -82,6 +82,6 @@ data class SwapQuoteStatusData(
     val isLoading: Boolean = true,
     val error: Exception? = null,
 ) {
-    val originAsset = status?.quote?.originAsset
-    val destinationAsset = status?.quote?.destinationAsset
+    val originAsset = status?.originAsset
+    val destinationAsset = status?.destinationAsset
 }

@@ -115,11 +115,8 @@ class GetSwapStatusUseCaseTest {
         swapStatus: SwapStatus = SwapStatus.SUCCESS
     ): SwapQuoteStatus =
         mockk {
-            every { quote } returns
-                mockk {
-                    every { originAsset } returns origin
-                    every { destinationAsset } returns destination
-                }
+            every { originAsset } returns origin
+            every { destinationAsset } returns destination
             every { status } returns swapStatus
             every { amountOutFormatted } returns BigDecimal("1.23")
             every { mode } returns SwapMode.EXACT_INPUT

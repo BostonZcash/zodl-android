@@ -30,18 +30,18 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 
 /**
- * [NearSwapDataSourceImpl] maps the 1Click API: de-duplicating supported tokens and mapping them to
+ * [NearSwapDataSource] maps the 1Click API: de-duplicating supported tokens and mapping them to
  * `SwapAsset` models, building the quote request (slippage in bps, amount normalized to the asset's
  * decimals, asset ids/addresses), and translating NEAR error responses into typed exceptions.
  */
-class NearSwapDataSourceImplTest {
+class NearSwapDataSourceTest {
     private val nearApiProvider = mockk<NearApiProvider>()
     private val tokenIconProvider = mockk<TokenIconProvider>(relaxed = true)
     private val tokenNameProvider = mockk<TokenNameProvider>(relaxed = true)
     private val blockchainProvider = mockk<BlockchainProvider>(relaxed = true)
     private val synchronizerProvider = mockk<SynchronizerProvider>(relaxed = true)
     private val dataSource =
-        NearSwapDataSourceImpl(
+        NearSwapDataSource(
             nearApiProvider,
             tokenIconProvider,
             tokenNameProvider,

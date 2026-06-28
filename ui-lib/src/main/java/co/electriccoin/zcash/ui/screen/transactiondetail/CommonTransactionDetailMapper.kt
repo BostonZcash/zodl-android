@@ -91,7 +91,7 @@ class CommonTransactionDetailMapper {
                     bigIcon = destinationAsset.swapQuoteTokenIcon(),
                     smallIcon =
                         destinationAsset.swapQuoteChainIcon(
-                            isShielded = swap.quote.destinationAddress is ZcashShieldedSwapAddress
+                            isShielded = swap.destinationAddress is ZcashShieldedSwapAddress
                         ),
                     amount = stringResByNumber(swap.amountOutFormatted),
                     fiatAmount = stringResByDynamicCurrencyNumber(swap.amountOutUsd, FiatCurrency.USD.symbol),

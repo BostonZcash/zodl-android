@@ -62,8 +62,8 @@ class SwapDetailVM(
                     mapper
                         .createTransactionDetailQuoteHeaderState(
                             swap = swapData.status,
-                            originAsset = swapData.status?.quote?.originAsset,
-                            destinationAsset = swapData.status?.quote?.destinationAsset
+                            originAsset = swapData.status?.originAsset,
+                            destinationAsset = swapData.status?.destinationAsset
                         ),
                 status =
                     TransactionDetailSwapStatusRowState(
@@ -121,9 +121,9 @@ class SwapDetailVM(
                     val text =
                         stringResByCurrencyNumber(
                             amount = swapData.status.amountInFee,
-                            ticker = swapData.status.quote.originAsset.tokenTicker
+                            ticker = swapData.status.originAsset.tokenTicker
                         )
-                    if (swapData.status.quote.destinationAsset.isZCashAsset) {
+                    if (swapData.status.destinationAsset.isZCashAsset) {
                         stringRes("~") + text
                     } else {
                         text
@@ -136,7 +136,6 @@ class SwapDetailVM(
     private fun createRecipientState(swapData: SwapData): TransactionDetailInfoRowState {
         val destinationAddress =
             swapData.status
-                ?.quote
                 ?.destinationAddress
                 ?.address
         return TransactionDetailInfoRowState(
@@ -214,7 +213,6 @@ class SwapDetailVM(
             icons =
                 listOf(
                     swapData.status
-                        ?.quote
                         ?.originAsset
                         ?.tokenIcon ?: loadingImageRes(),
                     imageRes(R.drawable.ic_transaction_received),
