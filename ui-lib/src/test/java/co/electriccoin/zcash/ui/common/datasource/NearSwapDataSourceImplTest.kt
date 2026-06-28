@@ -347,7 +347,7 @@ class NearSwapDataSourceImplTest {
                 statusResponse(originAssetId = "missing", destinationAssetId = origin.assetId)
 
             val exception =
-                assertFailsWith<TokenNotFoundException> {
+                assertFailsWith<AssetNotFoundException> {
                     dataSource.checkSwapStatus(depositAddress = "deposit", supportedTokens = listOf(origin))
                 }
             assertEquals(true, exception.message?.contains("missing"))
@@ -361,7 +361,7 @@ class NearSwapDataSourceImplTest {
                 statusResponse(originAssetId = origin.assetId, destinationAssetId = "missing")
 
             val exception =
-                assertFailsWith<TokenNotFoundException> {
+                assertFailsWith<AssetNotFoundException> {
                     dataSource.checkSwapStatus(depositAddress = "deposit", supportedTokens = listOf(origin))
                 }
             // The origin resolves; the unsupported destination is what's reported missing.

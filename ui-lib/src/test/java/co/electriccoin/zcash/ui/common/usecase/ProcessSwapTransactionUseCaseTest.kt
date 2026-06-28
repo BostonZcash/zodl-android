@@ -2,7 +2,6 @@ package co.electriccoin.zcash.ui.common.usecase
 
 import cash.z.ecc.android.sdk.model.WalletAddress
 import cash.z.ecc.android.sdk.model.Zatoshi
-import co.electriccoin.zcash.ui.common.datasource.SwapDataSource
 import co.electriccoin.zcash.ui.common.datasource.SwapTransactionProposal
 import co.electriccoin.zcash.ui.common.model.SubmitResult
 import co.electriccoin.zcash.ui.common.model.SwapAsset
@@ -11,6 +10,7 @@ import co.electriccoin.zcash.ui.common.model.SwapMode
 import co.electriccoin.zcash.ui.common.model.SwapQuote
 import co.electriccoin.zcash.ui.common.model.SwapStatus
 import co.electriccoin.zcash.ui.common.repository.MetadataRepository
+import co.electriccoin.zcash.ui.common.repository.SwapRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -64,16 +64,17 @@ class ProcessSwapTransactionUseCaseTest {
     fun submitsEachTxIdAsADepositTransaction() =
         runTest {
             val fx = Fixtures()
+            val proposal = swapProposal()
 
-            fx.useCase(swapProposal(), SubmitResult.Success(listOf("tx1", "tx2")))
+            fx.useCase(proposal, SubmitResult.Success(listOf("tx1", "tx2")))
 
             coVerify(exactly = 1) {
-                fx.swapDataSource.submitDepositTransaction(txHash = "tx1", depositAddress = "deposit-address")
+                fx.swapRepository.submitDepositTransaction(txId = "tx1", transactionProposal = proposal)
             }
             coVerify(exactly = 1) {
-                fx.swapDataSource.submitDepositTransaction(txHash = "tx2", depositAddress = "deposit-address")
+                fx.swapRepository.submitDepositTransaction(txId = "tx2", transactionProposal = proposal)
             }
-            coVerify(exactly = 2) { fx.swapDataSource.submitDepositTransaction(any(), any()) }
+            coVerify(exactly = 2) { fx.swapRepository.submitDepositTransaction(any(), any()) }
         }
 
     @Test
@@ -83,8 +84,8 @@ class ProcessSwapTransactionUseCaseTest {
 
             fx.useCase(swapProposal(), SubmitResult.Success(listOf("tx1", "", "tx2")))
 
-            coVerify(exactly = 2) { fx.swapDataSource.submitDepositTransaction(any(), any()) }
-            coVerify(exactly = 0) { fx.swapDataSource.submitDepositTransaction(txHash = "", depositAddress = any()) }
+            coVerify(exactly = 2) { fx.swapRepository.submitDepositTransaction(any(), any()) }
+            coVerify(exactly = 0) { fx.swapRepository.submitDepositTransaction(txId = "", transactionProposal = any()) }
         }
 
     @Test
@@ -107,25 +108,26 @@ class ProcessSwapTransactionUseCaseTest {
                     any()
                 )
             }
-            coVerify(exactly = 0) { fx.swapDataSource.submitDepositTransaction(any(), any()) }
+            coVerify(exactly = 0) { fx.swapRepository.submitDepositTransaction(any(), any()) }
         }
 
     @Test
     fun continuesSubmittingRemainingDepositsWhenOneFails() =
         runTest {
             val fx = Fixtures()
+            val proposal = swapProposal()
             coEvery {
-                fx.swapDataSource.submitDepositTransaction(txHash = "tx1", depositAddress = any())
+                fx.swapRepository.submitDepositTransaction(txId = "tx1", transactionProposal = any())
             } throws RuntimeException("boom")
 
             // Must not throw — the failure is logged and the next deposit is still attempted.
-            fx.useCase(swapProposal(), SubmitResult.Success(listOf("tx1", "tx2")))
+            fx.useCase(proposal, SubmitResult.Success(listOf("tx1", "tx2")))
 
             coVerify(exactly = 1) {
-                fx.swapDataSource.submitDepositTransaction(txHash = "tx1", depositAddress = "deposit-address")
+                fx.swapRepository.submitDepositTransaction(txId = "tx1", transactionProposal = proposal)
             }
             coVerify(exactly = 1) {
-                fx.swapDataSource.submitDepositTransaction(txHash = "tx2", depositAddress = "deposit-address")
+                fx.swapRepository.submitDepositTransaction(txId = "tx2", transactionProposal = proposal)
             }
         }
 
@@ -149,7 +151,7 @@ class ProcessSwapTransactionUseCaseTest {
 
     private class Fixtures {
         val metadataRepository = mockk<MetadataRepository>(relaxed = true)
-        val swapDataSource = mockk<SwapDataSource>(relaxed = true)
-        val useCase = ProcessSwapTransactionUseCase(metadataRepository, swapDataSource)
+        val swapRepository = mockk<SwapRepository>(relaxed = true)
+        val useCase = ProcessSwapTransactionUseCase(metadataRepository, swapRepository)
     }
 }

@@ -1,12 +1,16 @@
 package co.electriccoin.zcash.ui.common.repository
 
+import cash.z.ecc.android.sdk.model.WalletAddress
 import co.electriccoin.zcash.ui.common.datasource.AFFILIATE_ADDRESS
 import co.electriccoin.zcash.ui.common.datasource.SwapDataSource
+import co.electriccoin.zcash.ui.common.datasource.SwapTransactionProposal
 import co.electriccoin.zcash.ui.common.model.SwapAssetTestFixture
 import co.electriccoin.zcash.ui.common.model.SwapMode
 import co.electriccoin.zcash.ui.common.model.SwapQuote
+import co.electriccoin.zcash.ui.common.model.SwapQuoteStatus
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -17,6 +21,7 @@ import java.math.BigDecimal
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -311,6 +316,85 @@ class SwapRepositoryImplTest {
 
         assertEquals(listOf(btc), repository.assets.value.data)
     }
+
+    @Test
+    fun submitDepositTransactionForwardsTxIdAndProposalDepositAddress() =
+        runTest {
+            val dataSource = mockk<SwapDataSource>(relaxed = true)
+            val repository = repository(dataSource)
+            val walletAddress = mockk<WalletAddress> { every { address } returns "deposit-address" }
+            val proposal = mockk<SwapTransactionProposal> { every { destination } returns walletAddress }
+
+            repository.submitDepositTransaction(txId = "tx1", transactionProposal = proposal)
+
+            coVerify(exactly = 1) {
+                dataSource.submitDepositTransaction(txHash = "tx1", depositAddress = "deposit-address")
+            }
+        }
+
+    @Test
+    fun checkSwapStatusPassesLoadedSupportedTokensIncludingZec() =
+        runTest {
+            val status = mockk<SwapQuoteStatus>()
+            val dataSource =
+                mockk<SwapDataSource> {
+                    coEvery { getSupportedTokens() } returns listOf(zec, btc)
+                    coEvery { checkSwapStatus(any(), any()) } returns status
+                }
+            val repository = loadedRepository(dataSource)
+
+            val result = repository.checkSwapStatus("deposit-address")
+
+            assertEquals(status, result)
+            // The repo supplies the tokens itself: the priced list plus the separately-kept ZEC asset.
+            coVerify(exactly = 1) {
+                dataSource.checkSwapStatus(depositAddress = "deposit-address", supportedTokens = listOf(btc, zec))
+            }
+        }
+
+    @Test
+    fun checkSwapStatusRefreshesAssetsWhenNotYetLoaded() =
+        runTest {
+            val status = mockk<SwapQuoteStatus>()
+            val dataSource =
+                mockk<SwapDataSource> {
+                    coEvery { getSupportedTokens() } returns listOf(zec, btc)
+                    coEvery { checkSwapStatus(any(), any()) } returns status
+                }
+            val repository = repository(dataSource) // assets not loaded yet
+
+            val result = repository.checkSwapStatus("deposit-address")
+
+            assertEquals(status, result)
+            coVerify(exactly = 1) { dataSource.getSupportedTokens() } // refreshed once on demand
+            coVerify(exactly = 1) {
+                dataSource.checkSwapStatus(depositAddress = "deposit-address", supportedTokens = listOf(btc, zec))
+            }
+        }
+
+    @Test
+    fun checkSwapStatusFailsWithSwapAssetsUnavailableWhenNoZecAssetCanBeLoaded() =
+        runTest {
+            // The supported list has no ZEC asset, so the repo can't assemble both sides and fails closed.
+            val dataSource = mockk<SwapDataSource> { coEvery { getSupportedTokens() } returns listOf(btc) }
+            val repository = repository(dataSource)
+
+            assertFailsWith<SwapAssetsUnavailableException> {
+                repository.checkSwapStatus("deposit-address")
+            }
+        }
+
+    @Test
+    fun checkSwapStatusRethrowsTheAssetRefreshErrorInsteadOfWrappingIt() =
+        runTest {
+            // When the refresh itself failed, the original error is surfaced — not SwapAssetsUnavailableException.
+            val failure = RuntimeException("boom")
+            val dataSource = mockk<SwapDataSource> { coEvery { getSupportedTokens() } throws failure }
+            val repository = repository(dataSource)
+
+            val thrown = assertFailsWith<RuntimeException> { repository.checkSwapStatus("deposit-address") }
+            assertEquals("boom", thrown.message)
+        }
 
     private fun dataSourceReturning(quote: SwapQuote) =
         mockk<SwapDataSource> {

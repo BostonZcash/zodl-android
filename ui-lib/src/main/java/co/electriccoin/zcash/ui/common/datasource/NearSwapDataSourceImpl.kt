@@ -191,10 +191,10 @@ class NearSwapDataSourceImpl(
         val response = this.nearApiProvider.checkSwapStatus(depositAddress)
         val originAsset =
             supportedTokens.find { it.assetId == response.quoteResponse.quoteRequest.originAsset }
-                ?: throw TokenNotFoundException(response.quoteResponse.quoteRequest.originAsset)
+                ?: throw AssetNotFoundException(response.quoteResponse.quoteRequest.originAsset)
         val destinationAsset =
             supportedTokens.find { it.assetId == response.quoteResponse.quoteRequest.destinationAsset }
-                ?: throw TokenNotFoundException(response.quoteResponse.quoteRequest.destinationAsset)
+                ?: throw AssetNotFoundException(response.quoteResponse.quoteRequest.destinationAsset)
         log("checkSwapStatus $depositAddress")
         return NearSwapQuoteStatus(
             response = response,
@@ -228,6 +228,7 @@ class NearSwapDataSourceImpl(
 
             AddressType.Tex,
             AddressType.Transparent -> ZcashTransparentSwapAddress(address)
+
             is AddressType.Invalid -> throw IllegalArgumentException("Zcash address is invalid")
         }
 }
