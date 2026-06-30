@@ -1,5 +1,6 @@
 package co.electriccoin.zcash.ui.common.repository
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import co.electriccoin.zcash.ui.common.datasource.AFFILIATE_ADDRESS
 import co.electriccoin.zcash.ui.common.datasource.AssetNotFoundException
@@ -109,6 +110,7 @@ class SwapRepositoryImpl(
      * Scope the background refresh/quote jobs run on. A test seam: unit tests replace it with a
      * test dispatcher before invoking any method, so the fire-and-forget jobs run deterministically.
      */
+    @set:RestrictTo(RestrictTo.Scope.TESTS)
     @VisibleForTesting
     internal var scope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
