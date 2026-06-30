@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("TooManyFunctions")
 internal class PayVM(
@@ -243,7 +244,7 @@ internal class PayVM(
     @Suppress("MagicNumber")
     private suspend fun hideCancelBottomSheet() {
         isCancelStateVisible.update { false }
-        delay(350)
+        delay(350.milliseconds)
     }
 
     private fun onTextFieldChange(amount: NumberTextFieldInnerState, fiat: NumberTextFieldInnerState) {

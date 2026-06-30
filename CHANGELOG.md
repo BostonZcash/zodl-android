@@ -6,11 +6,15 @@ and this application adheres to [Semantic Versioning](https://semver.org/spec/v2
 
 ## [Unreleased]
 
+### Fixed:
+- When a send fails because the wallet's chain state changed between tapping review and confirm (due to syncing catching up, a reorg, or the app resuming from background), a clear actionable message is now shown instead of the generic error copy.
+
 ### Added:
 - Currency Conversion now supports multiple fiat currencies. You can pick which currency your balances and payment amounts are shown in from the Currency Conversion settings and opt-in screens.
 - When opening Send or Request while the selected currency's exchange rate can't be fetched, a bottom sheet now explains the issue and offers to switch to USD or continue entering amounts in ZEC.
 
 ### Fixed:
+- Modal bottom sheets again slide down when they close, including when navigating onward from them. The dismiss animation had stopped playing after a UI-toolkit update and sheets disappeared abruptly.
 - Amount fields now always use a period as the decimal separator and a comma for grouping, regardless of the device region, so amounts render and parse consistently everywhere. Typing an extra separator on an amount that already has a decimal point no longer resets the amount or drops its fraction digits.
 - Network request/response bodies and voting diagnostics are no longer written to logs in release builds, preventing sensitive data (recipient/refund addresses, amounts, transaction hashes) from leaking to logcat, bug reports, and crash dumps. Credential headers are also redacted from logs.
 - Crash reporting (Firebase Crashlytics) collection is now off by default and is only enabled after the user opts in, so no crash data can be sent before consent.

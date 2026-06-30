@@ -7,6 +7,9 @@ import cash.z.ecc.sdk.ANDROID_STATE_FLOW_TIMEOUT
 import co.electriccoin.zcash.ui.NavigationRouter
 import co.electriccoin.zcash.ui.R
 import co.electriccoin.zcash.ui.common.model.SwapAsset
+import co.electriccoin.zcash.ui.common.model.SwapDirection
+import co.electriccoin.zcash.ui.common.model.SwapDirection.SWAP_FROM_ZEC
+import co.electriccoin.zcash.ui.common.model.SwapDirection.SWAP_INTO_ZEC
 import co.electriccoin.zcash.ui.common.model.SwapMode
 import co.electriccoin.zcash.ui.common.model.WalletAccount
 import co.electriccoin.zcash.ui.common.repository.DEFAULT_SLIPPAGE
@@ -31,8 +34,6 @@ import co.electriccoin.zcash.ui.design.component.TextSelection
 import co.electriccoin.zcash.ui.design.util.imageRes
 import co.electriccoin.zcash.ui.design.util.stringRes
 import co.electriccoin.zcash.ui.design.util.stringResByDynamicNumber
-import co.electriccoin.zcash.ui.screen.swap.Mode.SWAP_FROM_ZEC
-import co.electriccoin.zcash.ui.screen.swap.Mode.SWAP_INTO_ZEC
 import co.electriccoin.zcash.ui.screen.swap.info.SwapRefundAddressInfoArgs
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,6 +45,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("TooManyFunctions")
 internal class SwapVM(
@@ -76,7 +78,7 @@ internal class SwapVM(
                 swapAssets = SwapAssetsData(),
                 isRequestingQuote = false,
                 selectedContact = null,
-                mode = SWAP_INTO_ZEC,
+                swapDirection = SWAP_INTO_ZEC,
                 isEphemeralAddressLocked = false
             )
         )
@@ -162,8 +164,8 @@ internal class SwapVM(
     private fun onChangeButtonClick() {
         internalState.update {
             it.copy(
-                mode =
-                    when (it.mode) {
+                swapDirection =
+                    when (it.swapDirection) {
                         SWAP_FROM_ZEC -> SWAP_INTO_ZEC
                         SWAP_INTO_ZEC -> SWAP_FROM_ZEC
                     }
@@ -193,7 +195,7 @@ internal class SwapVM(
         }
 
     private fun preselectChain(selected: EnhancedABContact) {
-        if (internalState.value.mode != SWAP_INTO_ZEC) return
+        if (internalState.value.swapDirection != SWAP_INTO_ZEC) return
 
         val selectedChainTicker = selected.blockchain?.chainTicker
         val currentChainTicker = internalState.value.swapAsset?.chainTicker
@@ -235,7 +237,7 @@ internal class SwapVM(
                     currentSlippage = internalState.value.slippage,
                     fiatAmount = fiatAmount,
                     mode =
-                        when (internalState.value.mode) {
+                        when (internalState.value.swapDirection) {
                             SWAP_FROM_ZEC -> SwapMode.EXACT_INPUT
                             SWAP_INTO_ZEC -> SwapMode.FLEX_INPUT
                         }
@@ -277,7 +279,7 @@ internal class SwapVM(
     @Suppress("MagicNumber")
     private suspend fun hideCancelBottomSheet() {
         isCancelStateVisible.update { false }
-        delay(350)
+        delay(350.milliseconds)
     }
 
     private fun onSwapCurrencyTypeClick(newTextFieldAmount: BigDecimal?) {
@@ -310,7 +312,7 @@ internal class SwapVM(
             val asset = internalState.value.swapAsset ?: return@launch
             val slippage = internalState.value.slippage
             internalState.update { it.copy(isRequestingQuote = true) }
-            when (internalState.value.mode) {
+            when (internalState.value.swapDirection) {
                 SWAP_FROM_ZEC -> {
                     requestSwapQuote.requestExactInput(
                         amount = amount,
@@ -356,8 +358,6 @@ internal class SwapVM(
 
 internal enum class CurrencyType { TOKEN, FIAT }
 
-internal enum class Mode { SWAP_FROM_ZEC, SWAP_INTO_ZEC }
-
 internal interface InternalState {
     val account: WalletAccount?
     val swapAsset: SwapAsset?
@@ -368,7 +368,7 @@ internal interface InternalState {
     val swapAssets: SwapAssetsData
     val isRequestingQuote: Boolean
     val selectedContact: EnhancedABContact?
-    val mode: Mode
+    val swapDirection: SwapDirection
     val isEphemeralAddressLocked: Boolean
 
     val totalSpendableBalance: Zatoshi
@@ -385,6 +385,6 @@ internal data class InternalStateImpl(
     override val swapAssets: SwapAssetsData,
     override val isRequestingQuote: Boolean,
     override val selectedContact: EnhancedABContact?,
-    override val mode: Mode,
+    override val swapDirection: SwapDirection,
     override val isEphemeralAddressLocked: Boolean,
 ) : InternalState

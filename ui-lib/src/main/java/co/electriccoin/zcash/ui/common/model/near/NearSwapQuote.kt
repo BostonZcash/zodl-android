@@ -10,8 +10,8 @@ import co.electriccoin.zcash.ui.common.model.SwapAddress
 import co.electriccoin.zcash.ui.common.model.SwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapMode
 import co.electriccoin.zcash.ui.common.model.SwapQuote
-import co.electriccoin.zcash.ui.common.model.ZecSwapAsset
 import co.electriccoin.zcash.ui.common.model.isSame
+import co.electriccoin.zcash.ui.common.model.isZCashAsset
 import java.math.BigDecimal
 import java.math.MathContext
 import java.math.RoundingMode
@@ -35,14 +35,6 @@ data class NearSwapQuote(
     val expectedSlippageToleranceBps: Int? = null,
 ) : SwapQuote {
     init {
-        require(response.quoteRequest.originAsset == originAsset.assetId) {
-            "Swap quote asset mismatch: requested originAsset=${originAsset.assetId} " +
-                "but server returned ${response.quoteRequest.originAsset}"
-        }
-        require(response.quoteRequest.destinationAsset == destinationAsset.assetId) {
-            "Swap quote asset mismatch: requested destinationAsset=${destinationAsset.assetId} " +
-                "but server returned ${response.quoteRequest.destinationAsset}"
-        }
         // Guards zecExchangeRate (= amountInUsd / amountInFormatted) and the fee math below it against a
         // divide-by-zero. A quote with a non-positive input amount is invalid anyway; fail closed with a
         // clear message rather than letting an ArithmeticException surface from the property initializers.
@@ -114,7 +106,7 @@ data class NearSwapQuote(
             )
 
     override val affiliateFeeZatoshi: Zatoshi =
-        if (originAsset is ZecSwapAsset) {
+        if (originAsset.isZCashAsset) {
             response.quote.amountInFormatted
                 .coerceAtLeast(BigDecimal(0))
                 .multiply(

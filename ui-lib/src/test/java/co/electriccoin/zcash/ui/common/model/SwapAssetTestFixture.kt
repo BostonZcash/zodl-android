@@ -1,5 +1,6 @@
 package co.electriccoin.zcash.ui.common.model
 
+import co.electriccoin.zcash.ui.common.model.near.NearSwapAsset
 import co.electriccoin.zcash.ui.common.repository.SwapAssetsData
 import co.electriccoin.zcash.ui.design.util.imageRes
 import co.electriccoin.zcash.ui.design.util.stringRes
@@ -23,7 +24,7 @@ object SwapAssetTestFixture {
         usdPrice: BigDecimal? = BigDecimal("100000"),
         decimals: Int = 8
     ): SwapAsset =
-        DynamicSwapAsset(
+        NearSwapAsset(
             tokenTicker = tokenTicker,
             tokenName = stringRes(tokenTicker.uppercase()),
             tokenIcon = imageRes(0),
@@ -34,14 +35,14 @@ object SwapAssetTestFixture {
         )
 
     fun zecAsset(): SwapAsset =
-        ZecSwapAsset(
+        NearSwapAsset(
             tokenTicker = "zec",
             tokenName = stringRes("ZEC"),
             tokenIcon = imageRes(0),
-            blockchain = blockchain("zec"),
             usdPrice = BigDecimal("30"),
             assetId = "zec-zec",
-            decimals = 8
+            decimals = 8,
+            blockchain = blockchain("zec")
         )
 
     fun simpleAsset(
