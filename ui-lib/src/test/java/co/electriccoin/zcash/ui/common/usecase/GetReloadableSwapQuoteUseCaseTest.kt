@@ -1,6 +1,5 @@
 package co.electriccoin.zcash.ui.common.usecase
 
-import co.electriccoin.zcash.ui.common.repository.TransactionSwapMetadata
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -21,7 +20,7 @@ import kotlin.test.assertEquals
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class GetReloadableSwapQuoteUseCaseTest {
-    private val metadata = mockk<TransactionSwapMetadata>()
+    private val depositAddress = "deposit"
 
     @Test
     fun wrapsSwapStatusIntoSwapData() =
@@ -29,13 +28,13 @@ class GetReloadableSwapQuoteUseCaseTest {
             val statusData = SwapQuoteStatusData(isLoading = false)
             val getSwapStatus = mockk<GetSwapStatusUseCase> { every { observe(any()) } returns flowOf(statusData) }
 
-            val result = GetReloadableSwapQuoteUseCase(getSwapStatus).observe(metadata).first()
+            val result = GetReloadableSwapQuoteUseCase(getSwapStatus).observe(depositAddress).first()
 
             assertEquals(statusData, result.data)
             assertEquals(statusData.status, result.status)
             assertEquals(statusData.isLoading, result.isLoading)
             assertEquals(statusData.error, result.error)
-            verify { getSwapStatus.observe(metadata) }
+            verify { getSwapStatus.observe(depositAddress) }
         }
 
     @Test
@@ -50,13 +49,13 @@ class GetReloadableSwapQuoteUseCaseTest {
 
             val useCase = GetReloadableSwapQuoteUseCase(getSwapStatus)
             val emissions = mutableListOf<SwapData>()
-            val job = launch { useCase.observe(metadata).collect { emissions += it } }
+            val job = launch { useCase.observe(depositAddress).collect { emissions += it } }
             advanceUntilIdle()
 
             emissions.first().handle.requestReload()
             advanceUntilIdle()
 
-            verify(exactly = 2) { getSwapStatus.observe(metadata) }
+            verify(exactly = 2) { getSwapStatus.observe(depositAddress) }
             assertEquals(listOf(first, second), emissions.map { it.data })
             job.cancelAndJoin()
         }
@@ -70,7 +69,7 @@ class GetReloadableSwapQuoteUseCaseTest {
 
             val useCase = GetReloadableSwapQuoteUseCase(getSwapStatus)
             val emissions = mutableListOf<SwapData>()
-            val job = launch { useCase.observe(metadata).collect { emissions += it } }
+            val job = launch { useCase.observe(depositAddress).collect { emissions += it } }
             advanceUntilIdle()
 
             assertEquals(1, emissions.size)

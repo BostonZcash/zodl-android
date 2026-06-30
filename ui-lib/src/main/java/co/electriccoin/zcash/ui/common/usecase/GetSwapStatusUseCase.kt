@@ -1,9 +1,9 @@
 package co.electriccoin.zcash.ui.common.usecase
 
 import co.electriccoin.zcash.ui.common.model.SwapQuoteStatus
+import co.electriccoin.zcash.ui.common.model.near.requireMatchingAsset
 import co.electriccoin.zcash.ui.common.repository.MetadataRepository
 import co.electriccoin.zcash.ui.common.repository.SwapRepository
-import co.electriccoin.zcash.ui.common.repository.TransactionSwapMetadata
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -18,11 +18,10 @@ class GetSwapStatusUseCase(
     private val metadataRepository: MetadataRepository,
     private val swapRepository: SwapRepository,
 ) {
-    suspend operator fun invoke(swapMetadata: TransactionSwapMetadata) =
-        observe(swapMetadata).first { !it.isLoading }
+    suspend operator fun invoke(depositAddress: String) = observe(depositAddress).first { !it.isLoading }
 
     @Suppress("TooGenericExceptionCaught", "LoopWithTooManyJumpStatements")
-    fun observe(swapMetadata: TransactionSwapMetadata): Flow<SwapQuoteStatusData> =
+    fun observe(depositAddress: String): Flow<SwapQuoteStatusData> =
         channelFlow {
             val data = MutableStateFlow(SwapQuoteStatusData())
 
@@ -31,11 +30,29 @@ class GetSwapStatusUseCase(
             }
 
             launch {
+                val expectedMetadata = metadataRepository.getSwapMetadata(depositAddress)
+
                 while (true) {
                     try {
-                        val result = swapRepository.checkSwapStatus(swapMetadata)
+                        val result = swapRepository.checkSwapStatus(depositAddress)
+                        expectedMetadata?.origin?.let {
+                            requireMatchingAsset(
+                                name = "origin",
+                                expectedTokenTicker = it.tokenTicker,
+                                expectedChainTicker = it.chainTicker,
+                                actual = result.originAsset
+                            )
+                        }
+                        expectedMetadata?.destination?.let {
+                            requireMatchingAsset(
+                                name = "destination",
+                                expectedTokenTicker = it.tokenTicker,
+                                expectedChainTicker = it.chainTicker,
+                                actual = result.destinationAsset
+                            )
+                        }
                         metadataRepository.updateSwap(
-                            depositAddress = swapMetadata.depositAddress,
+                            depositAddress = depositAddress,
                             amountOutFormatted = result.amountOutFormatted,
                             status = result.status,
                             mode = result.mode,

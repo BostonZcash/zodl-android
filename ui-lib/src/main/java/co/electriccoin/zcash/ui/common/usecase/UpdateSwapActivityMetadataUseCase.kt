@@ -105,7 +105,7 @@ class UpdateSwapActivityMetadataUseCase(
                         if (swapMetadata != null && !swapMetadata.status.isTerminal) {
                             Twig.debug { "Activities: consuming $depositAddress" }
                             val apiRequestTimestamp = Clock.System.now()
-                            val quoteStatus = getSwapStatus(swapMetadata)
+                            val quoteStatus = getSwapStatus(depositAddress)
                             pipelineCacheSemaphore.withLock { item.close() }
                             if (quoteStatus.status?.status?.isTerminal != true) {
                                 when (pipelineCache.lastOrNull()?.depositAddress) {

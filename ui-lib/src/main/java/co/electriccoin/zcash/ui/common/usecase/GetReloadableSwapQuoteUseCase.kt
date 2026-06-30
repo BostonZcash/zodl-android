@@ -1,7 +1,6 @@
 package co.electriccoin.zcash.ui.common.usecase
 
 import co.electriccoin.zcash.ui.common.model.SwapQuoteStatus
-import co.electriccoin.zcash.ui.common.repository.TransactionSwapMetadata
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -16,7 +15,7 @@ class GetReloadableSwapQuoteUseCase(
     private val getSwapStatus: GetSwapStatusUseCase,
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun observe(swapMetadata: TransactionSwapMetadata) =
+    fun observe(depositAddress: String) =
         channelFlow {
             val requestSwipeReloadPipeline = MutableSharedFlow<Unit>()
 
@@ -32,7 +31,7 @@ class GetReloadableSwapQuoteUseCase(
             val swapFlow =
                 requestSwipeReloadPipeline
                     .onStart { emit(Unit) }
-                    .flatMapLatest { getSwapStatus.observe(swapMetadata) }
+                    .flatMapLatest { getSwapStatus.observe(depositAddress) }
 
             swapFlow
                 .map { status ->

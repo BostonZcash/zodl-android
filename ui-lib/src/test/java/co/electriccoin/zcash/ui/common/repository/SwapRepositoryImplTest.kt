@@ -5,7 +5,6 @@ import co.electriccoin.zcash.ui.common.datasource.AFFILIATE_ADDRESS
 import co.electriccoin.zcash.ui.common.datasource.SwapDataSource
 import co.electriccoin.zcash.ui.common.datasource.SwapTransactionProposal
 import co.electriccoin.zcash.ui.common.model.FakeSwapQuote
-import co.electriccoin.zcash.ui.common.model.SimpleSwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapAssetTestFixture
 import co.electriccoin.zcash.ui.common.model.SwapMode
@@ -440,11 +439,7 @@ class SwapRepositoryImplTest {
     @Test
     fun checkSwapStatusPassesLoadedSupportedTokensIncludingZec() =
         runTest {
-            val status =
-                mockk<SwapQuoteStatus> {
-                    every { originAsset } returns btc
-                    every { destinationAsset } returns zec
-                }
+            val status = mockk<SwapQuoteStatus>()
             val dataSource =
                 mockk<SwapDataSource> {
                     coEvery { getSupportedTokens() } returns listOf(zec, btc)
@@ -452,7 +447,7 @@ class SwapRepositoryImplTest {
                 }
             val repository = loadedRepository(dataSource)
 
-            val result = repository.checkSwapStatus(swapMetadata())
+            val result = repository.checkSwapStatus("deposit-address")
 
             assertEquals(status, result)
             // The repo supplies the tokens itself: the priced list plus the separately-kept ZEC asset.
@@ -464,11 +459,7 @@ class SwapRepositoryImplTest {
     @Test
     fun checkSwapStatusRefreshesAssetsWhenNotYetLoaded() =
         runTest {
-            val status =
-                mockk<SwapQuoteStatus> {
-                    every { originAsset } returns btc
-                    every { destinationAsset } returns zec
-                }
+            val status = mockk<SwapQuoteStatus>()
             val dataSource =
                 mockk<SwapDataSource> {
                     coEvery { getSupportedTokens() } returns listOf(zec, btc)
@@ -476,7 +467,7 @@ class SwapRepositoryImplTest {
                 }
             val repository = repository(dataSource) // assets not loaded yet
 
-            val result = repository.checkSwapStatus(swapMetadata())
+            val result = repository.checkSwapStatus("deposit-address")
 
             assertEquals(status, result)
             coVerify(exactly = 1) { dataSource.getSupportedTokens() } // refreshed once on demand
@@ -493,7 +484,7 @@ class SwapRepositoryImplTest {
             val repository = repository(dataSource)
 
             assertFailsWith<SwapAssetsUnavailableException> {
-                repository.checkSwapStatus(swapMetadata())
+                repository.checkSwapStatus("deposit-address")
             }
         }
 
@@ -505,40 +496,8 @@ class SwapRepositoryImplTest {
             val dataSource = mockk<SwapDataSource> { coEvery { getSupportedTokens() } throws failure }
             val repository = repository(dataSource)
 
-            val thrown = assertFailsWith<RuntimeException> { repository.checkSwapStatus(swapMetadata()) }
+            val thrown = assertFailsWith<RuntimeException> { repository.checkSwapStatus("deposit-address") }
             assertEquals("boom", thrown.message)
-        }
-
-    @Test
-    fun checkSwapStatusRejectsServerAssetsThatDoNotMatchStoredMetadata() =
-        runTest {
-            // Stored origin is ETH but the server returns a BTC origin -> requireMatchingAsset fails closed.
-            val status =
-                mockk<SwapQuoteStatus> {
-                    every { originAsset } returns btc
-                    every { destinationAsset } returns zec
-                }
-            val dataSource =
-                mockk<SwapDataSource> {
-                    coEvery { getSupportedTokens() } returns listOf(zec, btc)
-                    coEvery { checkSwapStatus(any(), any()) } returns status
-                }
-            val repository = loadedRepository(dataSource)
-            val metadata =
-                swapMetadata(from = SwapAssetTestFixture.simpleAsset(tokenTicker = "eth", chainTicker = "eth"))
-
-            assertFailsWith<IllegalArgumentException> { repository.checkSwapStatus(metadata) }
-        }
-
-    private fun swapMetadata(
-        address: String = "deposit-address",
-        from: SimpleSwapAsset = SwapAssetTestFixture.simpleAsset(tokenTicker = "btc", chainTicker = "btc"),
-        to: SimpleSwapAsset = SwapAssetTestFixture.zecSimpleAsset()
-    ): TransactionSwapMetadata =
-        mockk {
-            every { depositAddress } returns address
-            every { origin } returns from
-            every { destination } returns to
         }
 
     @Suppress("LongParameterList")

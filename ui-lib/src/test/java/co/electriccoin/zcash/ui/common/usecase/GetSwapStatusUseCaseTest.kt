@@ -1,6 +1,5 @@
 package co.electriccoin.zcash.ui.common.usecase
 
-import co.electriccoin.zcash.ui.common.model.SimpleSwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapAssetTestFixture
 import co.electriccoin.zcash.ui.common.model.SwapMode
@@ -19,14 +18,14 @@ import java.math.BigDecimal
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertIs
 import kotlin.test.assertNull
 
 /**
- * [GetSwapStatusUseCase.invoke] emits the first non-loading [SwapQuoteStatusData] for the swap
- * identified by the passed [TransactionSwapMetadata] (no metadata IO of its own): on success it
- * persists the latest status to metadata and surfaces it; a failure from
- * [co.electriccoin.zcash.ui.common.repository.SwapRepository.checkSwapStatus] (lookup error or a
- * stored metadata/returned-asset mismatch) is surfaced as an error state with metadata left untouched.
+ * [GetSwapStatusUseCase.invoke] emits the first non-loading [SwapQuoteStatusData]: on success it
+ * persists the latest status to metadata and surfaces it; any failure — a status-lookup error or a
+ * stored-metadata/returned-asset mismatch (via `requireMatchingAsset`) — is surfaced as an error
+ * state and metadata is left untouched.
  */
 class GetSwapStatusUseCaseTest {
     private val btc = SwapAssetTestFixture.asset(tokenTicker = "btc", chainTicker = "btc")
@@ -35,14 +34,17 @@ class GetSwapStatusUseCaseTest {
     @Test
     fun emitsStatusAndPersistsMetadataOnSuccess() =
         runTest {
-            val metadataRepository = mockk<MetadataRepository>(relaxed = true)
+            val metadataRepository =
+                mockk<MetadataRepository>(relaxed = true) {
+                    coEvery { getSwapMetadata("deposit") } returns null
+                }
             val status = swapStatusResult()
             val swapRepository =
                 mockk<SwapRepository> {
-                    coEvery { checkSwapStatus(any()) } returns status
+                    coEvery { checkSwapStatus("deposit") } returns status
                 }
 
-            val result = GetSwapStatusUseCase(metadataRepository, swapRepository).invoke(swapMetadata())
+            val result = GetSwapStatusUseCase(metadataRepository, swapRepository).invoke("deposit")
 
             assertFalse(result.isLoading)
             assertNull(result.error)
@@ -62,14 +64,17 @@ class GetSwapStatusUseCaseTest {
     @Test
     fun surfacesErrorAndSkipsMetadataWhenStatusLookupFails() =
         runTest {
-            val metadataRepository = mockk<MetadataRepository>(relaxed = true)
+            val metadataRepository =
+                mockk<MetadataRepository>(relaxed = true) {
+                    coEvery { getSwapMetadata("deposit") } returns null
+                }
             val failure = SwapAssetsUnavailableException()
             val swapRepository =
                 mockk<SwapRepository> {
-                    coEvery { checkSwapStatus(any()) } throws failure
+                    coEvery { checkSwapStatus("deposit") } throws failure
                 }
 
-            val result = GetSwapStatusUseCase(metadataRepository, swapRepository).invoke(swapMetadata())
+            val result = GetSwapStatusUseCase(metadataRepository, swapRepository).invoke("deposit")
 
             assertFalse(result.isLoading)
             assertEquals(failure, result.error)
@@ -77,15 +82,55 @@ class GetSwapStatusUseCaseTest {
             verify(exactly = 0) { metadataRepository.updateSwap(any(), any(), any(), any(), any(), any()) }
         }
 
-    private fun swapMetadata(
-        address: String = "deposit",
-        from: SimpleSwapAsset = SwapAssetTestFixture.simpleAsset(tokenTicker = "btc", chainTicker = "btc"),
-        to: SimpleSwapAsset = SwapAssetTestFixture.zecSimpleAsset()
-    ): TransactionSwapMetadata =
-        mockk {
-            every { depositAddress } returns address
-            every { origin } returns from
-            every { destination } returns to
+    @Test
+    fun surfacesErrorWhenStoredMetadataDoesNotMatchTheReturnedAssets() =
+        runTest {
+            // Stored origin is ETH but the server returns a BTC origin -> requireMatchingAsset rejects it.
+            val metadata =
+                mockk<TransactionSwapMetadata> {
+                    every { origin } returns SwapAssetTestFixture.simpleAsset(tokenTicker = "eth", chainTicker = "eth")
+                    every { destination } returns SwapAssetTestFixture.zecSimpleAsset()
+                }
+            val metadataRepository =
+                mockk<MetadataRepository>(relaxed = true) {
+                    coEvery { getSwapMetadata("deposit") } returns metadata
+                }
+            val swapRepository =
+                mockk<SwapRepository> {
+                    coEvery { checkSwapStatus("deposit") } returns swapStatusResult()
+                }
+
+            val result = GetSwapStatusUseCase(metadataRepository, swapRepository).invoke("deposit")
+
+            assertFalse(result.isLoading)
+            assertIs<IllegalArgumentException>(result.error)
+            assertNull(result.status)
+            verify(exactly = 0) { metadataRepository.updateSwap(any(), any(), any(), any(), any(), any()) }
+        }
+
+    @Test
+    fun emitsStatusWhenStoredMetadataMatchesTheReturnedAssets() =
+        runTest {
+            val metadata =
+                mockk<TransactionSwapMetadata> {
+                    every { origin } returns SwapAssetTestFixture.simpleAsset(tokenTicker = "btc", chainTicker = "btc")
+                    every { destination } returns SwapAssetTestFixture.zecSimpleAsset()
+                }
+            val metadataRepository =
+                mockk<MetadataRepository>(relaxed = true) {
+                    coEvery { getSwapMetadata("deposit") } returns metadata
+                }
+            val status = swapStatusResult()
+            val swapRepository =
+                mockk<SwapRepository> {
+                    coEvery { checkSwapStatus("deposit") } returns status
+                }
+
+            val result = GetSwapStatusUseCase(metadataRepository, swapRepository).invoke("deposit")
+
+            assertEquals(status, result.status)
+            assertNull(result.error)
+            verify(exactly = 1) { metadataRepository.updateSwap(any(), any(), any(), any(), any(), any()) }
         }
 
     private fun swapStatusResult(

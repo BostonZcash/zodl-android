@@ -65,13 +65,8 @@ interface SwapRepository {
     @Throws(ResponseException::class)
     suspend fun submitDepositTransaction(txId: String, transactionProposal: SwapTransactionProposal)
 
-    @Throws(
-        ResponseException::class,
-        AssetNotFoundException::class,
-        SwapAssetsUnavailableException::class,
-        IllegalArgumentException::class
-    )
-    suspend fun checkSwapStatus(swapMetadata: TransactionSwapMetadata): SwapQuoteStatus
+    @Throws(ResponseException::class, AssetNotFoundException::class, SwapAssetsUnavailableException::class)
+    suspend fun checkSwapStatus(depositAddress: String): SwapQuoteStatus
 
     fun clear()
 
@@ -341,26 +336,11 @@ class SwapRepositoryImpl(
         )
     }
 
-    override suspend fun checkSwapStatus(swapMetadata: TransactionSwapMetadata): SwapQuoteStatus {
-        val result =
-            swapDataSource.checkSwapStatus(
-                depositAddress = swapMetadata.depositAddress,
-                supportedTokens = getSupportedTokensForStatus()
-            )
-        requireMatchingAsset(
-            name = "origin",
-            expectedTokenTicker = swapMetadata.origin.tokenTicker,
-            expectedChainTicker = swapMetadata.origin.chainTicker,
-            actual = result.originAsset
+    override suspend fun checkSwapStatus(depositAddress: String): SwapQuoteStatus =
+        swapDataSource.checkSwapStatus(
+            depositAddress = depositAddress,
+            supportedTokens = getSupportedTokensForStatus()
         )
-        requireMatchingAsset(
-            name = "destination",
-            expectedTokenTicker = swapMetadata.destination.tokenTicker,
-            expectedChainTicker = swapMetadata.destination.chainTicker,
-            actual = result.destinationAsset
-        )
-        return result
-    }
 
     /**
      * Resolves the supported-token list the status lookup needs to map asset ids back to [SwapAsset]s.
