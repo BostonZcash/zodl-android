@@ -193,10 +193,10 @@ class NearSwapDataSource(
     override suspend fun checkSwapStatus(depositAddress: String, supportedTokens: List<SwapAsset>): SwapQuoteStatus {
         val response = this.nearApiProvider.checkSwapStatus(depositAddress)
         val originAsset =
-            supportedTokens.find { it.assetId == response.quoteResponse.quoteRequest.originAsset }
+            findAssetByEchoedId(supportedTokens, response.quoteResponse.quoteRequest.originAsset)
                 ?: throw AssetNotFoundException(response.quoteResponse.quoteRequest.originAsset)
         val destinationAsset =
-            supportedTokens.find { it.assetId == response.quoteResponse.quoteRequest.destinationAsset }
+            findAssetByEchoedId(supportedTokens, response.quoteResponse.quoteRequest.destinationAsset)
                 ?: throw AssetNotFoundException(response.quoteResponse.quoteRequest.destinationAsset)
         log("checkSwapStatus $depositAddress")
         return NearSwapQuoteStatus(
@@ -208,6 +208,15 @@ class NearSwapDataSource(
             refundAddress = getRefundAddress(response.quoteResponse, originAsset),
         )
     }
+
+    // The 1Click API normalises asset IDs for routing (e.g. "nep141:btc.omft.near" →
+    // "1cs_v1:btc:native:coin"). Try an exact match first; fall back to extracting the ticker
+    // from the normalised "1cs_v1:<ticker>:..." format and matching by tokenTicker.
+    private fun findAssetByEchoedId(supportedTokens: List<SwapAsset>, echoedId: String): SwapAsset? =
+        supportedTokens.find { it.assetId == echoedId }
+            ?: echoedId.split(":").getOrNull(1)?.let { ticker ->
+                supportedTokens.find { it.tokenTicker.equals(ticker, ignoreCase = true) }
+            }
 
     private suspend fun getDepositAddress(response: QuoteResponseDto, originAsset: SwapAsset): SwapAddress {
         val address = response.quote.depositAddress
