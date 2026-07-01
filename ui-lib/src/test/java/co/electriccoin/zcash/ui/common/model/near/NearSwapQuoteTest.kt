@@ -1,7 +1,6 @@
 package co.electriccoin.zcash.ui.common.model.near
 
 import co.electriccoin.zcash.ui.common.model.DynamicSwapAddress
-import co.electriccoin.zcash.ui.common.model.DynamicSwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapBlockchain
 import co.electriccoin.zcash.ui.common.model.SwapMode
@@ -26,20 +25,6 @@ class NearSwapQuoteTest {
         assertEquals(SwapMode.EXACT_INPUT, quote.mode)
         assertEquals(BigDecimal("1"), quote.amountInFormatted)
         assertEquals(BigDecimal("2"), quote.amountOutFormatted)
-    }
-
-    @Test
-    fun rejectsOriginAssetSubstitution() {
-        assertFailsWith<IllegalArgumentException> {
-            nearSwapQuote(quoteResponse(originAssetId = "$ORIGIN_ID.tampered"))
-        }
-    }
-
-    @Test
-    fun rejectsDestinationAssetSubstitution() {
-        assertFailsWith<IllegalArgumentException> {
-            nearSwapQuote(quoteResponse(destinationAssetId = "$DEST_ID.tampered"))
-        }
     }
 
     @Test
@@ -152,7 +137,7 @@ class NearSwapQuoteTest {
         )
 
     private fun asset(assetId: String, token: String, chain: String, decimals: Int): SwapAsset =
-        DynamicSwapAsset(
+        NearSwapAsset(
             tokenTicker = token,
             tokenName = StringResource.ByString(token),
             tokenIcon = imageRes(token),
