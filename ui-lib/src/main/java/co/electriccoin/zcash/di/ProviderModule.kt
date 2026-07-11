@@ -107,7 +107,7 @@ val providerModule =
         singleOf(::KtorNearApiProvider) bind NearApiProvider::class
         factoryOf(::HttpClientProviderImpl) bind HttpClientProvider::class
         singleOf(::HttpPirSnapshotResolver) bind PirSnapshotResolver::class
-        factoryOf(::SimpleSwapAssetProviderImpl) bind SimpleSwapAssetProvider::class
+        singleOf(::SimpleSwapAssetProviderImpl) bind SimpleSwapAssetProvider::class
         factoryOf(::SwapAssetProviderImpl) bind SwapAssetProvider::class
         factoryOf(::IsKeepScreenOnDuringRestoreProviderImpl) bind IsKeepScreenOnDuringRestoreProvider::class
         singleOf(::EphemeralAddressStorageProviderImpl) bind EphemeralAddressStorageProvider::class

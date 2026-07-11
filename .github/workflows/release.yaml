@@ -1,9 +1,28 @@
 name: Release
 
+# Normally triggered by `release: published`, which `create-release.yml` emits
+# (it flips the release draft->published with the App token so the event
+# cascades — the default GITHUB_TOKEN cannot trigger downstream workflows).
+#
+# RECOVERY LEVER (workflow_dispatch): a tag-push runs create-release.yml from
+# the TAGGED tree, so a tag cut from a branch that predates the cascade fix
+# (e.g. a long-lived `prerelease/x.y.z` branch that never merged main's
+# workflow updates) runs an OLD create-release.yml that never forces the
+# published event — and this workflow then never fires. That is exactly what
+# left 3.7.0-1986's alt-store publish un-run. When that happens, an operator
+# can publish the stores directly for an existing tag without the
+# create-release re-publish dance:
+#     gh workflow run release.yaml -f tag=3.7.0-1986
 on:
   release:
     types:
       - published  # Runs only when a release is published
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to (re)publish to the stores (e.g. 3.7.0-1986)'
+        required: true
+        type: string
 
 permissions:
   contents: write  # Grant write permissions to GITHUB_TOKEN
@@ -32,6 +51,9 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+          # On `release: published`, github.ref already points at the tag. On a
+          # manual workflow_dispatch recovery run, check out the requested tag.
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
@@ -171,6 +193,9 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+          # See the release job's checkout: target the requested tag on a manual
+          # recovery dispatch, otherwise the published tag.
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Get release tag
         id: release_info
@@ -234,7 +259,7 @@ jobs:
 
           echo "Decrypting config.yaml..."
           gcloud kms decrypt \
-            --key=config \
+            --key=gpg \
             --keyring=gpg \
             --location=global \
             --plaintext-file=/tmp/config.yaml \
@@ -263,40 +288,46 @@ jobs:
             "stores/solana/release-notes-template.yaml" \
             "docs/whatsNew/WHATS_NEW_EN.md"
 
-      - name: Create Solana dApp Store Release
+      # ---------------------------------------------------------------------
+      # Solana dApp Store CLI 0.15.0 -> 1.0.0 migration (2026-06)
+      #
+      # The previous flow used `@solana-mobile/dapp-store-cli@latest` with the
+      # 0.15.x interface: `create release ... -k <keypair> --config config.yaml`
+      # followed by `publish update ... --config config.yaml`. Solana Mobile
+      # shipped dapp-store-cli@1.0.0, a portal-backed CLI that REMOVED
+      # `create release`, `publish update`, `-k`, and `--config`. The legacy
+      # 0.15.0 is now hard-gated server-side and refuses to run, so neither the
+      # old pinned version nor `@latest` works any more.
+      #
+      # The 1.0.0 interface is a single invocation:
+      #   dapp-store --apk-file <apk> --keypair <keypair> --whats-new "<text>"
+      # plus a portal API key supplied via the env var DAPP_STORE_API_KEY
+      # (or `--api-key-stdin`). The release/version metadata that config.yaml
+      # used to carry now lives in the publish.solanamobile.com portal, so the
+      # GCS-backed config.yaml decrypt/re-encrypt scaffolding above is largely
+      # vestigial in the 1.0.0 model. We keep the KMS key fix (--key=gpg) and
+      # the keypair decrypt (still required to sign the on-chain submission)
+      # rather than rip the scaffolding out in this same PR.
+      #
+      # HUMAN PREREQUISITE: the DAPP_STORE_API_KEY repo secret does NOT exist
+      # yet. Generate it at publish.solanamobile.com -> settings -> API keys,
+      # then `gh secret set DAPP_STORE_API_KEY`. Until it exists this job will
+      # fail at this step; `continue-on-error: true` on the job keeps that from
+      # failing the release.
+      # ---------------------------------------------------------------------
+      - name: Publish to Solana dApp Store
         working-directory: stores/solana
+        env:
+          DAPP_STORE_API_KEY: ${{ secrets.DAPP_STORE_API_KEY }}
         run: |
-          echo "Creating release on Solana dApp Store..."
+          echo "Publishing to Solana dApp Store (dapp-store-cli 1.0.0)..."
 
-          npx @solana-mobile/dapp-store-cli@latest create release \
-            -k /tmp/solana-keypair.json \
-            -b $ANDROID_SDK_ROOT/build-tools/35.0.0 \
-            -u https://api.mainnet-beta.solana.com \
-            --config config.yaml
+          npx @solana-mobile/dapp-store-cli@1.0.0 \
+            --apk-file solana.apk \
+            --keypair /tmp/solana-keypair.json \
+            --whats-new "New features and improvements in this release."
 
-          echo "Release created successfully"
-
-      - name: Publish Update to Solana dApp Store
-        working-directory: stores/solana
-        run: |
-          echo "Publishing update to Solana dApp Store..."
-
-          npx @solana-mobile/dapp-store-cli@latest publish update \
-            -k /tmp/solana-keypair.json \
-            -u https://api.mainnet-beta.solana.com \
-            --complies-with-solana-dapp-store-policies \
-            --requestor-is-authorized \
-            --config config.yaml
-
-          echo "Update published successfully"
-
-      - name: Display publish information
-        working-directory: stores/solana
-        run: |
-          echo "Solana dApp Store Publishing Complete"
-          echo "Release Address: $(yq eval '.release.address' config.yaml)"
-          echo "Version: $(yq eval '.release.android_details.version' config.yaml)"
-          echo "Version Code: $(yq eval '.release.android_details.version_code' config.yaml)"
+          echo "Published successfully"
 
       - name: Re-encrypt and upload config.yaml to GCS
         run: |
@@ -308,7 +339,7 @@ jobs:
 
           echo "Re-encrypting config.yaml..."
           gcloud kms encrypt \
-            --key=config \
+            --key=gpg \
             --keyring=gpg \
             --location=global \
             --plaintext-file=stores/solana/config.yaml \
@@ -322,144 +353,52 @@ jobs:
           echo "Config updated in GCS"
           echo "Backup: gs://${{ secrets.SOLANA_GCS_BUCKET }}/backups/encrypted_config.yaml.kms.${TIMESTAMP}"
 
+  # Publishes the FOSS APK to the self-hosted F-Droid repo at foss.zodl.com.
+  #
+  # The repo is served by GitLab Pages (project zodl-inc/fdroid on gitlab.com).
+  # A GitLab CI "pages" job downloads this release's FOSS APK from the GitHub
+  # release, builds + signs the F-Droid index (with the long-lived index key
+  # held as a GitLab CI variable), and publishes via Pages -- which, unlike
+  # GitHub Pages (100 MB/file hard limit), can serve the ~181 MB APK.
+  #
+  # This job's only responsibility is to TRIGGER that GitLab pipeline with the
+  # release tag, so the right APK version gets published. All the AWS Secrets
+  # Manager / keystore / fdroidserver / git-push work now lives in GitLab CI.
+  #
+  # Best-effort: a failed trigger must not fail the release.
   publish_to_fdroid:
     needs: [release]
-    environment: deployment
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write  # Required for OIDC -> AWS
     steps:
-      - name: Get release tag
-        id: release_info
+      - name: Trigger GitLab Pages F-Droid publish
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITLAB_FDROID_TRIGGER_TOKEN: ${{ secrets.GITLAB_FDROID_TRIGGER_TOKEN }}
+          # Project id + target ref live in repo variables so they can be updated
+          # in one place if the GitLab project is recreated or the pipeline moves
+          # to an environment branch (review: noop-sk). Default to the known
+          # values if the vars are unset, so the step still works pre-config.
+          GITLAB_FDROID_PROJECT_ID: ${{ vars.GITLAB_FDROID_PROJECT_ID || '83433564' }}
+          GITLAB_FDROID_REF: ${{ vars.GITLAB_FDROID_REF || 'main' }}
+          # On `release: published` GITHUB_REF_NAME is the tag; on a manual
+          # recovery dispatch it is the workflow's branch (e.g. main), so prefer
+          # the explicit input tag when present.
+          APK_TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          TAG="${GITHUB_REF_NAME}"
-          VERSION_NAME=$(echo "$TAG" | sed 's/^v//' | cut -d'-' -f1)
-          VERSION_CODE=$(echo "$TAG" | cut -d'-' -f2)
-
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
-          echo "version_name=${VERSION_NAME}" >> $GITHUB_OUTPUT
-          echo "version_code=${VERSION_CODE}" >> $GITHUB_OUTPUT
-
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
-        with:
-          role-to-assume: ${{ secrets.AWS_RELEASE_ROLE_ARN }}
-          aws-region: us-east-1
-
-      - name: Load F-Droid index keystore + SSH deploy key from Secrets Manager
-        id: secrets
-        run: |
-          KEYSTORE_JSON=$(aws secretsmanager get-secret-value \
-            --secret-id /infra/zodl-android/fdroid_index_keystore \
-            --query SecretString --output text)
-          echo "$KEYSTORE_JSON" | jq -r '.keystore_b64' | base64 -d > /tmp/fdroid-index.jks
-
-          # Read into shell vars first, register the mask, then write to
-          # GITHUB_OUTPUT. Reversing this order risks the runner flushing
-          # the output line to the log before the mask command takes effect.
-          KEYSTORE_PASS=$(echo "$KEYSTORE_JSON" | jq -r '.keystore_password')
-          KEY_ALIAS=$(echo "$KEYSTORE_JSON" | jq -r '.key_alias')
-          KEY_PASS=$(echo "$KEYSTORE_JSON" | jq -r '.key_password')
-          echo "::add-mask::${KEYSTORE_PASS}"
-          echo "::add-mask::${KEY_PASS}"
-
-          echo "keystore_password=${KEYSTORE_PASS}" >> "$GITHUB_OUTPUT"
-          echo "key_alias=${KEY_ALIAS}"             >> "$GITHUB_OUTPUT"
-          echo "key_password=${KEY_PASS}"           >> "$GITHUB_OUTPUT"
-
-          mkdir -p ~/.ssh
-          aws secretsmanager get-secret-value \
-            --secret-id /infra/zodl-android/fdroid_deploy_ssh_key \
-            --query SecretString --output text > ~/.ssh/id_fdroid
-          chmod 600 ~/.ssh/id_fdroid
-          ssh-keyscan -t ed25519,rsa github.com >> ~/.ssh/known_hosts
-          cat > ~/.ssh/config <<'EOF'
-          Host github.com-fdroid
-            HostName github.com
-            User git
-            IdentityFile ~/.ssh/id_fdroid
-            IdentitiesOnly yes
-          EOF
-          chmod 600 ~/.ssh/config
-
-      - name: Install fdroidserver + deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            fdroidserver openjdk-21-jdk-headless apksigner git python3
-          fdroid --version
-
-      - name: Clone zodl-inc/fdroid (SSH)
-        run: |
-          git config --global user.name  "zodl-inc-bot"
-          git config --global user.email "sysadmin@zodl.com"
-          git clone --depth 1 \
-            git@github.com-fdroid:zodl-inc/fdroid.git fdroid-repo
-          mkdir -p fdroid-repo/fdroid/repo fdroid-repo/fdroid/archive
-
-      - name: Download FOSS APK from GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.release_info.outputs.tag }}
-        run: |
-          gh release download "$TAG" \
-            --repo zodl-inc/zodl-android \
-            -p "app-zcashmainnet-foss-release-full-externallibs.apk" \
-            -D fdroid-repo/fdroid/repo/
-
-      - name: Initialize fdroid config
-        working-directory: fdroid-repo/fdroid
-        env:
-          KEYSTORE_PASSWORD: ${{ steps.secrets.outputs.keystore_password }}
-          KEY_ALIAS: ${{ steps.secrets.outputs.key_alias }}
-          KEY_PASSWORD: ${{ steps.secrets.outputs.key_password }}
-        run: |
-          # fdroid init expects config.yml at repo root; write one pointing at
-          # the shared keystore that lives in /tmp.
-          cat > config.yml <<EOF
-          repo_url: https://foss.zodl.com/fdroid/repo
-          repo_name: Zodl F-Droid Repo
-          repo_icon: icon.png
-          repo_description: >-
-            Official self-hosted F-Droid repository for the Zodl Zcash Wallet.
-            APKs are built by zodl-inc/zodl-android CI and signed with the
-            production upload key (same as Google Play).
-          archive_url: https://foss.zodl.com/fdroid/archive
-          archive_name: Zodl F-Droid Archive
-          archive_description: Archive of older Zodl wallet builds.
-          archive_older: 3
-          keystore: /tmp/fdroid-index.jks
-          repo_keyalias: ${KEY_ALIAS}
-          keystorepass: ${KEYSTORE_PASSWORD}
-          keypass: ${KEY_PASSWORD}
-          EOF
-
-      - name: Run fdroid update
-        working-directory: fdroid-repo/fdroid
-        run: |
-          fdroid update --create-metadata --pretty --verbose
-          # config.yml contains plaintext keystore + key passwords.
-          # Use shred to match how the other key material in this job is
-          # disposed of (JKS, SSH deploy key) and to reduce recoverability.
-          shred -u config.yml
-
-      - name: Commit + push
-        working-directory: fdroid-repo
-        env:
-          TAG: ${{ steps.release_info.outputs.tag }}
-        run: |
-          git add fdroid/repo fdroid/archive fdroid/metadata || true
-          if git diff --cached --quiet; then
-            echo "No changes to publish."
-            exit 0
+          echo "Triggering GitLab F-Droid pipeline for ${APK_TAG}"
+          # -m 30 bounds the wait: without it, an unreachable GitLab would block
+          # until the runner's job-level timeout (~6h) fires (review: noop-sk).
+          HTTP_CODE=$(curl -s -m 30 -o /tmp/trigger.json -w '%{http_code}' \
+            -X POST "https://gitlab.com/api/v4/projects/${GITLAB_FDROID_PROJECT_ID}/trigger/pipeline" \
+            -F token="${GITLAB_FDROID_TRIGGER_TOKEN}" \
+            -F "ref=${GITLAB_FDROID_REF}" \
+            -F "variables[APK_TAG]=${APK_TAG}")
+          cat /tmp/trigger.json
+          echo
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "GitLab pipeline triggered: $(jq -r '.web_url // empty' /tmp/trigger.json)"
+          else
+            # Publishing is best-effort -- never fail the release on a trigger error.
+            echo "::warning::GitLab F-Droid trigger returned HTTP ${HTTP_CODE}; F-Droid publish skipped. Re-run manually if needed."
           fi
-          git commit -m "Publish ${TAG}"
-          git push origin HEAD:main
-
-      - name: Cleanup
-        if: always()
-        run: |
-          shred -u /tmp/fdroid-index.jks ~/.ssh/id_fdroid 2>/dev/null || true

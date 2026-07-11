@@ -35,6 +35,7 @@ import co.electriccoin.zcash.ui.common.usecase.GetActivitiesUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetAllVotingRoundsUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetAutomaticEndpointUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetConfigurationUseCase
+import co.electriccoin.zcash.ui.common.usecase.GetCuratedSwapAssetsUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetExchangeRateUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetFilteredActivitiesUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetFlexaStatusUseCase
@@ -49,7 +50,6 @@ import co.electriccoin.zcash.ui.common.usecase.GetSelectedSwapAssetUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetSelectedWalletAccountUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetSlippageUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetSupportUseCase
-import co.electriccoin.zcash.ui.common.usecase.GetSwapAssetsUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetSwapStatusUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetTotalSpendableBalanceUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetTransactionDetailByIdUseCase
@@ -272,7 +272,7 @@ val useCaseModule =
         factoryOf(::CancelSwapUseCase)
         factoryOf(::GetSelectedSwapAssetUseCase)
         factoryOf(::SelectSwapAssetUseCase)
-        factoryOf(::GetSwapAssetsUseCase)
+        factoryOf(::GetCuratedSwapAssetsUseCase)
         factoryOf(::EnsureSwapAssetsLoadedUseCase)
         factoryOf(::FilterSwapAssetsUseCase)
         factoryOf(::FilterSwapBlockchainsUseCase)
