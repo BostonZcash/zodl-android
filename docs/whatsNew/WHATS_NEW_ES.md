@@ -12,6 +12,11 @@ directly impact users rather than highlighting other key architectural updates.*
 
 ## [Unreleased]
 
+## [3.7.2 (1996)] - 2026-07-11
+
+### Cambiado:
+- Refinamos nuestra lista de criptoactivos compatibles con Swap/Pago, centrándonos en los que los usuarios realmente utilizan.
+
 ## [3.7.1 (1992)] - 2026-06-29
 
 ### Corregido:
