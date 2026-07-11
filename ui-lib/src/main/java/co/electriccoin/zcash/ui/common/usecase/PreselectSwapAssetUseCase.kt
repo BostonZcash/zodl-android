@@ -65,8 +65,8 @@ class PreselectSwapAssetUseCase(
             .firstOrNull()
             ?.takeIf { it !is ZecSimpleSwapAsset }
             ?.takeIf { asset ->
-                simpleSwapAssetProvider
-                    .getCuratedSwapAssets()
-                    .any { it.isSame(asset.tokenTicker, asset.chainTicker) }
+                // Single curation path: getAssetFromHistory() only runs once curated assets are loaded
+                // (observe() guards on data.data != null), so this synchronous snapshot is populated.
+                getCuratedSwapAssets().data?.any { it.isSame(asset.tokenTicker, asset.chainTicker) } == true
             }
 }

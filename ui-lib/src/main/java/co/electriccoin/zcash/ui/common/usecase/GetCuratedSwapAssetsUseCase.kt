@@ -10,8 +10,14 @@ class GetCuratedSwapAssetsUseCase(
     private val swapRepository: SwapRepository,
     private val simpleSwapAssetProvider: SimpleSwapAssetProvider,
 ) {
+    /**
+     * Synchronous snapshot of the currently loaded assets, curated. Returns [SwapAssetsData] with
+     * `data == null` when assets haven't loaded yet — callers (e.g. `SwapVM.preselectChain`) treat
+     * that as "nothing selectable". Prefer [observe] for reactive UI; use this only for one-off reads.
+     */
     operator fun invoke() = curate(swapRepository.assets.value)
 
+    /** Reactive curated stream. */
     fun observe() = swapRepository.assets.map(::curate)
 
     private fun curate(data: SwapAssetsData): SwapAssetsData {

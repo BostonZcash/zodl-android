@@ -6,16 +6,17 @@ import kotlinx.coroutines.flow.map
 
 class GetABSwapContactsUseCase(
     private val addressBookRepository: AddressBookRepository,
-    private val simpleSwapAssetProvider: SimpleSwapAssetProvider,
+    simpleSwapAssetProvider: SimpleSwapAssetProvider,
 ) {
+    private val curatedChainTickers =
+        simpleSwapAssetProvider
+            .getCuratedSwapAssets()
+            .map { it.chainTicker.lowercase() }
+            .toSet()
+
     fun observe() =
         addressBookRepository.contacts
             .map { contacts ->
-                val curatedChainTickers =
-                    simpleSwapAssetProvider
-                        .getCuratedSwapAssets()
-                        .map { it.chainTicker.lowercase() }
-                        .toSet()
                 contacts?.filter { contact ->
                     contact.blockchain?.chainTicker?.lowercase() in curatedChainTickers
                 }
