@@ -12,7 +12,7 @@ directly impact users rather than highlighting other key architectural updates.*
 
 ## [Unreleased]
 
-## [3.7.2 (2007)] - 2026-07-11
+## [3.7.2 (2009)] - 2026-07-11
 
 ### Changed:
 - We refined our list of supported Swap/Pay assets, focusing on the ones users actually use.
