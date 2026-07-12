@@ -17,9 +17,9 @@ import co.electriccoin.zcash.ui.common.repository.EnhancedABContact
 import co.electriccoin.zcash.ui.common.repository.SwapAssetsData
 import co.electriccoin.zcash.ui.common.repository.SwapRepository
 import co.electriccoin.zcash.ui.common.usecase.CancelSwapUseCase
+import co.electriccoin.zcash.ui.common.usecase.GetCuratedSwapAssetsUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetPreselectedSwapAssetUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetSelectedWalletAccountUseCase
-import co.electriccoin.zcash.ui.common.usecase.GetSwapAssetsUseCase
 import co.electriccoin.zcash.ui.common.usecase.NavigateToScanGenericAddressUseCase
 import co.electriccoin.zcash.ui.common.usecase.NavigateToSelectABSwapRecipientUseCase
 import co.electriccoin.zcash.ui.common.usecase.NavigateToSlippageUseCase
@@ -49,7 +49,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("TooManyFunctions")
 internal class SwapVM(
-    getSwapAssetsUseCase: GetSwapAssetsUseCase,
+    private val getCuratedSwapAssetsUseCase: GetCuratedSwapAssetsUseCase,
     getSelectedWalletAccount: GetSelectedWalletAccountUseCase,
     private val getPreselectedSwapAsset: GetPreselectedSwapAssetUseCase,
     private val swapRepository: SwapRepository,
@@ -117,7 +117,7 @@ internal class SwapVM(
     val state =
         combine(
             internalState,
-            getSwapAssetsUseCase.observe(),
+            getCuratedSwapAssetsUseCase.observe(),
             getSelectedWalletAccount.observe(),
         ) { state, swapAssets, account ->
             createState(state.copy(swapAssets = swapAssets, account = account))
@@ -203,7 +203,8 @@ internal class SwapVM(
         // Only proceed if the chain ticker changed.
         if (selectedChainTicker != null && !selectedChainTicker.equals(currentChainTicker, ignoreCase = true)) {
             val matchingAssets =
-                swapRepository.assets.value.data
+                getCuratedSwapAssetsUseCase()
+                    .data
                     ?.filter { asset -> asset.chainTicker.equals(selectedChainTicker, ignoreCase = true) }
                     .orEmpty()
             internalState.update { it.copy(swapAsset = matchingAssets.singleOrNull()) }

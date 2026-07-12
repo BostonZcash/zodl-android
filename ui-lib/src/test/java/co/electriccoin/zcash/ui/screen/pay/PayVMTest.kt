@@ -9,9 +9,9 @@ import co.electriccoin.zcash.ui.common.repository.EnhancedABContact
 import co.electriccoin.zcash.ui.common.repository.SwapAssetsData
 import co.electriccoin.zcash.ui.common.repository.SwapRepository
 import co.electriccoin.zcash.ui.common.usecase.CancelSwapUseCase
+import co.electriccoin.zcash.ui.common.usecase.GetCuratedSwapAssetsUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetPreselectedSwapAssetUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetSelectedWalletAccountUseCase
-import co.electriccoin.zcash.ui.common.usecase.GetSwapAssetsUseCase
 import co.electriccoin.zcash.ui.common.usecase.IsABContactHintVisibleUseCase
 import co.electriccoin.zcash.ui.common.usecase.NavigateToScanGenericAddressUseCase
 import co.electriccoin.zcash.ui.common.usecase.NavigateToSelectABSwapRecipientUseCase
@@ -329,7 +329,7 @@ class PayVMTest {
         val navigateToSwapQuoteIfAvailable = mockk<NavigateToSwapQuoteIfAvailableUseCase>(relaxed = true)
         val navigationRouter = mockk<NavigationRouter>(relaxed = true)
         val getSwapAssets =
-            mockk<GetSwapAssetsUseCase> { every { observe() } returns MutableStateFlow(assets) }
+            mockk<GetCuratedSwapAssetsUseCase> { every { observe() } returns MutableStateFlow(assets) }
         val getSelectedWalletAccount =
             mockk<GetSelectedWalletAccountUseCase> {
                 every { observe() } returns MutableStateFlow<WalletAccount?>(null)
@@ -370,7 +370,7 @@ class PayVMTest {
 
         harness.vm =
             PayVM(
-                getSwapAssetsUseCase = getSwapAssets,
+                getCuratedSwapAssetsUseCase = getSwapAssets,
                 getSelectedWalletAccount = getSelectedWalletAccount,
                 swapRepository = mockk<SwapRepository>(relaxed = true),
                 cancelSwap = cancelSwap,

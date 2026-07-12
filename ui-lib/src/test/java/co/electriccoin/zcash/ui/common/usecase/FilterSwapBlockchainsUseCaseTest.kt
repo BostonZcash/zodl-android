@@ -1,7 +1,7 @@
 package co.electriccoin.zcash.ui.common.usecase
 
 import co.electriccoin.zcash.ui.common.model.SwapAssetTestFixture
-import co.electriccoin.zcash.ui.common.provider.BlockchainProvider
+import co.electriccoin.zcash.ui.common.provider.SimpleSwapAssetProvider
 import co.electriccoin.zcash.ui.common.repository.SwapAssetsData
 import io.mockk.every
 import io.mockk.mockk
@@ -23,8 +23,8 @@ import kotlin.test.assertTrue
 @Config(sdk = [34])
 class FilterSwapBlockchainsUseCaseTest {
     private val context = RuntimeEnvironment.getApplication()
-    private val blockchainProvider = mockk<BlockchainProvider>(relaxed = true)
-    private val useCase = FilterSwapBlockchainsUseCase(context, blockchainProvider)
+    private val simpleSwapAssetProvider = mockk<SimpleSwapAssetProvider>(relaxed = true)
+    private val useCase = FilterSwapBlockchainsUseCase(context, simpleSwapAssetProvider)
 
     @Test
     fun mapsAssetsToDistinctBlockchainsSortedByTicker() {
@@ -61,9 +61,12 @@ class FilterSwapBlockchainsUseCaseTest {
     }
 
     @Test
-    fun fallsBackToHardcodedBlockchainsWhenNoData() {
-        every { blockchainProvider.getHardcodedBlockchains() } returns
-            listOf(SwapAssetTestFixture.blockchain("sol"), SwapAssetTestFixture.blockchain("btc"))
+    fun fallsBackToCuratedBlockchainsWhenNoData() {
+        every { simpleSwapAssetProvider.getCuratedSwapAssets() } returns
+            listOf(
+                SwapAssetTestFixture.simpleAsset(chainTicker = "sol"),
+                SwapAssetTestFixture.simpleAsset(chainTicker = "btc")
+            )
 
         val result = useCase(SwapAssetsData(data = null), text = "")
 

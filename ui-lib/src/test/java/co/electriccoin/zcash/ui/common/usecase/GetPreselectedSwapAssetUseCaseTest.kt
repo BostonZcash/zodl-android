@@ -86,6 +86,26 @@ class GetPreselectedSwapAssetUseCaseTest {
         }
 
     @Test
+    fun fallsBackToHardcodedBtcWhenHistoryHeadIsNonCurated() =
+        runTest {
+            // MOB-1473: a last-used asset that is no longer curated must not be preselected; it falls
+            // through to the curated BTC default instead of surfacing a now-unsupported asset.
+            val useCase =
+                useCase(
+                    assets =
+                        SwapAssetTestFixture.assetsData(
+                            data = listOf(SwapAssetTestFixture.asset(tokenTicker = "btc", chainTicker = "btc"))
+                        ),
+                    history = setOf(SwapAssetTestFixture.simpleAsset(tokenTicker = "doge", chainTicker = "doge"))
+                )
+
+            val result = useCase()
+
+            assertEquals("btc", result.tokenTicker)
+            assertEquals("btc", result.chainTicker)
+        }
+
+    @Test
     fun suspendsWhileResolvedAssetAbsentFromData() =
         runTest(UnconfinedTestDispatcher()) {
             val useCase =
@@ -130,7 +150,13 @@ class GetPreselectedSwapAssetUseCaseTest {
     private fun useCase(
         assets: SwapAssetsData = SwapAssetTestFixture.assetsData(),
         assetsFlow: MutableStateFlow<SwapAssetsData> = MutableStateFlow(assets),
-        history: Set<SimpleSwapAsset> = emptySet()
+        history: Set<SimpleSwapAsset> = emptySet(),
+        curated: List<SimpleSwapAsset> =
+            listOf(
+                SwapAssetTestFixture.simpleAsset(tokenTicker = "btc", chainTicker = "btc"),
+                SwapAssetTestFixture.simpleAsset(tokenTicker = "eth", chainTicker = "eth"),
+                SwapAssetTestFixture.simpleAsset(tokenTicker = "sol", chainTicker = "sol"),
+            )
     ): GetPreselectedSwapAssetUseCase {
         val swapRepository = mockk<SwapRepository> { every { this@mockk.assets } returns assetsFlow }
         val metadataRepository =
@@ -140,6 +166,7 @@ class GetPreselectedSwapAssetUseCaseTest {
                 every { get(any(), any()) } answers {
                     SwapAssetTestFixture.simpleAsset(tokenTicker = firstArg(), chainTicker = secondArg())
                 }
+                every { getCuratedSwapAssets() } returns curated
             }
         return GetPreselectedSwapAssetUseCase(swapRepository, metadataRepository, simpleSwapAssetProvider)
     }

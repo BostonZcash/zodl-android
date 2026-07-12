@@ -12,6 +12,28 @@ directly impact users rather than highlighting other key architectural updates.*
 
 ## [Unreleased]
 
+## [3.7.2 (2009)] - 2026-07-11
+
+### Cambiado:
+- Refinamos nuestra lista de criptoactivos compatibles con Swap/Pago, centrándonos en los que los usuarios realmente utilizan.
+
+## [3.7.1 (1992)] - 2026-06-29
+
+### Corregido:
+- Solucionamos un problema que afectaba a los swaps y pagos de BTC.
+
+## [3.7.0 (1986)] - 2026-06-23
+
+### Añadido:
+- Cuando la selección de servidor está en Automático, ahora transmitimos tus transacciones a través de varios servidores para un envío más confiable. Puedes cambiarlo en Configuración avanzada.
+
+### Cambiado:
+- Realizamos varias mejoras de seguridad y privacidad.
+
+### Corregido:
+- Corregimos un problema con la desconexión de una billetera de hardware Keystone.
+- Corregimos varios problemas con la visualización del estado de las transacciones.
+
 ## [3.6.0 (1914)] - 2026-06-16
 
 ### Añadido:

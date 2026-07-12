@@ -3,6 +3,7 @@ package co.electriccoin.zcash.ui.common.usecase
 import co.electriccoin.zcash.ui.common.model.SimpleSwapAsset
 import co.electriccoin.zcash.ui.common.model.SwapAsset
 import co.electriccoin.zcash.ui.common.model.ZecSimpleSwapAsset
+import co.electriccoin.zcash.ui.common.model.isSame
 import co.electriccoin.zcash.ui.common.provider.SimpleSwapAssetProvider
 import co.electriccoin.zcash.ui.common.repository.MetadataRepository
 import co.electriccoin.zcash.ui.common.repository.SwapRepository
@@ -43,4 +44,9 @@ class GetPreselectedSwapAssetUseCase(
             .first()
             .firstOrNull()
             ?.takeIf { it !is ZecSimpleSwapAsset }
+            ?.takeIf { asset ->
+                // MOB-1473: never preselect a now-non-curated last-used asset; fall back to the curated
+                // default (BTC). `SimpleSwapAssetProvider.getCuratedSwapAssets()` is the curation source of truth.
+                simpleSwapAssetProvider.getCuratedSwapAssets().any { it.isSame(asset.tokenTicker, asset.chainTicker) }
+            }
 }
