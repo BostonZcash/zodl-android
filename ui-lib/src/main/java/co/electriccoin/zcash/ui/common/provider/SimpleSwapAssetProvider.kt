@@ -49,6 +49,7 @@ class SimpleSwapAssetProviderImpl(
             "DASH" to "dash",
             "BCH" to "bch",
             "ZEC" to "sol",
+            "ZEC" to "near",
         )
 
     // Built once: the curated set is static, but getCuratedSwapAssets() is called on every
