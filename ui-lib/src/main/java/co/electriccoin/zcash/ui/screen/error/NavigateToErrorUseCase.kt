@@ -6,6 +6,7 @@ import co.electriccoin.zcash.ui.NavigationRouter
 import co.electriccoin.zcash.ui.common.model.SubmitResult
 import co.electriccoin.zcash.ui.common.model.SynchronizerError
 import co.electriccoin.zcash.ui.common.repository.HomeMessageData
+import co.electriccoin.zcash.ui.common.repository.KeystoneFirmwareBelowMinimumException
 import co.electriccoin.zcash.ui.design.util.getCausesAsSequence
 
 class NavigateToErrorUseCase(
@@ -21,6 +22,7 @@ class NavigateToErrorUseCase(
             is ErrorArgs.General -> navigationRouter.navigate(ErrorDialog)
             is ErrorArgs.ShieldingGeneralError -> navigationRouter.navigate(ErrorDialog)
             is ErrorArgs.SynchronizerTorInitError -> navigationRouter.navigate(ErrorDialog)
+            is ErrorArgs.KeystoneFirmwareUpdateRequired -> navigationRouter.navigate(ErrorBottomSheet)
         }
     }
 
@@ -96,4 +98,13 @@ sealed interface ErrorArgs {
     ) : ErrorArgs
 
     data object SynchronizerTorInitError : ErrorArgs
+
+    /**
+     * The scanned Keystone-signed PCZT came from firmware below the minimum supported version
+     * (MOB-1510). The exception's `detected` is `null` when the firmware is too old to stamp its
+     * version at all.
+     */
+    data class KeystoneFirmwareUpdateRequired(
+        val exception: KeystoneFirmwareBelowMinimumException
+    ) : ErrorArgs
 }

@@ -13,8 +13,11 @@ import co.electriccoin.zcash.ui.common.datasource.TexUnsupportedOnKSException
 import co.electriccoin.zcash.ui.common.datasource.TransactionProposal
 import co.electriccoin.zcash.ui.common.datasource.TransactionProposalNotCreatedException
 import co.electriccoin.zcash.ui.common.datasource.Zip321TransactionProposal
+import co.electriccoin.zcash.ui.common.model.KeystoneFirmwarePolicy
+import co.electriccoin.zcash.ui.common.model.KeystoneFirmwareVersion
 import co.electriccoin.zcash.ui.common.model.SubmitResult
 import co.electriccoin.zcash.ui.common.model.SwapQuote
+import co.electriccoin.zcash.ui.common.model.readKeystoneFwVersion
 import co.electriccoin.zcash.ui.common.provider.KeystoneSDKException
 import co.electriccoin.zcash.ui.common.provider.KeystoneSDKProvider
 import com.sparrowwallet.hummingbird.UR
@@ -89,6 +92,18 @@ interface KeystoneProposalRepository {
 }
 
 class ParsePCZTException : Exception()
+
+/**
+ * The scanned signed PCZT came from Keystone firmware below
+ * [KeystoneFirmwareVersion.MINIMUM_SUPPORTED]. [detected] is `null` when the firmware is too old
+ * to stamp its version at all.
+ */
+class KeystoneFirmwareBelowMinimumException(
+    val detected: KeystoneFirmwareVersion?
+) : Exception(
+        "Keystone firmware ${detected ?: "unstamped"} is below minimum supported " +
+            "${KeystoneFirmwareVersion.MINIMUM_SUPPORTED}"
+    )
 
 sealed interface SubmitProposalState {
     data object Submitting : SubmitProposalState
@@ -203,11 +218,27 @@ class KeystoneProposalRepositoryImpl(
 
     override suspend fun parsePCZT(ur: UR) =
         withContext(Dispatchers.IO) {
-            try {
-                pcztWithSignatures = Pczt(keystoneSDKProvider.parsePczt(ur))
-            } catch (_: Exception) {
-                throw ParsePCZTException()
+            val parsed =
+                try {
+                    keystoneSDKProvider.parsePczt(ur)
+                } catch (_: Exception) {
+                    throw ParsePCZTException()
+                }
+
+            // MOB-1510: firmware >= 2.4.6 stamps its version into the signed PCZT's proprietary
+            // fields; refuse signatures from firmware below the minimum (or too old to stamp at
+            // all) before they can reach submission.
+            val detected = parsed.readKeystoneFwVersion()
+            val outcome = KeystoneFirmwarePolicy.evaluate(detected, KeystoneFirmwareVersion.MINIMUM_SUPPORTED)
+            Twig.info {
+                "Keystone firmware on signed PCZT: ${detected ?: "unstamped"} " +
+                    "(required ${KeystoneFirmwareVersion.MINIMUM_SUPPORTED}) -> $outcome"
             }
+            if (outcome != KeystoneFirmwarePolicy.Outcome.OK) {
+                throw KeystoneFirmwareBelowMinimumException(detected)
+            }
+
+            pcztWithSignatures = Pczt(parsed)
         }
 
     @Suppress("UseCheckOrError", "ThrowingExceptionsWithoutMessageOrCause", "TooGenericExceptionCaught")

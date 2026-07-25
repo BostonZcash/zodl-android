@@ -9,6 +9,11 @@
         later or report this issue if the problem persists.\n\n%s</string>
     <string name="error_shielding_message_grpc">An error happened during the last shielding transaction. We will try to resubmit the transaction later. If it fails, you may need to repeat the shielding attempt at a later time.</string>
     
+    <string name="error_keystone_firmware_title">Keystone Firmware Update Required</string>
+    <string name="error_keystone_firmware_message">Your Keystone’s firmware (%1$s) is below the minimum supported version (%2$s). Update your device’s firmware, then try again.</string>
+    <string name="error_keystone_firmware_message_legacy">Your Keystone’s firmware is too old to report its version and is below the minimum supported version (%1$s). Update your device’s firmware, then try again.</string>
+    <string name="error_keystone_firmware_close">Close</string>
+
     <string name="error_tor_title">Disable Tor?</string>
     <string name="error_tor_message">Tor connection issues detected. To improve performance, try disabling Tor. This will stop exchange rate updates. You can re-enable it later in Advanced Settings.</string>
     <string name="error_tor_negative">Disable</string>
