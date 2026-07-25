@@ -115,8 +115,7 @@ private fun BalanceCard(
                 .background(
                     color = ZashiColors.Surfaces.bgPrimary,
                     shape = RoundedCornerShape(16.dp)
-                )
-                .padding(horizontal = 16.dp, vertical = 12.dp)
+                ).padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Text(
             text = state.title.getValue(),
@@ -172,7 +171,9 @@ private fun Preview() =
                             BalanceBreakdownItemState(stringRes("Transparent"), Zatoshi(14200000), stringRes("$68.82")),
                             BalanceBreakdownItemState(stringRes("Ironwood"), Zatoshi(406800000), stringRes("$1,971.64")),
                         ),
-                    positive = co.electriccoin.zcash.ui.design.component.ButtonState(stringRes("Got it")),
+                    positive =
+                        co.electriccoin.zcash.ui.design.component
+                            .ButtonState(stringRes("Got it")),
                     onBack = {},
                 )
         )
@@ -201,7 +202,9 @@ private fun PreviewNoFiat() =
                             BalanceBreakdownItemState(stringRes("Transparent"), Zatoshi(14200000), null),
                             BalanceBreakdownItemState(stringRes("Ironwood"), Zatoshi(406800000), null),
                         ),
-                    positive = co.electriccoin.zcash.ui.design.component.ButtonState(stringRes("Got it")),
+                    positive =
+                        co.electriccoin.zcash.ui.design.component
+                            .ButtonState(stringRes("Got it")),
                     onBack = {},
                 )
         )
