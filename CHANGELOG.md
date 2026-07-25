@@ -6,6 +6,11 @@ and this application adheres to [Semantic Versioning](https://semver.org/spec/v2
 
 ## [Unreleased]
 
+## [3.8.0 (2018)] - 2026-07-25
+
+### Added:
+- We added support for Zcash's Ironwood network upgrade (NU6.3), keeping your wallet fully compatible with the latest network changes. Support for moving funds to the new Ironwood pool will arrive in a future update.
+
 ## [3.7.2 (2009)] - 2026-07-11
 
 ### Changed:

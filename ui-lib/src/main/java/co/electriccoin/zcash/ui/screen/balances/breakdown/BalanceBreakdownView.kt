@@ -168,8 +168,16 @@ private fun Preview() =
                         listOf(
                             BalanceBreakdownItemState(stringRes("Orchard"), Zatoshi(310000000), stringRes("$1,502.48")),
                             BalanceBreakdownItemState(stringRes("Sapling"), Zatoshi(281300000), stringRes("$1,363.38")),
-                            BalanceBreakdownItemState(stringRes("Transparent"), Zatoshi(14200000), stringRes("$68.82")),
-                            BalanceBreakdownItemState(stringRes("Ironwood"), Zatoshi(406800000), stringRes("$1,971.64")),
+                            BalanceBreakdownItemState(
+                                stringRes("Transparent"),
+                                Zatoshi(14200000),
+                                stringRes("$68.82")
+                            ),
+                            BalanceBreakdownItemState(
+                                stringRes("Ironwood"),
+                                Zatoshi(406800000),
+                                stringRes("$1,971.64")
+                            ),
                         ),
                     positive =
                         co.electriccoin.zcash.ui.design.component

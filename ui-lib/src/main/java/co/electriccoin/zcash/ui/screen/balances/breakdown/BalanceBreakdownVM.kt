@@ -79,8 +79,8 @@ class BalanceBreakdownVM(
     )
 
     private fun fiatOf(amount: Zatoshi, exchangeRate: ExchangeRateState): StringResource? {
-        val data = exchangeRate as? ExchangeRateState.Data ?: return null
-        val conversion = data.currencyConversion ?: return null
+        val data = exchangeRate as? ExchangeRateState.Data
+        val conversion = data?.currencyConversion ?: return null
         return stringResByDynamicCurrencyNumber(
             amount =
                 amount
