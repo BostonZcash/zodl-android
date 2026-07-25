@@ -294,7 +294,8 @@ class AccountDataSourceImpl(
         val balanceFlow =
             synchronizer.walletBalances
                 .map {
-                    it?.get(sdkAccount.accountUuid)
+                    it
+                        ?.get(sdkAccount.accountUuid)
                         ?.let { balance -> balance.orchard + balance.ironwood }
                         ?: createEmptyWalletBalance()
                 }
