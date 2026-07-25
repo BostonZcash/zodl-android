@@ -6,6 +6,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import co.electriccoin.zcash.ui.common.usecase.TrackVotingSharesUseCase
 import co.electriccoin.zcash.ui.common.usecase.VotingShareTrackingResult
+import co.electriccoin.zcash.ui.screen.more.VOTING_ENABLED
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -18,6 +19,7 @@ class VotingShareTrackingWorker(
     private val trackVotingShares: TrackVotingSharesUseCase by inject()
 
     override suspend fun doWork(): Result {
+        if (!VOTING_ENABLED) return Result.success()
         val roundId =
             inputData.getString(VotingShareTrackingScheduler.INPUT_ROUND_ID)
                 ?: return Result.failure()
