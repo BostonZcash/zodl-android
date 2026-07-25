@@ -1,6 +1,7 @@
 package co.electriccoin.zcash.ui.screen.balances
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,6 +42,10 @@ fun BalanceWidget(state: BalanceWidgetState, modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         BalanceWidgetHeader(
+            modifier =
+                state.onBalanceClick
+                    ?.let { onClick -> Modifier.clickable(onClick = onClick) }
+                    ?: Modifier,
             zatoshi = state.totalBalance,
             showDust = state.showDust
         )

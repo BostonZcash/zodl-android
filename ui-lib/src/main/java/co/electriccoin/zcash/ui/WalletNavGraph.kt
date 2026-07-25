@@ -24,6 +24,8 @@ import co.electriccoin.zcash.ui.screen.advancedsettings.debug.db.DebugDBArgs
 import co.electriccoin.zcash.ui.screen.advancedsettings.debug.db.DebugDBScreen
 import co.electriccoin.zcash.ui.screen.advancedsettings.debug.text.DebugTextArgs
 import co.electriccoin.zcash.ui.screen.advancedsettings.debug.text.DebugTextScreen
+import co.electriccoin.zcash.ui.screen.balances.breakdown.BalanceBreakdownArgs
+import co.electriccoin.zcash.ui.screen.balances.breakdown.BalanceBreakdownScreen
 import co.electriccoin.zcash.ui.screen.balances.spendable.SpendableBalanceArgs
 import co.electriccoin.zcash.ui.screen.balances.spendable.SpendableBalanceScreen
 import co.electriccoin.zcash.ui.screen.chooseserver.ChooseServerArgs
@@ -305,6 +307,7 @@ fun NavGraphBuilder.walletNavGraph(
         dialogComposable<ExchangeRateUnavailableArgs> { ExchangeRateUnavailableScreen() }
         dialogComposable<SyncErrorArgs> { SyncErrorScreen() }
         dialogComposable<SpendableBalanceArgs> { SpendableBalanceScreen() }
+        dialogComposable<BalanceBreakdownArgs> { BalanceBreakdownScreen() }
         composable<CrashReportOptIn> { AndroidCrashReportOptIn() }
         composable<ThirdPartyScan> { AndroidThirdPartyScan() }
         dialogComposable<SwapAssetPickerArgs> { SwapAssetPickerScreen(it.toRoute()) }
