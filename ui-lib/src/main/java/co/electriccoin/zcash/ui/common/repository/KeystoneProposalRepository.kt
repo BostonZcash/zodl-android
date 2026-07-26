@@ -17,7 +17,7 @@ import co.electriccoin.zcash.ui.common.model.KeystoneFirmwarePolicy
 import co.electriccoin.zcash.ui.common.model.KeystoneFirmwareVersion
 import co.electriccoin.zcash.ui.common.model.SubmitResult
 import co.electriccoin.zcash.ui.common.model.SwapQuote
-import co.electriccoin.zcash.ui.common.model.readKeystoneFwVersion
+import co.electriccoin.zcash.ui.common.model.readKeystoneFwStamp
 import co.electriccoin.zcash.ui.common.provider.KeystoneSDKException
 import co.electriccoin.zcash.ui.common.provider.KeystoneSDKProvider
 import com.sparrowwallet.hummingbird.UR
@@ -79,6 +79,13 @@ interface KeystoneProposalRepository {
     @Throws(IllegalStateException::class)
     suspend fun createPCZTEncoder(): UREncoder
 
+    /**
+     * Parses a Keystone-signed PCZT and enforces the firmware minimum-version gate (MOB-1510).
+     * Firmware >= 2.4.6 stamps its raw internal version into the signed PCZT's proprietary
+     * fields; this normalizes that stamp to display numbering and refuses signatures from
+     * firmware below [KeystoneFirmwareVersion.MINIMUM_SUPPORTED] (or too old to stamp a version
+     * at all) before they can reach submission.
+     */
     @Throws(ParsePCZTException::class)
     suspend fun parsePCZT(ur: UR)
 
@@ -225,17 +232,18 @@ class KeystoneProposalRepositoryImpl(
                     throw ParsePCZTException()
                 }
 
-            // MOB-1510: firmware >= 2.4.6 stamps its version into the signed PCZT's proprietary
-            // fields; refuse signatures from firmware below the minimum (or too old to stamp at
-            // all) before they can reach submission.
-            val detected = parsed.readKeystoneFwVersion()
+            val stamp = parsed.readKeystoneFwStamp()
+            val detected = stamp?.let(KeystoneFirmwareVersion::fromStamp)
             val outcome = KeystoneFirmwarePolicy.evaluate(detected, KeystoneFirmwareVersion.MINIMUM_SUPPORTED)
-            Twig.info {
-                "Keystone firmware on signed PCZT: ${detected ?: "unstamped"} " +
-                    "(required ${KeystoneFirmwareVersion.MINIMUM_SUPPORTED}) -> $outcome"
+            val logMessage = {
+                "Keystone firmware on signed PCZT: raw stamp ${stamp ?: "absent"}, normalized " +
+                    "${detected ?: "unknown"} (required ${KeystoneFirmwareVersion.MINIMUM_SUPPORTED}) -> $outcome"
             }
             if (outcome != KeystoneFirmwarePolicy.Outcome.OK) {
+                Twig.warn(logMessage)
                 throw KeystoneFirmwareBelowMinimumException(detected)
+            } else {
+                Twig.info(logMessage)
             }
 
             pcztWithSignatures = Pczt(parsed)

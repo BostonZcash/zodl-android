@@ -11,6 +11,9 @@ and this application adheres to [Semantic Versioning](https://semver.org/spec/v2
 ### Added:
 - We added support for Zcash's Ironwood network upgrade (NU6.3), keeping your wallet fully compatible with the latest network changes. Support for moving funds to the new Ironwood pool will arrive in a future update.
 
+### Fixed:
+- We fixed an issue where a Keystone hardware wallet signature could be accepted even though its firmware couldn't produce a transaction the app can broadcast. Keystone signing now requires firmware 3.0.3 or later; older or version-less firmware is blocked before broadcast, and the prompt reports the firmware version exactly as your device displays it.
+
 ## [3.7.2 (2009)] - 2026-07-11
 
 ### Changed:

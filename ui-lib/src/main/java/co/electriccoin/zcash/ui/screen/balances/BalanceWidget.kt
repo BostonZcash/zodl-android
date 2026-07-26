@@ -2,11 +2,13 @@ package co.electriccoin.zcash.ui.screen.balances
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -44,7 +46,13 @@ fun BalanceWidget(state: BalanceWidgetState, modifier: Modifier = Modifier) {
         BalanceWidgetHeader(
             modifier =
                 state.onBalanceClick
-                    ?.let { onClick -> Modifier.clickable(onClick = onClick) }
+                    ?.let { onClick ->
+                        Modifier.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = onClick
+                        )
+                    }
                     ?: Modifier,
             zatoshi = state.totalBalance,
             showDust = state.showDust

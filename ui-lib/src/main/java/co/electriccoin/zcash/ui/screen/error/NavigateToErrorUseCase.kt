@@ -23,6 +23,7 @@ class NavigateToErrorUseCase(
             is ErrorArgs.ShieldingGeneralError -> navigationRouter.navigate(ErrorDialog)
             is ErrorArgs.SynchronizerTorInitError -> navigationRouter.navigate(ErrorDialog)
             is ErrorArgs.KeystoneFirmwareUpdateRequired -> navigationRouter.navigate(ErrorBottomSheet)
+            is ErrorArgs.KeystoneAccountUnsupported -> navigationRouter.navigate(ErrorBottomSheet)
         }
     }
 
@@ -106,5 +107,14 @@ sealed interface ErrorArgs {
      */
     data class KeystoneFirmwareUpdateRequired(
         val exception: KeystoneFirmwareBelowMinimumException
+    ) : ErrorArgs
+
+    /**
+     * A scanned Keystone account can't be used by this app — typically its UFVK belongs to a
+     * different network than the app is built for (e.g. a mainnet Keystone account scanned into a
+     * testnet build), which surfaces as a derivation failure.
+     */
+    data class KeystoneAccountUnsupported(
+        val exception: Exception
     ) : ErrorArgs
 }

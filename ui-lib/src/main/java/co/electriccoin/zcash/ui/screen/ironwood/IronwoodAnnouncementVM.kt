@@ -13,10 +13,24 @@ import kotlinx.coroutines.launch
 
 private const val GUIDE_URL = "https://support.zodl.com/article/42-moving-your-funds-to-ironwood"
 
+/**
+ * Marks the announcement as shown at display time, not at dismissal. Home forwards here from a
+ * `WhileSubscribed`-retained state flow derived from [WalletRepository.isIronwoodAnnouncementShown];
+ * flipping the flag only on dismissal left that flow's retained value a stale `true` while this
+ * screen covered Home, so returning re-triggered the navigation and the announcement appeared
+ * twice in a row. Marking on display flips the flag while Home's upstream is still subscribed,
+ * and also covers dismissal via system back.
+ */
 class IronwoodAnnouncementVM(
     private val navigationRouter: NavigationRouter,
-    private val walletRepository: WalletRepository,
+    walletRepository: WalletRepository,
 ) : ViewModel() {
+    init {
+        viewModelScope.launch {
+            walletRepository.markIronwoodAnnouncementShown()
+        }
+    }
+
     val state =
         MutableStateFlow(
             IronwoodAnnouncementState(
@@ -25,10 +39,7 @@ class IronwoodAnnouncementVM(
                     ButtonState(
                         text = stringRes(R.string.ironwood_announcement_primary_button),
                     ) {
-                        viewModelScope.launch {
-                            walletRepository.markIronwoodAnnouncementShown()
-                            navigationRouter.back()
-                        }
+                        navigationRouter.back()
                     },
             )
         )

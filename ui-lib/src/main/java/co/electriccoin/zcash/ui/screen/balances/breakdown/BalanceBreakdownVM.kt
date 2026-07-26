@@ -54,10 +54,10 @@ class BalanceBreakdownVM(
                 ),
             pools =
                 listOf(
+                    poolItem(R.string.balance_breakdown_pool_ironwood, pools.ironwood, exchangeRate),
                     poolItem(R.string.balance_breakdown_pool_orchard, pools.orchard, exchangeRate),
                     poolItem(R.string.balance_breakdown_pool_sapling, pools.sapling, exchangeRate),
                     poolItem(R.string.balance_breakdown_pool_transparent, pools.transparent, exchangeRate),
-                    poolItem(R.string.balance_breakdown_pool_ironwood, pools.ironwood, exchangeRate),
                 ),
             positive =
                 ButtonState(

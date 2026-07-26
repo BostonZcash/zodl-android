@@ -43,6 +43,7 @@ class ErrorVM(
             is ErrorArgs.ShieldingGeneralError -> createGeneralShieldingErrorState(args)
             is ErrorArgs.SynchronizerTorInitError -> createSdkSynchronizerError()
             is ErrorArgs.KeystoneFirmwareUpdateRequired -> createKeystoneFirmwareUpdateRequiredState(args)
+            is ErrorArgs.KeystoneAccountUnsupported -> createKeystoneAccountUnsupportedState(args)
         }
 
     private fun createSdkSynchronizerError(): ErrorState =
@@ -75,6 +76,23 @@ class ErrorVM(
                 ButtonState(
                     text = stringRes(co.electriccoin.zcash.ui.design.R.string.general_report),
                     onClick = { sendReportClick(args) }
+                ),
+            onBack = ::onBack,
+        )
+
+    private fun createKeystoneAccountUnsupportedState(args: ErrorArgs.KeystoneAccountUnsupported) =
+        ErrorState(
+            title = stringRes(R.string.error_keystone_account_title),
+            message = stringRes(R.string.error_keystone_account_message),
+            positive =
+                ButtonState(
+                    text = stringRes(R.string.error_keystone_firmware_close),
+                    onClick = { navigationRouter.back() }
+                ),
+            negative =
+                ButtonState(
+                    text = stringRes(co.electriccoin.zcash.ui.design.R.string.general_report),
+                    onClick = { sendReportClick(args.exception) }
                 ),
             onBack = ::onBack,
         )

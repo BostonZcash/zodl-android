@@ -1,26 +1,72 @@
 package co.electriccoin.zcash.ui.common.model
 
 /**
- * Keystone hardware-wallet firmware version triple, matching the ordering keystone3-firmware
- * stamps into every signed PCZT's `global.proprietary["keystone:fw_version"]` field.
+ * Keystone hardware-wallet firmware version triple exactly as keystone3-firmware stamps it into
+ * every signed PCZT's `global.proprietary["keystone:fw_version"]` field. This is the device's
+ * **raw internal** numbering, not what the device screen displays — `major` carries a
+ * +[KeystoneFirmwareVersion.STAMPED_MAJOR_OFFSET] offset over the displayed major version.
+ * Never compare this directly against [KeystoneFirmwareVersion.MINIMUM_SUPPORTED]; convert it
+ * with [KeystoneFirmwareVersion.fromStamp] first.
+ */
+data class KeystoneFirmwareStamp(
+    val major: Int,
+    val minor: Int,
+    val build: Int
+) {
+    override fun toString() = "$major.$minor.$build"
+}
+
+/**
+ * Keystone hardware-wallet firmware version in **display** numbering — the triple the device
+ * screen shows the user, and the only numbering [MINIMUM_SUPPORTED] and comparisons should use.
+ * Construct this from a raw [KeystoneFirmwareStamp] via [fromStamp]; the `displayMajor` label on
+ * the constructor exists to make every call site say which numbering it's using.
  */
 data class KeystoneFirmwareVersion(
-    val major: Int,
+    val displayMajor: Int,
     val minor: Int,
     val build: Int
 ) : Comparable<KeystoneFirmwareVersion> {
     override fun compareTo(other: KeystoneFirmwareVersion): Int =
-        compareValuesBy(this, other, { it.major }, { it.minor }, { it.build })
+        compareValuesBy(this, other, { it.displayMajor }, { it.minor }, { it.build })
 
-    override fun toString() = "$major.$minor.$build"
+    override fun toString() = "$displayMajor.$minor.$build"
 
     companion object {
         /**
-         * Minimum Keystone firmware this app will accept a signature from — set by product
-         * (MOB-1510). Single point of change if the minimum is ever raised. Always enforced —
-         * there is no "disable the check" escape hatch.
+         * Keystone's `version.h` stamps the device's raw internal major version into signed
+         * PCZTs; keystone3-firmware renders `MAJOR - STAMPED_MAJOR_OFFSET` on the device screen.
+         * This offset has held at every tag from 2.2.8 through 3.0.0 — a contract, not an
+         * oversight — and was confirmed against a physical device.
          */
-        val MINIMUM_SUPPORTED = KeystoneFirmwareVersion(major = 3, minor = 0, build = 1)
+        const val STAMPED_MAJOR_OFFSET = 10
+
+        /**
+         * Minimum Keystone firmware this app will accept a signature from — set by product
+         * (MOB-1510), raised to 3.0.3 because 3.0.1 produces PCZTs the app cannot extract
+         * (`MissingSpendAuthSig`). Expressed in display numbering — the version the device
+         * screen (and the error prompt) show. Single point of change if the minimum is ever
+         * raised. Always enforced — there is no "disable the check" escape hatch.
+         */
+        val MINIMUM_SUPPORTED = KeystoneFirmwareVersion(displayMajor = 3, minor = 0, build = 3)
+
+        /**
+         * Converts a raw [KeystoneFirmwareStamp] into display numbering by removing
+         * [STAMPED_MAJOR_OFFSET] from its major component. Firmware below the offset threshold
+         * is taken as already normalized, so this degrades to the identity transform if Keystone
+         * ever stamps display numbering directly.
+         */
+        fun fromStamp(stamp: KeystoneFirmwareStamp): KeystoneFirmwareVersion =
+            KeystoneFirmwareVersion(
+                displayMajor =
+                    if (stamp.major >= STAMPED_MAJOR_OFFSET) {
+                        stamp.major - STAMPED_MAJOR_OFFSET
+                    } else {
+                        stamp.major
+                    },
+                minor = stamp.minor,
+                build = stamp.build
+            )
     }
 }
 
@@ -36,8 +82,12 @@ private const val FIRMWARE_VERSION_VALUE_LENGTH = 3
  * literal directly in the byte stream and reads the 3 bytes immediately following the expected
  * `0x03` length byte. Returns `null` if the key isn't present (legacy firmware that predates the
  * stamping feature) or the bytes that follow don't match the expected shape.
+ *
+ * The bytes are returned exactly as the device wrote them — raw internal numbering, not display
+ * numbering. Use [KeystoneFirmwareVersion.fromStamp] to convert before comparing against
+ * [KeystoneFirmwareVersion.MINIMUM_SUPPORTED].
  */
-fun ByteArray.readKeystoneFwVersion(): KeystoneFirmwareVersion? {
+fun ByteArray.readKeystoneFwStamp(): KeystoneFirmwareStamp? {
     val keyStart = indexOfSubArray(FIRMWARE_VERSION_KEY)
     if (keyStart < 0) return null
 
@@ -49,7 +99,7 @@ fun ByteArray.readKeystoneFwVersion(): KeystoneFirmwareVersion? {
             valueStart + FIRMWARE_VERSION_VALUE_LENGTH <= size
 
     return if (hasValidStamp) {
-        KeystoneFirmwareVersion(
+        KeystoneFirmwareStamp(
             major = this[valueStart].toInt() and 0xFF,
             minor = this[valueStart + 1].toInt() and 0xFF,
             build = this[valueStart + 2].toInt() and 0xFF,
