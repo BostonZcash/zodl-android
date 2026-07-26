@@ -1,5 +1,6 @@
 package co.electriccoin.zcash.ui
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
@@ -8,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import androidx.navigation.toRoute
+import co.electriccoin.zcash.ui.common.viewmodel.WalletViewModel
 import co.electriccoin.zcash.ui.screen.about.AboutArgs
 import co.electriccoin.zcash.ui.screen.about.AboutScreen
 import co.electriccoin.zcash.ui.screen.accountlist.AccountListArgs
@@ -24,6 +26,8 @@ import co.electriccoin.zcash.ui.screen.advancedsettings.debug.db.DebugDBArgs
 import co.electriccoin.zcash.ui.screen.advancedsettings.debug.db.DebugDBScreen
 import co.electriccoin.zcash.ui.screen.advancedsettings.debug.text.DebugTextArgs
 import co.electriccoin.zcash.ui.screen.advancedsettings.debug.text.DebugTextScreen
+import co.electriccoin.zcash.ui.screen.balances.breakdown.BalanceBreakdownArgs
+import co.electriccoin.zcash.ui.screen.balances.breakdown.BalanceBreakdownScreen
 import co.electriccoin.zcash.ui.screen.balances.spendable.SpendableBalanceArgs
 import co.electriccoin.zcash.ui.screen.balances.spendable.SpendableBalanceScreen
 import co.electriccoin.zcash.ui.screen.chooseserver.ChooseServerArgs
@@ -100,6 +104,8 @@ import co.electriccoin.zcash.ui.screen.insufficientfunds.InsufficientFundsArgs
 import co.electriccoin.zcash.ui.screen.insufficientfunds.InsufficientFundsScreen
 import co.electriccoin.zcash.ui.screen.integrations.IntegrationsArgs
 import co.electriccoin.zcash.ui.screen.integrations.IntegrationsScreen
+import co.electriccoin.zcash.ui.screen.ironwood.IronwoodAnnouncementArgs
+import co.electriccoin.zcash.ui.screen.ironwood.IronwoodAnnouncementScreen
 import co.electriccoin.zcash.ui.screen.keepopen.KeepOpenArgs
 import co.electriccoin.zcash.ui.screen.keepopen.KeepOpenScreen
 import co.electriccoin.zcash.ui.screen.more.MoreArgs
@@ -222,17 +228,27 @@ import co.electriccoin.zcash.ui.screen.whatsnew.WrapWhatsNew
 
 fun NavGraphBuilder.walletNavGraph(
     storageCheckViewModel: StorageCheckViewModel,
+    walletViewModel: WalletViewModel,
     navigationRouter: NavigationRouter,
 ) {
     navigation<MainAppGraph>(startDestination = HomeArgs) {
         composable<HomeArgs> {
             AndroidHome()
 
+            val showIronwoodAnnouncement by
+                walletViewModel.shouldShowIronwoodAnnouncement.collectAsStateWithLifecycle()
+            LaunchedEffect(showIronwoodAnnouncement) {
+                if (showIronwoodAnnouncement) {
+                    navigationRouter.forward(IronwoodAnnouncementArgs)
+                }
+            }
+
             val isEnoughSpace by storageCheckViewModel.isEnoughSpace.collectAsStateWithLifecycle()
             if (isEnoughSpace == false) {
                 navigationRouter.forward(NavigationTargets.NOT_ENOUGH_SPACE)
             }
         }
+        composable<IronwoodAnnouncementArgs> { IronwoodAnnouncementScreen() }
         composable<MoreArgs> { MoreScreen() }
         composable<AdvancedSettingsArgs> { AdvancedSettingsScreen() }
         composable<ChooseServerArgs> { ChooseServerScreen() }
@@ -305,6 +321,7 @@ fun NavGraphBuilder.walletNavGraph(
         dialogComposable<ExchangeRateUnavailableArgs> { ExchangeRateUnavailableScreen() }
         dialogComposable<SyncErrorArgs> { SyncErrorScreen() }
         dialogComposable<SpendableBalanceArgs> { SpendableBalanceScreen() }
+        dialogComposable<BalanceBreakdownArgs> { BalanceBreakdownScreen() }
         composable<CrashReportOptIn> { AndroidCrashReportOptIn() }
         composable<ThirdPartyScan> { AndroidThirdPartyScan() }
         dialogComposable<SwapAssetPickerArgs> { SwapAssetPickerScreen(it.toRoute()) }

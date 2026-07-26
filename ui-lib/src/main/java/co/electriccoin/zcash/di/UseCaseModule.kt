@@ -34,6 +34,7 @@ import co.electriccoin.zcash.ui.common.usecase.GetABSwapContactsUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetActivitiesUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetAllVotingRoundsUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetAutomaticEndpointUseCase
+import co.electriccoin.zcash.ui.common.usecase.GetBalancePoolsUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetConfigurationUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetCuratedSwapAssetsUseCase
 import co.electriccoin.zcash.ui.common.usecase.GetExchangeRateUseCase
@@ -280,6 +281,7 @@ val useCaseModule =
         factoryOf(::GetSlippageUseCase)
         factoryOf(::NavigateToSwapInfoUseCase)
         factoryOf(::GetTotalSpendableBalanceUseCase)
+        factoryOf(::GetBalancePoolsUseCase)
         factoryOf(::IsABContactHintVisibleUseCase)
         factoryOf(::RequestSwapQuoteUseCase)
         factoryOf(::CancelSwapQuoteUseCase)

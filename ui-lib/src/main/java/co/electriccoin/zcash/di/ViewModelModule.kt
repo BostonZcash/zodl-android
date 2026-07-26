@@ -12,6 +12,7 @@ import co.electriccoin.zcash.ui.screen.advancedsettings.AdvancedSettingsVM
 import co.electriccoin.zcash.ui.screen.advancedsettings.debug.DebugVM
 import co.electriccoin.zcash.ui.screen.advancedsettings.debug.db.DebugDBVM
 import co.electriccoin.zcash.ui.screen.balances.BalanceWidgetVM
+import co.electriccoin.zcash.ui.screen.balances.breakdown.BalanceBreakdownVM
 import co.electriccoin.zcash.ui.screen.balances.spendable.SpendableBalanceVM
 import co.electriccoin.zcash.ui.screen.chooseserver.ChooseServerVM
 import co.electriccoin.zcash.ui.screen.connectkeystone.connect.KeystoneConnectVM
@@ -43,6 +44,7 @@ import co.electriccoin.zcash.ui.screen.hotfix.enhancement.EnhancementHotfixVM
 import co.electriccoin.zcash.ui.screen.hotfix.ephemeral.EphemeralHotfixVM
 import co.electriccoin.zcash.ui.screen.insufficientfunds.InsufficientFundsVM
 import co.electriccoin.zcash.ui.screen.integrations.IntegrationsVM
+import co.electriccoin.zcash.ui.screen.ironwood.IronwoodAnnouncementVM
 import co.electriccoin.zcash.ui.screen.keepopen.KeepOpenVM
 import co.electriccoin.zcash.ui.screen.more.MoreVM
 import co.electriccoin.zcash.ui.screen.pay.PayVM
@@ -109,6 +111,7 @@ import org.koin.dsl.module
 val viewModelModule =
     module {
         viewModelOf(::WalletViewModel)
+        viewModelOf(::IronwoodAnnouncementVM)
         viewModelOf(::AuthenticationViewModel)
         viewModelOf(::OldHomeViewModel)
         viewModelOf(::StorageCheckViewModel)
@@ -161,6 +164,7 @@ val viewModelModule =
         viewModelOf(::ErrorVM)
         viewModelOf(::SyncErrorVM)
         viewModelOf(::SpendableBalanceVM)
+        viewModelOf(::BalanceBreakdownVM)
         viewModelOf(::CrashReportOptInViewModel)
         viewModelOf(::WalletRestoringInfoViewModel)
         viewModelOf(::ThirdPartyScanViewModel)
