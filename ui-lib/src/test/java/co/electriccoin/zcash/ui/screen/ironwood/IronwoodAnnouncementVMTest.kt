@@ -50,7 +50,8 @@ class IronwoodAnnouncementVMTest {
             val vm = IronwoodAnnouncementVM(navigationRouter, walletRepository)
             advanceUntilIdle()
 
-            vm.state.value.primaryButton.onClick()
+            vm.state.value.primaryButton
+                .onClick()
             advanceUntilIdle()
 
             verify(exactly = 1) { navigationRouter.back() }
