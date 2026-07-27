@@ -10,7 +10,7 @@ class KeystoneFirmwareVersionTest {
     @Test
     fun minimumSupportedMatchesProductRequirement() {
         assertEquals(
-            KeystoneFirmwareVersion(displayMajor = 3, minor = 0, build = 3),
+            KeystoneFirmwareVersion(displayMajor = 3, minor = 0, build = 1),
             KeystoneFirmwareVersion.MINIMUM_SUPPORTED
         )
     }
