@@ -6,6 +6,11 @@ and this application adheres to [Semantic Versioning](https://semver.org/spec/v2
 
 ## [Unreleased]
 
+## [3.8.0 (2023)] - 2026-07-27
+
+### Changed:
+- We lowered the minimum supported Keystone firmware for signing from 3.0.3 to 3.0.1.
+
 ## [3.8.0 (2018)] - 2026-07-25
 
 ### Added:

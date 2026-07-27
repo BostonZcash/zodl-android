@@ -12,6 +12,12 @@ directly impact users rather than highlighting other key architectural updates.*
 
 ## [Unreleased]
 
+## [3.8.0 (2023)] - 2026-07-27
+
+### Added:
+- We added support for Zcash's Ironwood network upgrade (NU6.3), keeping your wallet fully compatible with the latest network changes. Support for moving funds to the new Ironwood pool will arrive in a future update.
+- Tap your balance on the home screen to see how your ZEC is split across Zcash pools, including the new Ironwood pool.
+
 ## [3.8.0 (2018)] - 2026-07-25
 
 ### Added:

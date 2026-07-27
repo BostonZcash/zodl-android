@@ -43,12 +43,11 @@ data class KeystoneFirmwareVersion(
 
         /**
          * Minimum Keystone firmware this app will accept a signature from — set by product
-         * (MOB-1510), raised to 3.0.3 because 3.0.1 produces PCZTs the app cannot extract
-         * (`MissingSpendAuthSig`). Expressed in display numbering — the version the device
-         * screen (and the error prompt) show. Single point of change if the minimum is ever
-         * raised. Always enforced — there is no "disable the check" escape hatch.
+         * (MOB-1510; initially 3.0.3, lowered to 3.0.1). Expressed in display numbering — the
+         * version the device screen (and the error prompt) show. Single point of change if the
+         * minimum ever changes. Always enforced — there is no "disable the check" escape hatch.
          */
-        val MINIMUM_SUPPORTED = KeystoneFirmwareVersion(displayMajor = 3, minor = 0, build = 3)
+        val MINIMUM_SUPPORTED = KeystoneFirmwareVersion(displayMajor = 3, minor = 0, build = 1)
 
         /**
          * Converts a raw [KeystoneFirmwareStamp] into display numbering by removing
