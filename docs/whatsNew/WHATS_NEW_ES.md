@@ -12,6 +12,22 @@ directly impact users rather than highlighting other key architectural updates.*
 
 ## [Unreleased]
 
+## [3.8.1 (2025)] - 2026-07-29
+
+### Corregido:
+- Corregimos varios problemas que afectaban a la visualización del saldo y los detalles de las transacciones. Tus fondos están seguros: esto solo corrige cómo la billetera muestra los valores.
+
+## [3.8.0 (2023)] - 2026-07-27
+
+### Añadido:
+- Agregamos compatibilidad con la actualización de red Ironwood (NU6.3) de Zcash, para mantener tu billetera totalmente compatible con los últimos cambios de la red. La función para mover fondos al nuevo pool de Ironwood llegará en una próxima actualización.
+- Toca tu saldo en la pantalla de inicio para ver cómo se divide tu ZEC entre los pools de Zcash, incluido el nuevo pool de Ironwood.
+
+## [3.8.0 (2018)] - 2026-07-25
+
+### Añadido:
+- Agregamos compatibilidad con la actualización de red Ironwood (NU6.3) de Zcash, para mantener tu billetera totalmente compatible con los últimos cambios de la red. La función para mover fondos al nuevo pool de Ironwood llegará en una próxima actualización.
+
 ## [3.7.2 (2009)] - 2026-07-11
 
 ### Cambiado:

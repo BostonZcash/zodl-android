@@ -8,4 +8,6 @@ data class BalanceWidgetState(
     val totalBalance: Zatoshi,
     val button: BalanceButtonState?,
     val exchangeRate: ExchangeRateState?,
+    /** Tapping the balance opens the per-pool breakdown; `null` disables the tap. */
+    val onBalanceClick: (() -> Unit)? = null,
 )

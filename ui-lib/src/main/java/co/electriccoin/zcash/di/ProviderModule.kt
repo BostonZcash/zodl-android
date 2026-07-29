@@ -21,6 +21,8 @@ import co.electriccoin.zcash.ui.common.provider.HttpClientProviderImpl
 import co.electriccoin.zcash.ui.common.provider.HttpPirSnapshotResolver
 import co.electriccoin.zcash.ui.common.provider.IsExchangeRateEnabledStorageProvider
 import co.electriccoin.zcash.ui.common.provider.IsExchangeRateEnabledStorageProviderImpl
+import co.electriccoin.zcash.ui.common.provider.IsIronwoodAnnouncementShownStorageProvider
+import co.electriccoin.zcash.ui.common.provider.IsIronwoodAnnouncementShownStorageProviderImpl
 import co.electriccoin.zcash.ui.common.provider.IsKeepScreenOnDuringRestoreProvider
 import co.electriccoin.zcash.ui.common.provider.IsKeepScreenOnDuringRestoreProviderImpl
 import co.electriccoin.zcash.ui.common.provider.IsServerSelectionAutomaticProvider
@@ -90,6 +92,8 @@ val providerModule =
         singleOf(::WalletBackupRemindMeTimestampStorageProviderImpl) bind
             WalletBackupRemindMeTimestampStorageProvider::class
         singleOf(::WalletBackupFlagStorageProviderImpl) bind WalletBackupFlagStorageProvider::class
+        singleOf(::IsIronwoodAnnouncementShownStorageProviderImpl) bind
+            IsIronwoodAnnouncementShownStorageProvider::class
         singleOf(::WalletBackupConsentStorageProviderImpl) bind WalletBackupConsentStorageProvider::class
         singleOf(::WalletRestoringStateProviderImpl) bind WalletRestoringStateProvider::class
         singleOf(::CrashReportingStorageProviderImpl) bind CrashReportingStorageProvider::class
