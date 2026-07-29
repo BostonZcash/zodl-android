@@ -12,6 +12,11 @@ directly impact users rather than highlighting other key architectural updates.*
 
 ## [Unreleased]
 
+## [3.8.1 (2025)] - 2026-07-29
+
+### Fixed:
+- Corrected several issues affecting how balances and transaction details were displayed. Your funds are safe, this only fixes how the wallet shows the values.
+
 ## [3.8.0 (2023)] - 2026-07-27
 
 ### Added:
