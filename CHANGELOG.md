@@ -23,6 +23,11 @@ and this application adheres to [Semantic Versioning](https://semver.org/spec/v2
 - Swap quotes rejected by the amount-consistency safety check are now reported to monitoring (without any amounts), so a future swap-provider format change surfaces as an observable signal instead of silently blocking swaps.
 - Exchange rates are no longer requested over a direct (non-Tor) connection. When Tor Protection is disabled the request to the rate provider is now blocked instead of falling back to clearnet, preventing the user's IP address and request timing from being exposed.
 
+## [3.8.1 (2027)] - 2026-07-30
+
+### Fixed:
+- Corrected several issues affecting how balances and transaction details were displayed. Your funds are safe, this only fixes how the wallet shows the values.
+
 ## [3.8.1 (2025)] - 2026-07-29
 
 ### Fixed:
