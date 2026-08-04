@@ -1,0 +1,75 @@
+name: sync-fdroid-metadata
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'fastlane/metadata/android/**'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mint App token (cross-repo)
+        id: app_token
+        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2.2.2
+        with:
+          app-id: ${{ vars.RELEASE_BOT_APP_ID }}
+          private-key: ${{ secrets.RELEASE_BOT_APP_KEY }}
+          repositories: zodl-android,fdroid
+
+      - name: Sync metadata to fdroid repo
+        env:
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+        run: |
+          set -euo pipefail
+          APP_ID="co.electriccoin.zcash"
+          DEST_REPO="zodl-inc/fdroid"
+          SRC="fastlane/metadata/android"
+          DEST="fdroid/repo/$APP_ID"
+
+          upload_file() {
+            local src="$1"
+            local dest_path="$2"
+            local content
+            content=$(base64 -w0 < "$src")
+            local sha
+            sha=$(gh api repos/$DEST_REPO/contents/$dest_path --jq '.sha' 2>/dev/null || true)
+            if [ -n "$sha" ]; then
+              gh api --method PUT repos/$DEST_REPO/contents/$dest_path \
+                --field message="chore: sync fastlane metadata from zodl-android" \
+                --field content="$content" \
+                --field sha="$sha" \
+                --silent
+            else
+              gh api --method PUT repos/$DEST_REPO/contents/$dest_path \
+                --field message="chore: sync fastlane metadata from zodl-android" \
+                --field content="$content" \
+                --silent
+            fi
+            echo "synced: $dest_path"
+          }
+
+          for locale in en-US es; do
+            locale_src="$SRC/$locale"
+            locale_dest="$DEST/$locale"
+            [ -d "$locale_src" ] || continue
+
+            for f in title.txt short_description.txt full_description.txt; do
+              [ -f "$locale_src/$f" ] && upload_file "$locale_src/$f" "$locale_dest/$f"
+            done
+
+            for img in icon.png featureGraphic.png; do
+              [ -f "$locale_src/images/$img" ] && upload_file "$locale_src/images/$img" "$locale_dest/$img"
+            done
+
+            if [ -d "$locale_src/images/phoneScreenshots" ]; then
+              for ss in "$locale_src/images/phoneScreenshots"/*.png; do
+                [ -f "$ss" ] || continue
+                name=$(basename "$ss")
+                upload_file "$ss" "$locale_dest/phoneScreenshots/$name"
+              done
+            fi
+          done
