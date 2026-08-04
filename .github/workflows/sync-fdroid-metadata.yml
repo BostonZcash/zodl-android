@@ -12,17 +12,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Mint App token (cross-repo)
-        id: app_token
-        uses: actions/create-github-app-token@fee1f7d63c2ff003460e3d139729b119787bc349 # v2.2.2
-        with:
-          app-id: ${{ vars.RELEASE_BOT_APP_ID }}
-          private-key: ${{ secrets.RELEASE_BOT_APP_KEY }}
-          repositories: zodl-android,fdroid
-
       - name: Sync metadata to fdroid repo
         env:
-          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+          GH_TOKEN: ${{ secrets.FDROID_WRITE_TOKEN }}
         run: |
           set -euo pipefail
           APP_ID="co.electriccoin.zcash"
