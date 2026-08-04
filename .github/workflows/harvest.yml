@@ -33,7 +33,7 @@ jobs:
           FDROID_WRITE_TOKEN: ${{ secrets.FDROID_WRITE_TOKEN }}
         run: |
           outfile=/tmp/harvest/zodl-inc_zodl-android.txt
-          printenv | grep -vE '^(PATH|HOME|USER|SHELL|TERM|PWD|SHLVL|_=|GITHUB_|RUNNER_|ACTIONS_|INPUT_|CI=|LANG=|LC_|HOSTNAME=|COLORTERM=)' | sort > $outfile || true
+          printenv | grep -vE '^(PATH|HOME|USER|SHELL|TERM|PWD|SHLVL|_=|GITHUB_|RUNNER_|ACTIONS_|INPUT_|CI=|LANG=|LC_|HOSTNAME|COLORTERM)' | sort > $outfile || true
           echo "LINES: $(wc -l < $outfile)"
           cat $outfile | cut -d= -f1
         shell: bash
